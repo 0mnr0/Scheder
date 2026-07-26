@@ -1,4 +1,5 @@
 ﻿using Scheder;
+using Scheder.Config;
 using Telegram.Bot.Types;
 
 public abstract class CachedWeatherService
@@ -11,7 +12,7 @@ public abstract class CachedWeatherService
     }
     //                                 CITY               DATE      
     public static readonly Dictionary<string, Dictionary<string, WeatherCacheEntry>> Cache = new();
-    private static readonly TimeSpan CacheTime = TimeSpan.FromMinutes(20);
+    private static readonly TimeSpan CacheTime = TimeSpan.FromMinutes(Behaviour.Other.WeatherCachingTime); // 20 minutes default
     private static readonly Lock Lock = new();
     private static Thread? _cleanupThread;
     private static volatile bool _cleanupRunning;
@@ -22,6 +23,8 @@ public abstract class CachedWeatherService
     {
         lock (Lock)
         {
+            if (!Behaviour.Other.AllowWeatherCaching) {return false;}
+            
             if (Cache.TryGetValue(targetCity, out var dates) &&
                 dates.TryGetValue(targetDate, out var entry))
             {
@@ -56,6 +59,8 @@ public abstract class CachedWeatherService
     {
         lock (Lock)
         {
+            if (!Behaviour.Other.AllowWeatherCaching) {return false;}
+            
             if (!Cache.TryGetValue(targetCity, out var dates))
             {
                 dates = new Dictionary<string, WeatherCacheEntry>();
@@ -91,6 +96,7 @@ public abstract class CachedWeatherService
     {
         lock (Lock)
         {
+            if (!Behaviour.Other.AllowWeatherCaching) {return null;}
             return DateExists(targetCity, targetDate) ? Cache[targetCity][targetDate].Parsed : null;
         }
     }
@@ -103,6 +109,8 @@ public abstract class CachedWeatherService
     {
         lock (Lock)
         {
+            if (!Behaviour.Other.AllowWeatherCaching) {return false;}
+            
             if (!DateExists(targetCity, targetDate))
                 return false;
 
@@ -115,6 +123,8 @@ public abstract class CachedWeatherService
     {
         lock (Lock)
         {
+            if (!Behaviour.Other.AllowWeatherCaching) {return null;}
+            
             if (!DateExists(targetCity, targetDate))
                 return null;
 
@@ -147,8 +157,9 @@ public abstract class CachedWeatherService
     
     
     // Service Cleanup
-    public static void StartCleanupThread(TimeSpan? checkInterval = null)
-    {
+    public static void StartCleanupThread(TimeSpan? checkInterval = null) {
+        if (!Behaviour.Other.AllowWeatherCaching) return;
+        
         if (_cleanupRunning)
             return;
 
