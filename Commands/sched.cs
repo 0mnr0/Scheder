@@ -2,10 +2,7 @@
 using Scheder.Config;
 using Scheder.ContextDetection;
 using Scheder.JournalAPI;
-using Scheder.Services.WebRender;
 using Scheder.Tools;
-using Scheder.Tools.RawTelegramApi;
-using Telegram.Bot.Extensions;
 using Telegram.Bot.Types.Enums;
 
 namespace Scheder.Commands;

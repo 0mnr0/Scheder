@@ -4,7 +4,7 @@ namespace Scheder.JournalAPI;
 
 public class TokenService
 {
-    private const int JwtKeepTime = 1; // 29 минут
+    private const int JwtKeepTime = 29; // 29 минут
     
 
     private static readonly MemoryCache Cache = new(new MemoryCacheOptions());
