@@ -1,0 +1,111 @@
+@font-face {
+    font-family: 'Main';
+    src: url('weather_icons/_font.ttf') format('woff')
+    
+}
+
+
+* {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: white;
+    font-family: 'Main', sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin-top: 2px;
+}
+
+    
+div.background {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    z-index: -1;
+}
+
+div.background img[bg] {
+    position: absolute;
+    left: 50%;
+    top: -100%;
+    filter: blur(10px) brightness(0.5);
+    transform: scale(8);
+    z-index: 1;
+}
+
+div.background img[bg][accent="1"] {
+    opacity: 1;
+}
+
+div.background img[bg][accent="2"] {
+    opacity: 0.92;
+}
+
+div.background img[bg][accent="3"] {
+    opacity: 0.84;
+}
+
+div.background img[bg][accent="4"] {
+    opacity: 0.76;
+}
+
+img[visible] {
+    position: absolute;
+    filter: brightness(0.9);
+    scale: 1.35;
+    z-index: 1;
+    width: 28px;
+    left: 14px;
+    bottom: 14px;
+}
+
+div.weather {
+    width: 360px;
+    height: 80px;
+    gap: 10px;
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: row;
+    padding: 2px 5px 12px;
+}
+
+
+div.weather div.display {
+    display: flex;
+    gap: 10px;
+    padding: 4px 8px;
+    width: 100%;
+    flex-direction: column;
+    position: relative;
+} 
+    
+    
+div.weather div.display > div {
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    border-radius: 10px;
+    justify-content: space-between;
+}
+    
+div.weather div.display > div time, div.weather div.display > div temp {
+    font-size: 160%;
+    font-weight: 500;
+}
+div.weather div.display > div desc {
+    font-size: 80%;
+    max-width: 75%;
+    width: 100%;
+    text-align: right;
+    font-weight: 300;
+    float: right;
+    opacity: 0.75;
+    bottom: 10px;
+    right: 12px;
+    position: absolute;
+}   
