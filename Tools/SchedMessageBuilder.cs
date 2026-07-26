@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Scheder.Config;
@@ -11,7 +12,6 @@ public abstract class SchedMessageBuilder
 {
     public static string BuildMessage(string? raw, BestDayOption.BestDayParseResult day, string? rawExamList = null)
     {
-        
         if (string.IsNullOrEmpty(raw))
         {
             return $"""
@@ -32,9 +32,14 @@ public abstract class SchedMessageBuilder
 
         
         var (lessons, exams) = ParseAndSort(raw, rawExamList, day);
+        var messageSize = 512
+                          + lessons.Count * (displayWeek ? 420 : 250)
+                          + exams.Count * 200;
+        
+        var messageText = new StringBuilder(capacity: messageSize);
+        
         var unixTime = CodeBunch.GetUnixFromDateTime(day, lessons);
-
-        var blocks = new List<string> {
+        var blocks = messageText.Append(
             $"""
               <h4> <b> Пары на {dayName}: </b> </h4>
               <a> (<tg-time unix="{unixTime}" format="wDT">{dateDisplay}</tg-time>, {lessons.Count * 1.5}ч) </a> 
@@ -43,7 +48,7 @@ public abstract class SchedMessageBuilder
               <br> {(displayWeek ? "<br>" : "")}
               <hr/>
               """
-        };
+        );
 
 
         var lastDate = "None";
@@ -57,7 +62,7 @@ public abstract class SchedMessageBuilder
                 lastDate = lessonDate;
                 if (displayWeek)
                 {
-                    blocks.Add($"<br> <h3> Пары на {lastDate}: </h3>");
+                    messageText.Append($"<br> <h3> Пары на {lastDate}: </h3>");
                 }
             }
 
@@ -65,38 +70,38 @@ public abstract class SchedMessageBuilder
 
             if (!displayWeek)
             {
-                blocks.Add($"""
-                            <mark> {lesson.LessonIndex} </mark> <b> {lesson.TeacherName} </b> 
-                            <blockquote> 
-                                <b>{lesson.SubjectName}</b>
-                                <br>
-                                {lesson.StartedAt} — {lesson.FinishedAt} | {lesson.RoomName}
-                            </blockquote>
-                            {(isLast ? "" : "<br>")}
+                messageText.Append($"""
+                                    <mark> {lesson.LessonIndex} </mark> <b> {lesson.TeacherName} </b> 
+                                    <blockquote> 
+                                        <b>{lesson.SubjectName}</b>
+                                        <br>
+                                        {lesson.StartedAt} — {lesson.FinishedAt} | {lesson.RoomName}
+                                    </blockquote>
+                                    {(isLast ? "" : "<br>")}
 
-                            """);
+                                    """);
             }
             else
             {
-                blocks.Add($"""
-                             <details>
-                             <summary>{lesson.StartedAt} - {lesson.SubjectName}</summary>
-                                 <table bordered striped>
-                                     <thead>
-                                         <tr><th colspan="2" align="center"><h2><b>{lesson.SubjectName}</b></h2></th></tr>
-                                         <tr><th colspan="2" align="center">{lesson.TeacherName}</th></tr>
-                                     </thead>
-                                 
-                                     <tbody>
-                                         <tr>
-                                             <td align="center">С {lesson.StartedAt} по {lesson.FinishedAt}</td>
-                                             <td align="center">В {lesson.RoomName}</td>
-                                         </tr>
-                                     </tbody>
-                                 </table>
-                                 {(isLast ? "" : "<br>")}
-                             </details>
-                             """);
+                messageText.Append($"""
+                                    <details>
+                                    <summary>{lesson.StartedAt} - {lesson.SubjectName}</summary>
+                                        <table bordered striped>
+                                            <thead>
+                                                <tr><th colspan="2" align="center"><h2><b>{lesson.SubjectName}</b></h2></th></tr>
+                                                <tr><th colspan="2" align="center">{lesson.TeacherName}</th></tr>
+                                            </thead>
+                                        
+                                            <tbody>
+                                                <tr>
+                                                    <td align="center">С {lesson.StartedAt} по {lesson.FinishedAt}</td>
+                                                    <td align="center">В {lesson.RoomName}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        {(isLast ? "" : "<br>")}
+                                    </details>
+                                    """);
                 
                     /*<b> Пара №{lesson.lesson} </b> <br>
                     <b> Учитель: {lesson.teacher_name} </b> <br>
@@ -109,67 +114,66 @@ public abstract class SchedMessageBuilder
 
         if (lessons.Count == 0)
         {
-            blocks.Add($"""
-                        <br>
-                        
-                        <table bordered striped>
-                            <thead>
-                                <tr><th colspan="2" align="center">Пар на {day.StartDate} не найдено! </th></tr>
-                            </thead>
-                        </table>
-                        
-                        <br>
-                        """);
+            messageText.Append($"""
+                                <br>
+
+                                <table bordered striped>
+                                    <thead>
+                                        <tr><th colspan="2" align="center">Пар на {day.StartDate} не найдено! </th></tr>
+                                    </thead>
+                                </table>
+
+                                <br>
+                                """);
         }
 
         if (day.IsEarlyDayMoveFix)
         {
-            blocks.Add($"""
-                        <details>
-                            <summary> ⚠️ Внимание! </summary>
-                            
-                            <blockquote> <b> ⚠️ Вы указали параметр "{DateExtractor.GetDayName(day.dayType)}". </b> <br>
-                            В вашем регионе менее двух часов назад сменился календарный день, иногда люди не сразу это осознают поэтому существует этот механизм.<br>
-                            До двух часов ночи "завтра" засчитывается как "сегодня", а "послезавтра" - как "завтра".<br>
-                            Чтобы избежать эту механику добавьте "!" в конец сообщения. Например: "пары завтра!". Тогда механизм не сработает и вы, в час ночи, получите расписание на завтра.
-                            
-                            </blockquote>
-                        </details>
+            messageText.Append($"""
+                                <details>
+                                    <summary> ⚠️ Внимание! </summary>
+                                    
+                                    <blockquote> <b> ⚠️ Вы указали параметр "{DateExtractor.GetDayName(day.dayType)}". </b> <br>
+                                    В вашем регионе менее двух часов назад сменился календарный день, иногда люди не сразу это осознают поэтому существует этот механизм.<br>
+                                    До двух часов ночи "завтра" засчитывается как "сегодня", а "послезавтра" - как "завтра".<br>
+                                    Чтобы избежать эту механику добавьте "!" в конец сообщения. Например: "пары завтра!". Тогда механизм не сработает и вы, в час ночи, получите расписание на завтра.
+                                    
+                                    </blockquote>
+                                </details>
 
-                        """);
+                                """);
         }
         
         if (exams.Count > 0)
         {
-            blocks.Add($"""
-                        <br><hr/>
-                        <details>
-                        <summary> <b> ⚠️ Экзамены ({exams.Count}) </b> </summary>
-                        
-                        """);
+            messageText.Append($"""
+                                <br><hr/>
+                                <details>
+                                <summary> <b> ⚠️ Экзамены ({exams.Count}) </b> </summary>
+
+                                """);
             for (var i = 0; i < exams.Count; i++)
             {
-                var isLast = i == exams.Count - 1;
                 var exam = exams[i];
                 
-                blocks.Add($"""
-                            <table bordered>
-                                <thead>
-                                    <tr><th align="center"> <b> {i+1}) {exam.TeacherName}</b>  </th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><th align="center"> {exam.SpecName} </th></tr>
-                                    {(displayWeek ? $"""<tr><th align="center">Дата: {exam.Date}</th></tr>""" : "")}
-                                </tbody>
-                            </table>
-                            """);
+                messageText.Append($"""
+                                    <table bordered>
+                                        <thead>
+                                            <tr><th align="center"> <b> {i+1}) {exam.TeacherName}</b>  </th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><th align="center"> {exam.SpecName} </th></tr>
+                                            {(displayWeek ? $"""<tr><th align="center">Дата: {exam.Date}</th></tr>""" : "")}
+                                        </tbody>
+                                    </table>
+                                    """);
 
             }
             
-            blocks.Add("</details>");
+            messageText.Append("</details>");
         }
 
-        return string.Join("", blocks);
+        return messageText.ToString();
 
     }
 
