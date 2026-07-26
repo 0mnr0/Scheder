@@ -26,7 +26,6 @@ public class Sched : ICommand
     {
         if (message.Text == null) return;
         var stopwatch = Stopwatch.StartNew();
-
         var chatId = message.Chat.Id;
         var msgText = message.Text;
         var fromGroup = !ChatTools.IsPrivateChat(message);
@@ -37,6 +36,16 @@ public class Sched : ICommand
         var noHumanoidFixes = msgText[^1].ToString() == "!";
         var calledViaContext = args.Length > 0;
 
+        if (isGroup && !await Memory.Group.IsGroupBind(chatId)) {
+            await bot.SendMessage(
+                chatId: chatId,
+                "Группа не привязана к аутентификационным данным. Используйте\n\n<blockquote> /bindgroup </blockquote> чтобы привязать группу к авторизованному аккаунту в боте",
+                parseMode: ParseMode.Html,
+                messageThreadId: threadId,
+                cancellationToken: cancellationToken
+                );
+            return;
+        }
 
         await SetDraft("Работа с контекстом…");
         var day = DateExtractor.GetDay(msgText);
@@ -98,8 +107,8 @@ public class Sched : ICommand
 
         var debugInfo =
             $"""
-             <i> Суммарное время ответа: {stopwatch.Elapsed.Milliseconds}мс | Сборка сообщения: {compileTime}мс </i>
-             <i> Триггер процент: {(calledViaContext ? args[0] : "false")} </i>"
+             <i>Суммарное время ответа: {stopwatch.Elapsed.Milliseconds}мс | Сборка сообщения: {compileTime}мс </i>
+             <i>Триггер процент: {(calledViaContext ? args[0] : "false")} </i>
              """;
 
         if (fromGroup && ElevatedUserConfig.DebugUID != 0)
