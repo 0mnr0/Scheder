@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Scheder.Config;
 using Scheder.ContextDetection;
 using Scheder.Services.WebRender;
+using Telegram.Bot.Types;
 
 namespace Scheder.Tools;
 
@@ -288,14 +289,19 @@ public abstract class SchedMessageBuilder
     }
     
 
-    public static async Task<List<byte[]>> BuildWeather(long chatId, BestDayOption.BestDayParseResult dayParseResult, bool isGroup) {
-        if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput) return [];
+    public static async Task<(List<byte[]>, List<InputRichMessageMedia>?)> BuildWeather(long chatId, BestDayOption.BestDayParseResult dayParseResult, bool isGroup) {
+        if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput) return ([], null);
         
+        var cachedWeatherUrlIds = await Weather.GetRichImageUrls(chatId, dayParseResult, isGroup);
+        if (cachedWeatherUrlIds is not null && cachedWeatherUrlIds.Count > 0) {
+            return ([], cachedWeatherUrlIds);
+        }
+
         var weatherData = await Weather.GetWeather(chatId, dayParseResult, isGroup);
         if (weatherData == null) {
-            return [];
+            return ([], null);
         }
         
-        return await WebRender.RenderWeather(weatherData);
+        return (await WebRender.RenderWeather(weatherData), null);
     }
 }

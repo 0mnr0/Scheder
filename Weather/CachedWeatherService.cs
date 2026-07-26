@@ -1,4 +1,6 @@
-﻿namespace Scheder.JournalAPI;
+﻿using Telegram.Bot.Types;
+
+namespace Scheder.JournalAPI;
 
 public class CachedWeatherService
 {
@@ -6,10 +8,11 @@ public class CachedWeatherService
     {
         public List<WeatherAPI.WeatherObject> Parsed { get; set; }
         public DateTime Update { get; set; }
+        public List<byte[]>? RichImages { get; set; }
     }
     //                                 CITY               DATE      
     public static readonly Dictionary<string, Dictionary<string, WeatherCacheEntry>> Cache = new();
-    private static readonly TimeSpan CacheTime = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan CacheTime = TimeSpan.FromMinutes(20);
     private static readonly Lock Lock = new();
     private static Thread? _cleanupThread;
     private static volatile bool _cleanupRunning;
@@ -91,6 +94,39 @@ public class CachedWeatherService
         lock (Lock)
         {
             return DateExists(targetCity, targetDate) ? Cache[targetCity][targetDate].Parsed : null;
+        }
+    }
+
+    // Attaches rich images to an already-cached entry. Does NOT touch entry.Update,
+    // so the images expire together with the original text data (same TTL/cleanup cycle).
+    // If the underlying entry has already expired/been removed by the time the images
+    // are ready, this is a no-op and returns false — there's nothing left to attach to.
+    public static bool AddRichImages(string targetCity, string targetDate, List<byte[]> richImages)
+    {
+        lock (Lock)
+        {
+            if (!DateExists(targetCity, targetDate))
+                return false;
+
+            Cache[targetCity][targetDate].RichImages = richImages;
+            return true;
+        }
+    }
+
+    public static List<InputRichMessageMedia>? GetRichImages(string targetCity, string targetDate)
+    {
+        lock (Lock)
+        {
+            if (!DateExists(targetCity, targetDate))
+                return null;
+
+            var data = Cache[targetCity][targetDate].RichImages;
+
+            return data?.Select((bytes, i) => new InputRichMessageMedia
+            {
+                Id = $"w{i + 1}",
+                Media = new InputMediaPhoto(new MemoryStream(bytes))
+            }).ToList();
         }
     }
     

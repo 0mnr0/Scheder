@@ -65,10 +65,11 @@ public class Sched : ICommand
         );
 
 
-        var finalWeather = await bgWeatherTask;
+        var (finalWeather, cachedImgId) = await bgWeatherTask;
         var currentMessage = sentMessage;
 
-        if (finalWeather.Count != 0) {
+        var useCache = cachedImgId is not null && cachedImgId.Count > 0;
+        if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
             string newText;
             List<InputRichMessageMedia> mediaList = [];
 
@@ -80,7 +81,8 @@ public class Sched : ICommand
                 newText = setNewText;
             }
             else {
-                newText = """
+                Console.WriteLine("useCache: "+useCache);
+                newText = $"""
                            <h5> Погода: </h5> 
                            <tg-slideshow>
                                <img src="tg://photo?id=w1">
@@ -88,12 +90,21 @@ public class Sched : ICommand
                            </tg-slideshow>
                           """;
 
-                Console.WriteLine("finalWeather list: "+finalWeather.Count);
-                mediaList.AddRange(
+                
+                if (!useCache) {
+                    var stream1 = new MemoryStream(finalWeather[0]);
+                    var stream2 = new MemoryStream(finalWeather[1]);
+                    mediaList.AddRange(
                     [
-                        new InputRichMessageMedia { Id = "w1", Media = new InputMediaPhoto(new MemoryStream(finalWeather[0]))},
-                        new InputRichMessageMedia { Id = "w2", Media = new InputMediaPhoto(new MemoryStream(finalWeather[1]))},
+                        new InputRichMessageMedia
+                            { Id = "w1", Media = new InputMediaPhoto(stream1 )},
+                        new InputRichMessageMedia
+                            { Id = "w2", Media = new InputMediaPhoto(stream2 )},
                     ]);
+                }
+                else {
+                    mediaList.AddRange(cachedImgId!);
+                }
             }
 
             messageText += newText;
@@ -103,6 +114,15 @@ public class Sched : ICommand
             };
 
             currentMessage = await bot.EditMessageText(chatId, sentMessage.Id, null, richMessage: irm, cancellationToken: cancellationToken);
+            
+            if (!useCache) {
+                await Weather.SetRichImageUrls(
+                    finalWeather,
+                    chatId,
+                    dayParseResult,
+                    isGroup
+                );
+            }
         }
 
         var debugInfo =

@@ -1,6 +1,7 @@
 ﻿using DotNetEnv;
 using Scheder.JournalAPI;
 using Scheder.Tools;
+using Telegram.Bot.Types;
 
 namespace Scheder;
 
@@ -34,8 +35,7 @@ public class Weather
             uid = newUid.Value;
         }
 
-        var targetCity = await GetUserCity(uid);
-        Console.WriteLine("targetCity: "+targetCity);
+        var targetCity = await GetCity(uid);
         if (targetCity == null) return null;
         
         var cachedWeather =
@@ -54,6 +54,45 @@ public class Weather
         
         CachedWeatherService.Add(targetCity, day, response);
         return response;
-        
     }
+
+
+    private static async Task<string?> GetCity(long uid, bool isGroup = false) {
+        if (isGroup) {
+            var newUid = await Memory.Group.getGroupBind(uid);
+            if (!newUid.HasValue) return null;
+            uid = newUid.Value;
+        }
+
+        var targetCity = await GetUserCity(uid);
+        return targetCity;
+    }
+
+    public static async Task SetRichImageUrls(
+            List<byte[]> imageData,
+            long uid,
+            BestDayOption.BestDayParseResult dayObject,
+            bool isGroup = false
+        ) {
+            var city = await GetCity(uid, isGroup);
+            if (city == null) return;
+            var targetDate = dayObject.StartDate;
+            
+            CachedWeatherService.AddRichImages(city, targetDate, imageData);
+    }
+
+    public static async Task<List<InputRichMessageMedia>?> GetRichImageUrls(
+        long uid,
+        BestDayOption.BestDayParseResult dayObject,
+        bool isGroup = false
+    ) {
+        
+        var city = await GetCity(uid, isGroup);
+        if (city == null) return null;
+        var targetDate = dayObject.StartDate;
+
+        var list = CachedWeatherService.GetRichImages(city, targetDate);
+        return list;
+    }
+
 }
