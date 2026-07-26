@@ -35,11 +35,11 @@ public class Sched : ICommand
         var uniqueDraft = (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var threadId = ChatTools.GetForumId(message);
         var noHumanoidFixes = msgText[^1].ToString() == "!";
+        var calledViaContext = args.Length > 0;
 
 
         await SetDraft("Работа с контекстом…");
         var day = DateExtractor.GetDay(msgText);
-
         var dayParseResult = await GetSched.GetDay(chatId, day, fromGroup, ignoreEarlyDay: noHumanoidFixes);
         var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup);
         
@@ -64,15 +64,11 @@ public class Sched : ICommand
             List<InputRichMessageMedia> mediaList = [];
 
             if ((isGroup && !Behaviour.Groups.AllowWeatherImageOutput) || (isPrivateChat && !Behaviour.Users.AllowWeatherImageOutput)) {
-                var wWatch = Stopwatch.StartNew();
                 var setNewText = await SchedMessageBuilder.BuildWeatherText(chatId, dayParseResult, isGroup);
                 if (setNewText is null) {
                     return;
                 }
                 newText = setNewText;
-
-                Console.WriteLine("wWatch: " + wWatch.ElapsedMilliseconds);
-                wWatch.Stop();
             }
             else {
                 newText = """
@@ -101,7 +97,10 @@ public class Sched : ICommand
         }
 
         var debugInfo =
-            $"<i> Суммарное время ответа: {stopwatch.Elapsed.Milliseconds}мс | Сборка сообщения: {compileTime}мс </i>";
+            $"""
+             <i> Суммарное время ответа: {stopwatch.Elapsed.Milliseconds}мс | Сборка сообщения: {compileTime}мс </i>
+             <i> Триггер процент: {(calledViaContext ? args[0] : "false")} </i>"
+             """;
 
         if (fromGroup && ElevatedUserConfig.DebugUID != 0)
         {
@@ -130,9 +129,6 @@ public class Sched : ICommand
             );
         }
         stopwatch.Stop();
-
-
-
         return;
         
         
