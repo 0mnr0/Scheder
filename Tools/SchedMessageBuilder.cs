@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -15,7 +16,7 @@ public abstract class SchedMessageBuilder
     {
         if (string.IsNullOrEmpty(raw))
         {
-            return $"""
+            return """
                     <b> <i> Токен не получен :/ </i> </b>
                     <details>
                         <summary> Детали: </summary>
@@ -40,7 +41,7 @@ public abstract class SchedMessageBuilder
         var messageText = new StringBuilder(capacity: messageSize);
         
         var unixTime = CodeBunch.GetUnixFromDateTime(day, lessons);
-        var blocks = messageText.Append(
+        messageText.Append(
             $"""
               <h4> <b> Пары на {dayName}: </b> </h4>
               <a> (<tg-time unix="{unixTime}" format="wDT">{dateDisplay}</tg-time>, {lessons.Count * 1.5}ч) </a> 
@@ -289,19 +290,26 @@ public abstract class SchedMessageBuilder
     }
     
 
-    public static async Task<(List<byte[]>, List<InputRichMessageMedia>?)> BuildWeather(long chatId, BestDayOption.BestDayParseResult dayParseResult, bool isGroup) {
+    public static async Task<(List<byte[]>, List<InputRichMessageMedia>?)> BuildWeather(
+            long chatId,
+            BestDayOption.BestDayParseResult dayParseResult,
+            bool isGroup,
+            Stopwatch? timer
+        ) {
         if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput) return ([], null);
         
         var cachedWeatherUrlIds = await Weather.GetRichImageUrls(chatId, dayParseResult, isGroup);
         if (cachedWeatherUrlIds is not null && cachedWeatherUrlIds.Count > 0) {
+            timer?.Stop();
             return ([], cachedWeatherUrlIds);
         }
 
         var weatherData = await Weather.GetWeather(chatId, dayParseResult, isGroup);
         if (weatherData == null) {
+            timer?.Stop();
             return ([], null);
         }
         
-        return (await WebRender.RenderWeather(weatherData), null);
+        return (await WebRender.RenderWeather(weatherData, timer), null);
     }
 }

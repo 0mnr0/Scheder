@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.Playwright;
 
 namespace Scheder.Services.WebRender;
@@ -65,7 +66,7 @@ public class WebRender
 
 
     
-    public static async Task<List<byte[]>> RenderWeather(List<WeatherAPI.WeatherObject> weather)
+    public static async Task<List<byte[]>> RenderWeather(List<WeatherAPI.WeatherObject> weather, Stopwatch? timer)
     {
         
         var dir = RenderMaterialsExtractor.Extract();
@@ -94,6 +95,7 @@ public class WebRender
             Type=ScreenshotType.Png
         });
         
+        timer?.Stop();
         return [firstImage, secondImage];
     }
 

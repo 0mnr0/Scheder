@@ -25,7 +25,7 @@ public class Sched : ICommand
         CancellationToken cancellationToken) 
     {
         if (message.Text == null) return;
-        var stopwatch = Stopwatch.StartNew();
+        var messageTimer = Stopwatch.StartNew();
         var chatId = message.Chat.Id;
         var msgText = message.Text;
         var fromGroup = !ChatTools.IsPrivateChat(message);
@@ -47,16 +47,22 @@ public class Sched : ICommand
             return;
         }
 
-        await SetDraft("Работа с контекстом…");
+        var tokenTimer = Stopwatch.StartNew();
+        var draftTimer = Stopwatch.StartNew(); draftTimer.Reset();
+        await SetDraft("Работа с контекстом…", draftTimer);
         var day = DateExtractor.GetDay(msgText);
         var dayParseResult = await GetSched.GetDay(chatId, day, fromGroup, ignoreEarlyDay: noHumanoidFixes);
-        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup);
         
-        await SetDraft("Парсинг токена и расписаний…");
+        var weatherTimer = Stopwatch.StartNew();
+        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, weatherTimer);
+        
+        
+        await SetDraft("Парсинг токена и расписаний…", draftTimer);
         var (schedule, exams) = await GetSched.GetSchedAndExams(chatId, dayParseResult, fromGroup);
+        tokenTimer.Stop(); var buildTimer = Stopwatch.StartNew();
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
+        buildTimer.Stop();
         
-        var compileTime = stopwatch.Elapsed.Milliseconds;
         var sentMessage = await bot.SendRichMessage(
             chatId: chatId,
             messageThreadId: threadId,
@@ -67,6 +73,7 @@ public class Sched : ICommand
 
         var (finalWeather, cachedImgId) = await bgWeatherTask;
         var currentMessage = sentMessage;
+        messageTimer.Stop();
 
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
         if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
@@ -127,42 +134,49 @@ public class Sched : ICommand
 
         var debugInfo =
             $"""
-             <i>Суммарное время ответа: {stopwatch.Elapsed.Milliseconds}мс | Сборка сообщения: {compileTime}мс </i>
-             <i>Триггер процент: {(calledViaContext ? args[0] : "false")} </i>
+             <b> Speed Insights: </b>
+             Суммарное время ответа: {messageTimer.Elapsed.Milliseconds}мс 
+                
+             Парсинг токена: {tokenTimer.Elapsed.Milliseconds}мс
+             Сборка сообщения: {Math.Round(buildTimer.Elapsed.Microseconds / 1000f, 1)}мс ({buildTimer.Elapsed.Microseconds}нс)
+             
+             Draft-Time: {draftTimer.Elapsed.Milliseconds}мс
+             Сборка погоды: {weatherTimer.Elapsed.Milliseconds}мс
+                
+             <i>Триггер процент: {(calledViaContext ? args[0] : "—")} </i>
              """;
 
-        if (fromGroup && ElevatedUserConfig.DebugUID != 0)
+        if (ElevatedUserConfig.DebugUID != 0)
         {
             if (isGroup && !Behaviour.Groups.AllowSendingResponseSpeed) { return; }
-            await bot.SendMessage(
-                chatId: chatId,
-                text: debugInfo,
-                ParseMode.Html,
-                messageThreadId: threadId,
-                cancellationToken: cancellationToken,
-                receiverUserId: ElevatedUserConfig.DebugUID
-            );
-        }
-        else if (message.From != null && message.From.Id == ElevatedUserConfig.DebugUID && ElevatedUserConfig.DebugUID != 0) {
             if (isPrivateChat && !Behaviour.Users.AllowSendingResponseSpeed) { return; }
-            
-            var debugRichMessage = currentMessage.ToInputRichMessage();
-            debugRichMessage!.Html += "<br>" + debugInfo;
 
-            currentMessage = await bot.EditMessageText(
-                chatId: chatId,
-                messageId: sentMessage.MessageId,
-                "",
-                richMessage: debugRichMessage,
-                cancellationToken: cancellationToken
-            );
+            if (isGroup) {
+                await bot.SendMessage(
+                    chatId: chatId,
+                    text: debugInfo,
+                    ParseMode.Html,
+                    messageThreadId: threadId,
+                    cancellationToken: cancellationToken,
+                    receiverUserId: ElevatedUserConfig.DebugUID
+                );
+            }
+            else {
+                await bot.SendMessage(
+                    chatId: chatId,
+                    text: debugInfo,
+                    ParseMode.Html,
+                    cancellationToken: cancellationToken
+                );
+            }
         }
-        stopwatch.Stop();
+        
+        
         return;
         
         
 ///////////////////////////////////////////////////////////////
-        async Task SetDraft(string draft)
+        async Task SetDraft(string draft, Stopwatch timer)
         {
             if (!ChatTools.IsPrivateChat(message)) return;
             
@@ -173,6 +187,7 @@ public class Sched : ICommand
                 richMessage: new InputRichMessage { Html = $"<tg-thinking>{draft}</tg-thinking>" },
                 cancellationToken: cancellationToken
             );
+            timer.Stop();
         }
     }
 }

@@ -1,13 +1,12 @@
-﻿using Telegram.Bot.Types;
+﻿using Scheder;
+using Telegram.Bot.Types;
 
-namespace Scheder.JournalAPI;
-
-public class CachedWeatherService
+public abstract class CachedWeatherService
 {
     public class WeatherCacheEntry
     {
         public List<WeatherAPI.WeatherObject> Parsed { get; set; }
-        public DateTime Update { get; set; }
+        public DateTime Update { get; init; }
         public List<byte[]>? RichImages { get; set; }
     }
     //                                 CITY               DATE      
@@ -42,13 +41,12 @@ public class CachedWeatherService
     {
         lock (Lock)
         {
-            if (Cache.TryGetValue(targetCity, out var dates) &&
-                dates.TryGetValue(targetDate, out var entry))
-            {
-                var age = DateTime.Now - entry.Update;
-                if (age < CacheTime)
-                    return CacheTime - age;
-            }
+            if (!Cache.TryGetValue(targetCity, out var dates) ||
+                !dates.TryGetValue(targetDate, out var entry)) return null;
+            
+            var age = DateTime.Now - entry.Update;
+            if (age < CacheTime)
+                return CacheTime - age;
             return null;
         }
     }
