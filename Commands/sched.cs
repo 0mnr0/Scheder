@@ -149,7 +149,7 @@ public class Sched : ICommand
         if (ElevatedUserConfig.DebugUID != 0)
         {
             if (isGroup && !Behaviour.Groups.AllowSendingResponseSpeed) { return; }
-            if (isPrivateChat && !Behaviour.Users.AllowSendingResponseSpeed) { return; }
+            if (isPrivateChat && !Behaviour.Users.AllowSendingResponseSpeed || isPrivateChat && !Behaviour.Users.AllowDisplaySpeedMetricToAnyone) { return; }
 
             if (isGroup) {
                 await bot.SendMessage(

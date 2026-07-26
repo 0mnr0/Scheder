@@ -1,4 +1,6 @@
-﻿using Scheder.ContextDetection;
+﻿using DotNetEnv;
+using Scheder.Config;
+using Scheder.ContextDetection;
 using Scheder.Tools;
 
 namespace Scheder.JournalAPI;
@@ -79,6 +81,8 @@ public class TokenPreFetch
 
     private static async Task OnEveryMinuteCalculations(bool forceRun = false)
     {
+        if (!Behaviour.Other.AllowPreFetch) return;
+        
         var currentHourStr = DateTime.Now.ToString("HH");
         var currentMinute = DateTime.Now.Minute;
         foreach (var config in PrefetchData)

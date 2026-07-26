@@ -1,4 +1,6 @@
-﻿namespace Scheder.JournalAPI;
+﻿using Scheder.Config;
+
+namespace Scheder.JournalAPI;
 
 public class CachedScheduleLibrary
 {
@@ -11,7 +13,7 @@ public class CachedScheduleLibrary
     }
     
     public static readonly Dictionary<long, Dictionary<string, CacheEntry>> Cache = new();
-    private static readonly TimeSpan CacheTime = TimeSpan.FromMinutes(20);
+    private static readonly TimeSpan CacheTime = TimeSpan.FromMinutes(Behaviour.Other.ScheduleCachingTime); // 20 minutes default
     private static readonly Lock Lock = new();
     private static Thread? _cleanupThread;
     private static volatile bool _cleanupRunning;
@@ -22,6 +24,8 @@ public class CachedScheduleLibrary
     {
         lock (Lock)
         {
+            if (!Behaviour.Other.AllowScheduleCaching) return false;
+            
             if (Cache.TryGetValue(uid, out var dates) &&
                 dates.TryGetValue(targetDate, out var entry))
             {
@@ -60,8 +64,9 @@ public class CachedScheduleLibrary
     
     public static bool Add(long uid, string targetDate, string? schedValue, string? examsValue, bool allowReplace = true)
     {
-        lock (Lock)
-        {
+        lock (Lock) {
+            if (!Behaviour.Other.AllowScheduleCaching) return false;
+            
             if (!Cache.TryGetValue(uid, out var dates))
             {
                 dates = new Dictionary<string, CacheEntry>();
@@ -97,8 +102,8 @@ public class CachedScheduleLibrary
     
     public static (string?, string?) GetText(long uid, string targetDate)
     {
-        lock (Lock)
-        {
+        lock (Lock) {
+            if (!Behaviour.Other.AllowScheduleCaching) return (null, null);
             return DateExists(uid, targetDate) ? (Cache[uid][targetDate].Sched, Cache[uid][targetDate].Exams) : (null, null);
         }
     }
@@ -124,6 +129,8 @@ public class CachedScheduleLibrary
     // Service Cleanup
     public static void StartCleanupThread(TimeSpan? checkInterval = null)
     {
+        if (!Behaviour.Other.AllowScheduleCaching) return;
+        
         if (_cleanupRunning)
             return;
 
