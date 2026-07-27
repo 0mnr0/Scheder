@@ -53,7 +53,6 @@ await Task.Delay(Timeout.Infinite);
 
 
 // TODO:
-// - Возможность отключать весь тип кэшинга из под Behaivor
 // - Добавить кнопки для переключения дней до двух часов ночи
 // - /notifyme
 // - /exams

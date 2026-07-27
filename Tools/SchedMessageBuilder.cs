@@ -29,7 +29,7 @@ public abstract class SchedMessageBuilder
         }
 
         var displayWeek = day.IsWeek;
-        var dayName = DateExtractor.GetDayName(day.dayType);
+        var dayName = DateExtractor.GetDayName(day.dayDisplay);
         var dateDisplay = (displayWeek ? $"{day.StartDate} — {day.EndDate}" : day.StartDate).Replace("-", ".");
 
         
@@ -294,7 +294,7 @@ public abstract class SchedMessageBuilder
             long chatId,
             BestDayOption.BestDayParseResult dayParseResult,
             bool isGroup,
-            Stopwatch? timer
+            Stopwatch? timer = null
         ) {
         if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput) return ([], null);
         

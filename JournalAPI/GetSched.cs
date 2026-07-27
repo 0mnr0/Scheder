@@ -6,7 +6,11 @@ public class GetSched
 {
     public static async Task<BestDayOption.BestDayParseResult> GetDay(long uid, string day, bool fromGroup=false, bool ignoreEarlyDay = false)
     {
-        return await BestDayOption.Get(uid, day, fromGroup, ignoreEarlyDay=ignoreEarlyDay);
+        return await BestDayOption.Get(uid, day, fromGroup, ignoreEarlyDay);
+    }
+    public static async Task<BestDayOption.BestDayParseResult> GetForcedDay(long uid, string day, bool fromGroup=false)
+    {
+        return await BestDayOption.Get(uid, day, fromGroup, true, true);
     }
 
 

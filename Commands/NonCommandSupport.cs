@@ -28,7 +28,7 @@ public class NonCommandSupport : ITextHandler
             case < DetectionContextRatio.DefaultThreshold:
                 return;
             case >= DetectionContextRatio.DefaultThreshold:
-                await _schedCommand.ExecuteAsync(bot, message, [ratio+""], cancellationToken);
+                await _schedCommand.ExecuteAsync(bot, message, ["directMessage", ratio*100+""], cancellationToken);
                 return;
         }
     }

@@ -4,19 +4,31 @@ namespace Scheder.Tools;
 
 public static class BestDayOption
 {
-    public static async Task<BestDayParseResult> Get(long uid, string day, bool fromGroup = false, bool ignoreEarlyDay = false)
+    public static async Task<BestDayParseResult> Get(long uid, string day, bool fromGroup = false, bool ignoreEarlyDay = false, bool asForced = false)
     {
         var timeShift = await GmtTool.Get(uid, fromGroup); // (from -24 to +24 hours int)
         var clientHour = DateTime.Now.AddHours(timeShift);
         var response = new BestDayParseResult();
         
         var date = DateTime.Now;
-        if (day is DayType.Tomorrow or DayType.ReTomorrow && clientHour.Hour <= 1 && !ignoreEarlyDay)
+        if (day is DayType.Tomorrow or DayType.ReTomorrow && clientHour.Hour <= 1 && !ignoreEarlyDay && !asForced)
         {
             // Логика в том, что люди, зачастую, при наступлении нового дня
             // не соображают об этом "сразу" и могут спросить расписание на завтра, когда на самом деле, тот хочет получить расписание на сегодня
             // Поэтому фикс прост - если запрос пришёл до 2‑х (01:59 actually) часов ночи - сделать так, чтобы был сдвиг на один день назад
             date = date.AddDays(-1);
+            
+            response.dayDiff = day switch {
+                DayType.Tomorrow => 1,
+                DayType.ReTomorrow => 2,
+                _ => response.dayDiff
+            };
+            response.dayDisplay = day switch {
+                DayType.Tomorrow => DayType.Today,
+                DayType.ReTomorrow => DayType.Tomorrow,
+                _ => response.dayDisplay
+            };
+            
             response.IsEarlyDayMoveFix = true;
         }
 
@@ -93,6 +105,8 @@ public static class BestDayOption
         
         response.StartDate = response.DateStart.ToString("yyyy-MM-dd");
         response.EndDate = response.DateEnd.ToString("yyyy-MM-dd");
+        if (!response.IsEarlyDayMoveFix) response.dayDisplay = day;
+        response.dayParsedName = DateExtractor.GetDayName(day);
         response.dayType = day;
         
         return response;
@@ -112,6 +126,9 @@ public static class BestDayOption
     public class BestDayParseResult
     {
         public string dayType { get; set; }
+        public string dayParsedName { get; set; } = "";
+        public string dayDisplay { get; set; } = "";
+        public int dayDiff { get; set; } = 0;
         public string StartDate { get; set; } = "";
         public string EndDate { get; set; } = "";
         public DateTime DateStart { get; set; }

@@ -1,4 +1,6 @@
-﻿namespace Scheder.ContextDetection;
+﻿using System.Globalization;
+
+namespace Scheder.ContextDetection;
 using FuzzySharp;
 
 
@@ -201,6 +203,41 @@ public static class DateExtractor
             12 => "декабря",
             _ => ""
         };
+    }
+
+
+    public static string GetForcedDay(string dateValue) {
+        
+        var date = DateOnly.ParseExact(dateValue, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (date == today)
+            return DayType.Today;
+
+        if (date == today.AddDays(-1))
+            return DayType.Yesterday;
+
+        if (date == today.AddDays(-2))
+            return DayType.ReYesterday;
+
+        if (date == today.AddDays(1))
+            return DayType.Tomorrow;
+
+        if (date == today.AddDays(2))
+            return DayType.ReTomorrow;
+
+        return date.DayOfWeek switch
+        {
+            DayOfWeek.Monday => DayType.Monday,
+            DayOfWeek.Tuesday => DayType.Tuesday,
+            DayOfWeek.Wednesday => DayType.Wednesday,
+            DayOfWeek.Thursday => DayType.Thursday,
+            DayOfWeek.Friday => DayType.Friday,
+            DayOfWeek.Saturday =>  DayType.Saturday,
+            DayOfWeek.Sunday => DayType.Sunday,
+            _ => dateValue
+        };
+        
     }
 }
 

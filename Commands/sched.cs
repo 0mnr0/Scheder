@@ -3,7 +3,9 @@ using Scheder.Config;
 using Scheder.ContextDetection;
 using Scheder.JournalAPI;
 using Scheder.Tools;
+using Telegram.Bot.Extensions;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Scheder.Commands;
 
@@ -31,7 +33,9 @@ public class Sched : ICommand
         var uniqueDraft = (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var threadId = ChatTools.GetForumId(message);
         var noHumanoidFixes = msgText[^1].ToString() == "!";
-        var calledViaContext = args.Length > 0;
+        
+        var forceDate = args is ["forceDate", _];
+        var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
 
         if (isGroup && !await Memory.Group.IsGroupBind(chatId)) {
             await bot.SendMessage(
@@ -60,18 +64,32 @@ public class Sched : ICommand
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
         buildTimer.Stop();
         
-        var sentMessage = await bot.SendRichMessage(
+        
+        var keyboard = new InlineKeyboardMarkup();
+        if (dayParseResult.IsEarlyDayMoveFix) {
+            keyboard = new InlineKeyboardMarkup([
+                [
+                    new InlineKeyboardButton($"Показать на {dayParseResult.dayParsedName}")
+                        { CallbackData = $"sched:To:{dayParseResult.StartDate}", Style = KeyboardButtonStyle.Danger },
+                    new InlineKeyboardButton("Всё супер, закрыть")
+                        { CallbackData = $"sched:C", Style = KeyboardButtonStyle.Primary }
+                ]
+            ]);
+        }
+        
+        var currentMessage = await bot.SendRichMessage(
             chatId: chatId,
             messageThreadId: threadId,
             richMessage: new InputRichMessage { Html = messageText },
+            replyMarkup: keyboard,
             cancellationToken: cancellationToken
         );
 
 
         var (finalWeather, cachedImgId) = await bgWeatherTask;
-        var currentMessage = sentMessage;
         messageTimer.Stop();
 
+        
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
         if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
             string newText;
@@ -117,10 +135,10 @@ public class Sched : ICommand
                 Media = mediaList
             };
 
-            currentMessage = await bot.EditMessageText(chatId, sentMessage.Id, null, richMessage: irm, cancellationToken: cancellationToken);
+            currentMessage = await bot.EditMessageText(chatId, currentMessage.Id, null, richMessage: irm, cancellationToken: cancellationToken, replyMarkup: keyboard);
             
             if (!useCache) {
-                await Weather.SetRichImageUrls(
+                await Weather.SetRichImageUrls( // that's cache system
                     finalWeather,
                     chatId,
                     dayParseResult,
@@ -140,7 +158,7 @@ public class Sched : ICommand
              Draft-Time: {draftTimer.Elapsed.Milliseconds}мс
              Сборка погоды: {weatherTimer.Elapsed.Milliseconds}мс
                 
-             <i>Триггер процент: {(calledViaContext ? args[0] : "—")} </i>
+             <i>Триггер процент: {(calledViaContext ? args[1] : "—")}% </i>
              """;
 
         if (ElevatedUserConfig.DebugUID != 0)
@@ -167,11 +185,20 @@ public class Sched : ICommand
                 );
             }
         }
+
+
+
+
+        
+        await Task.Delay(45 * 1000, cancellationToken);
+        await bot.EditMessageReplyMarkup(
+            chatId: chatId,
+            messageId: currentMessage.Id,
+            replyMarkup: null,
+            cancellationToken: cancellationToken);
         
         
         return;
-        
-        
 ///////////////////////////////////////////////////////////////
         async Task SetDraft(string draft, Stopwatch timer)
         {
