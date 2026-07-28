@@ -71,7 +71,7 @@ div.weather {
     display: flex;
     justify-content: space-evenly;
     flex-direction: row;
-    padding: 2px 5px 12px;
+    padding: 5px;
 }
 
 
