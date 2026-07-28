@@ -209,7 +209,10 @@ public class Sched : ICommand
 ///////////////////////////////////////////////////////////////
         async Task SetDraft(string draft, Stopwatch timer)
         {
-            if (!ChatTools.IsPrivateChat(message)) return;
+            if (!isPrivateChat) {
+                timer.Stop();
+                return;
+            }
             
             await bot.SendRichMessageDraft(
                 chatId: chatId,
