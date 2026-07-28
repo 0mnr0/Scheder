@@ -24,16 +24,13 @@
   </ItemGroup>
   
   <ItemGroup>
-	<EmbeddedResource Include="ContextDetection\dataset.onnx" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <None Update=".env">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   
   <ItemGroup>
+    <EmbeddedResource Include="Services\ContextDetection\dataset.onnx" />
     <EmbeddedResource Include="Services\WebRender\RenderMaterials\**\*" />
   </ItemGroup>
 

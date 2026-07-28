@@ -1,5 +1,6 @@
 ﻿using Scheder.Attributes;
 using Scheder.Services;
+using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Telegram.Bot;
 using Telegram.Bot.Types;

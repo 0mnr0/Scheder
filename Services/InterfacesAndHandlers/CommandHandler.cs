@@ -1,4 +1,6 @@
-﻿namespace Scheder.Services;
+﻿using Scheder.TelegramInteractions.Attributes;
+
+namespace Scheder.Services;
 
 using System.Reflection;
 using Telegram.Bot;

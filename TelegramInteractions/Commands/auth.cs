@@ -1,5 +1,6 @@
 ﻿using Scheder.Attributes;
 using Scheder.JournalAPI;
+using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Scheder.Tools.RawTelegramApi;
 using Telegram.Bot;

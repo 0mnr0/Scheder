@@ -2,6 +2,7 @@
 using Scheder.Config;
 using Scheder.ContextDetection;
 using Scheder.JournalAPI;
+using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Telegram.Bot.Extensions;
 using Telegram.Bot.Types.Enums;

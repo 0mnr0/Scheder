@@ -1,4 +1,5 @@
-﻿using Scheder.Tools;
+﻿using Scheder.TelegramInteractions.Attributes;
+using Scheder.Tools;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;

@@ -1,4 +1,4 @@
-﻿namespace Scheder.Attributes;
+﻿namespace Scheder.TelegramInteractions.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class CommandAttribute : Attribute
