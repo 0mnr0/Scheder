@@ -193,13 +193,18 @@ public class Sched : ICommand
 
         
         await Task.Delay(45 * 1000, cancellationToken);
-        await bot.EditMessageReplyMarkup(
-            chatId: chatId,
-            messageId: currentMessage.Id,
-            replyMarkup: null,
-            cancellationToken: cancellationToken);
-        
-        
+        try {
+            await bot.EditMessageReplyMarkup(
+                chatId: chatId,
+                messageId: currentMessage.Id,
+                replyMarkup: null,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception) {
+            /* content mey not change or there's no buttons since the message sent */
+        }
+
+
         return;
 ///////////////////////////////////////////////////////////////
         async Task SetDraft(string draft, Stopwatch timer)
