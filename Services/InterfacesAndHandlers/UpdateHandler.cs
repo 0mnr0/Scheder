@@ -2,6 +2,7 @@
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.Passport;
 
 namespace Scheder.Services.InterfacesAndHandlers;
 
@@ -21,23 +22,67 @@ public class UpdateHandler : IUpdateHandler
         Update update,
         CancellationToken cancellationToken)
     {
-        switch (update.Type)
+        _ = ProcessUpdateAsync(botClient, update, cancellationToken);
+    }
+    
+    private async Task ProcessUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        try
         {
-            case UpdateType.Message when update.Message != null:
-                await _commandHandler.HandleAsync(
-                    botClient,
-                    update.Message,
-                    cancellationToken);
-                break;
+            switch (update.Type)
+            {
+                case UpdateType.Message when update.Message != null:
+                    await _commandHandler.HandleAsync(
+                        botClient,
+                        update.Message,
+                        cancellationToken);
+                    break;
 
-            case UpdateType.CallbackQuery:
-                await _callbackInterface.HandleCallbackAsync(
-                    botClient,
-                    update,
-                    cancellationToken);
-                break;
+                case UpdateType.CallbackQuery:
+                    await _callbackInterface.HandleCallbackAsync(
+                        botClient,
+                        update,
+                        cancellationToken);
+                    break;
+                
+                case UpdateType.Unknown:
+                case UpdateType.InlineQuery:
+                case UpdateType.ChosenInlineResult:
+                case UpdateType.EditedMessage:
+                case UpdateType.ChannelPost:
+                case UpdateType.EditedChannelPost:
+                case UpdateType.ShippingQuery:
+                case UpdateType.PreCheckoutQuery:
+                case UpdateType.Poll:
+                case UpdateType.PollAnswer:
+                case UpdateType.MyChatMember:
+                case UpdateType.ChatMember:
+                case UpdateType.ChatJoinRequest:
+                case UpdateType.MessageReaction:
+                case UpdateType.MessageReactionCount:
+                case UpdateType.ChatBoost:
+                case UpdateType.RemovedChatBoost:
+                case UpdateType.BusinessConnection:
+                case UpdateType.BusinessMessage:
+                case UpdateType.EditedBusinessMessage:
+                case UpdateType.DeletedBusinessMessages:
+                case UpdateType.PurchasedPaidMedia:
+                case UpdateType.ManagedBot:
+                case UpdateType.GuestMessage:
+                case UpdateType.Subscription:
+                    break;
+                default:
+                    Console.WriteLine($"[Telegram.Bot] Unknown update type: {update.Type}");
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
         }
     }
+
+    
 
     public Task HandleErrorAsync(
         ITelegramBotClient botClient,
