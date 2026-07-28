@@ -10,7 +10,7 @@ public class EditedMessagesList {
     private static readonly List<MessageData> MessagesList = [];
 
 
-    public static async void AddMessage(long chatId, long messageId, int? secondsToClear = 90) {
+    public static async Task AddMessage(long chatId, long messageId, int? secondsToClear = 90) {
         lock (Lock) {
             MessagesList.Add(new MessageData {
                 ChatId = chatId,
@@ -23,8 +23,8 @@ public class EditedMessagesList {
         await Task.Delay(seconds * 1000);
     }
 
-    public static void AddMessage(Message message) {
-        AddMessage(message.Chat.Id, message.MessageId);
+    public static async Task AddMessage(Message message) {
+        await AddMessage(message.Chat.Id, message.MessageId);
     }
 
     public static bool IsIn(long chatId, long messageId) {

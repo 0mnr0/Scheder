@@ -23,7 +23,7 @@ public class start : ICommand
             return;
         }
 
-        ChatTools.AddGroupIfNotExists(message);
+        await ChatTools.AddGroupIfNotExists(message);
 
 
         var wasRegistered = await Memory.User.IsUserExistsAsync((long) whoAsking);

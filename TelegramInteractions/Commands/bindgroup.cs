@@ -143,7 +143,7 @@ public class bindgroup : ICommand
             ]
         ]);
         
-        ChatTools.AddGroupIfNotExists(message);
+        await ChatTools.AddGroupIfNotExists(message);
 
 
         await bot.SendMessage(

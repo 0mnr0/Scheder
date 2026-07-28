@@ -77,7 +77,7 @@ public static class ChatTools
         return message.Chat.Type != ChatType.Private;
     }
 
-    public static async void AddGroupIfNotExists(Message message)
+    public static async Task AddGroupIfNotExists(Message message)
     {
         if (IsPrivateChat(message)) return;
         
