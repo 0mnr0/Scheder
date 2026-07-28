@@ -67,11 +67,12 @@ img[visible] {
 div.weather {
     width: 360px;
     height: 80px;
-    gap: 7px;
+    gap: 8  px;
     display: flex;
     justify-content: space-evenly;
     flex-direction: row;
     padding: 5px;
+    padding-left: 7px;
 }
 
 
