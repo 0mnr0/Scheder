@@ -1,4 +1,4 @@
-﻿namespace Scheder.Config;
+﻿namespace Scheder.Tools.Config;
 
 public abstract class Behaviour {
     

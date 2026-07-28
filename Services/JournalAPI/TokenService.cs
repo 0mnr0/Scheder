@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Scheder.Services.Database;
 
-namespace Scheder.JournalAPI;
+namespace Scheder.Services.JournalAPI;
 
 public class TokenService
 {

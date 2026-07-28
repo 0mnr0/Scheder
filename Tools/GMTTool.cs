@@ -1,4 +1,6 @@
-﻿namespace Scheder.Tools;
+﻿using Scheder.Services.Database;
+
+namespace Scheder.Tools;
 
 public class GmtTool
 {

@@ -1,4 +1,4 @@
-﻿using Scheder.Database;
+﻿using Scheder.Services.Database;
 
 namespace Scheder.Config;
 

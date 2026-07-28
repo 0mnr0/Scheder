@@ -1,15 +1,18 @@
 ﻿using System.Globalization;
-using Scheder.Attributes;
 using Scheder.Commands;
 using Scheder.Config;
-using Scheder.ContextDetection;
-using Scheder.JournalAPI;
-using Scheder.Services;
+using Scheder.Services.ContextDetection;
+using Scheder.Services.InterfacesAndHandlers;
+using Scheder.Services.JournalAPI;
+using Scheder.Services.Weather;
+using Scheder.TelegramInteractions.Attributes;
+using Scheder.TelegramInteractions.Commands;
 using Scheder.Tools;
+using Scheder.Tools.Config;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Scheder.Callbacks;
+namespace Scheder.TelegramInteractions.Callbacks;
 
 
 [Callback("sched", IgnoreSplitter=false)]

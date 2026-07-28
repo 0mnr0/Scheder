@@ -1,14 +1,14 @@
-﻿using Scheder.Attributes;
-using Scheder.JournalAPI;
+﻿using Scheder.Services.Database;
+using Scheder.Services.InterfacesAndHandlers;
+using Scheder.Services.JournalAPI;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
-using Scheder.Tools.RawTelegramApi;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using static Scheder.Tools.MDTools;
 
-namespace Scheder.Commands;
+namespace Scheder.TelegramInteractions.Commands;
 
 
 [Command("/auth")]

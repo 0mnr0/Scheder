@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Scheder.ClientSideCommandFix;
+namespace Scheder.TelegramInteractions.Helpers;
 
 public static class EphemeralCommand
 {

@@ -1,10 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+
 // Microsoft.ML.OnnxRuntime
 
 
-namespace Scheder.ContextDetection
+namespace Scheder.Services.ContextDetection
 {
     
     public static partial class TextNormalizer

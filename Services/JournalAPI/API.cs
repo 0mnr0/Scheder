@@ -1,10 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Nodes;
 
-namespace Scheder.JournalAPI;
+namespace Scheder.Services.JournalAPI;
 
 public class API
 {

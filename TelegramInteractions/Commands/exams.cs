@@ -1,11 +1,10 @@
-﻿using Scheder.Attributes;
-using Scheder.Services;
+﻿using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Scheder.Commands;
+namespace Scheder.TelegramInteractions.Commands;
 
 
 [Command("/exams")]

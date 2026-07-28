@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
 using Npgsql;
 using Scheder.Config;
-using Scheder.JournalAPI;
+using Scheder.Services.JournalAPI;
+
+namespace Scheder.Services.Database;
 
 public static class Memory
 {

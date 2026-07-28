@@ -1,7 +1,6 @@
 ﻿using Scheder.Config;
-using Superpower.Parsers;
 
-namespace Scheder.JournalAPI;
+namespace Scheder.Services.JournalAPI.PreFetch;
 
 public class PreFetchLoad {
     public static async Task Run() {

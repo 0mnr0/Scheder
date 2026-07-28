@@ -1,6 +1,7 @@
 ﻿using Scheder.Config;
+using Scheder.Tools.Config;
 
-namespace Scheder.JournalAPI;
+namespace Scheder.Services.JournalAPI.PreFetch;
 
 public class CachedScheduleLibrary
 {

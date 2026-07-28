@@ -1,15 +1,14 @@
-﻿using Scheder.TelegramInteractions.Attributes;
+﻿using Scheder.Services.Database;
+using Scheder.Services.InterfacesAndHandlers;
+using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
-using Telegram.Bot.Requests;
+using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using static Scheder.Tools.MDTools;
 
-namespace Scheder.Commands;
-
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Attributes;
+namespace Scheder.TelegramInteractions.Commands;
 
 [Command("/bindgroup")]
 public class bindgroup : ICommand

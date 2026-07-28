@@ -1,13 +1,12 @@
-﻿using Scheder.TelegramInteractions.Attributes;
+﻿using Scheder.Services.Database;
+using Scheder.Services.InterfacesAndHandlers;
+using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
-using Telegram.Bot.Types.Enums;
-using static Scheder.Tools.MDTools;
-
-namespace Scheder.Commands;
-
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Attributes;
+using Telegram.Bot.Types.Enums;
+
+namespace Scheder.TelegramInteractions.Commands;
 
 [Command("/start")]
 public class start : ICommand

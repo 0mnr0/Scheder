@@ -1,6 +1,7 @@
-﻿using Scheder.Tools;
+﻿using Scheder.Services.JournalAPI.PreFetch;
+using Scheder.Tools;
 
-namespace Scheder.JournalAPI;
+namespace Scheder.Services.JournalAPI;
 
 public class GetSched
 {

@@ -1,6 +1,8 @@
-﻿using Scheder;
-using Scheder.Config;
+﻿using Scheder.Config;
+using Scheder.Tools.Config;
 using Telegram.Bot.Types;
+
+namespace Scheder.Services.Weather;
 
 public abstract class CachedWeatherService
 {

@@ -1,11 +1,11 @@
-﻿using Scheder.TelegramInteractions.Attributes;
+﻿using Scheder.Services.InterfacesAndHandlers;
+using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 
 namespace Scheder.Commands;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Attributes;
 
 [Command("/help")]
 public class help : ICommand

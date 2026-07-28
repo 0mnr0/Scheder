@@ -1,4 +1,4 @@
-﻿using Scheder.ContextDetection;
+﻿using Scheder.Services.ContextDetection;
 
 namespace Scheder.Tools;
 

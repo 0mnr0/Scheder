@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Scheder.Services.Database;
 
 namespace Scheder.Tools;
 
@@ -10,9 +11,6 @@ using Telegram.Bot.Types.Enums;
 
 public static class ChatTools
 {
-    public const ParseMode Markdown = ParseMode.MarkdownV2;
-    
-
     public static int? IsForum(Message message)
     {
         // В C# свойства Chat.IsForum и MessageThreadId являются Nullable (могут быть null)

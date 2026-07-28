@@ -1,12 +1,13 @@
-﻿using Scheder.Attributes;
-using Scheder.Services;
+﻿using Scheder.Services.Database;
+using Scheder.Services.InterfacesAndHandlers;
+using Scheder.TelegramInteractions.Attributes;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using static Scheder.Tools.MDTools;
 
-namespace Scheder.Callbacks;
+namespace Scheder.TelegramInteractions.Callbacks;
 
 
 [Callback("gmt", IgnoreSplitter=false)]

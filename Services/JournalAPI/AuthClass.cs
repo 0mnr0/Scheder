@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Scheder.JournalAPI;
+namespace Scheder.Services.JournalAPI;
 
 public class AuthClass
 {

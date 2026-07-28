@@ -1,9 +1,8 @@
-﻿using DotNetEnv;
-using Scheder.JournalAPI;
+﻿using Scheder.Services.Database;
 using Scheder.Tools;
 using Telegram.Bot.Types;
 
-namespace Scheder;
+namespace Scheder.Services.Weather;
 
 public class Weather
 {

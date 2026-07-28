@@ -1,6 +1,6 @@
-﻿namespace Scheder.Database;
+﻿namespace Scheder.Services.Database;
 
 public class DatabaseTools
 {
-    public static readonly string DatabaseName = "AcademySched";
+    public const string DatabaseName = "AcademySched";
 }

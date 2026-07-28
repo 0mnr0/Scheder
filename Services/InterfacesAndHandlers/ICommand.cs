@@ -1,6 +1,7 @@
-﻿namespace Scheder.Commands;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Types;
+
+namespace Scheder.Services.InterfacesAndHandlers;
 
 public interface ICommand
 {

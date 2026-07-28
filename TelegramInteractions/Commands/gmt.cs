@@ -1,4 +1,4 @@
-﻿using Scheder.Attributes;
+﻿using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Telegram.Bot;
@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Scheder.Commands;
+namespace Scheder.TelegramInteractions.Commands;
 
 [Command("/gmt")]
 public class gmt : ICommand

@@ -1,12 +1,10 @@
-﻿using Scheder.TelegramInteractions.Attributes;
-
-namespace Scheder.Services;
-
-using System.Reflection;
+﻿using System.Reflection;
+using Scheder.Commands;
+using Scheder.TelegramInteractions.Attributes;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Scheder.Attributes;
-using Scheder.Commands;
+
+namespace Scheder.Services.InterfacesAndHandlers;
 
 public class CommandHandler
 {

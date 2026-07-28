@@ -1,8 +1,7 @@
 ﻿using System.Globalization;
-
-namespace Scheder.ContextDetection;
 using FuzzySharp;
 
+namespace Scheder.Services.ContextDetection;
 
 public static class DayType
 {

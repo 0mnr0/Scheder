@@ -3,9 +3,10 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Scheder.Config;
-using Scheder.ContextDetection;
+using Scheder.Services.ContextDetection;
+using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
+using Scheder.Tools.Config;
 using Telegram.Bot.Types;
 
 namespace Scheder.Tools;

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Playwright;
+using Scheder.Services.Weather;
 
 namespace Scheder.Services.WebRender;
 

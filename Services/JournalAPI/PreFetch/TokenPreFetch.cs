@@ -1,13 +1,10 @@
-﻿using DotNetEnv;
+﻿using System.Text.Json;
 using Scheder.Config;
-using Scheder.ContextDetection;
+using Scheder.Services.ContextDetection;
 using Scheder.Tools;
+using Scheder.Tools.Config;
 
-namespace Scheder.JournalAPI;
-using System;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Threading;
+namespace Scheder.Services.JournalAPI.PreFetch;
 
 public class TokenPreFetch
 {

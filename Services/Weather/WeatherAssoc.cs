@@ -1,4 +1,4 @@
-﻿namespace Scheder;
+﻿namespace Scheder.Services.Weather;
 
 public class WeatherAssoc
 {

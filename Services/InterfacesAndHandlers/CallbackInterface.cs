@@ -1,12 +1,10 @@
-﻿using Scheder.Services;
-
-namespace Scheder.Callbacks;
-
-using System.Reflection;
+﻿using System.Reflection;
+using Scheder.TelegramInteractions.Attributes;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Attributes;
+
+namespace Scheder.Services.InterfacesAndHandlers;
 
 public class CallbackInterface
 {

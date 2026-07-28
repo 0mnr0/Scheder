@@ -1,11 +1,12 @@
-﻿using Scheder.Attributes;
-using Scheder.Services;
+﻿using Scheder.Services.Database;
+using Scheder.Services.InterfacesAndHandlers;
+using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Scheder.Callbacks;
+namespace Scheder.TelegramInteractions.Callbacks;
 
 
 [Callback("unbound", IgnoreSplitter=false)]

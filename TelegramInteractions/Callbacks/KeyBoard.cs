@@ -1,9 +1,9 @@
-﻿using Scheder.Attributes;
-using Scheder.Services;
+﻿using Scheder.Services.InterfacesAndHandlers;
+using Scheder.TelegramInteractions.Attributes;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Scheder.Callbacks;
+namespace Scheder.TelegramInteractions.Callbacks;
 
 [Callback("keyboard", IgnoreSplitter=false)]
 public class KeyBoard : ICallbackCommand

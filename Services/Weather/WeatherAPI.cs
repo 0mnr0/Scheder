@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
-namespace Scheder;
+
+namespace Scheder.Services.Weather;
 
 public class WeatherAPI
 {
