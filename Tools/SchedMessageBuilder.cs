@@ -130,16 +130,16 @@ public abstract class SchedMessageBuilder
                                 """);
         }
 
-        if (day.IsEarlyDayMoveFix)
-        {
+        if (day.IsEarlyDayMoveFix) {
+            var dayTarget = DateExtractor.GetDayName(day.dayType);
             messageText.Append($"""
                                 <details>
                                     <summary> ⚠️ Внимание! </summary>
                                     
-                                    <blockquote> <b> ⚠️ Вы указали параметр "{DateExtractor.GetDayName(day.dayType)}". </b> <br>
+                                    <blockquote> <b> ⚠️ Вы указали параметр "{dayTarget}". </b> <br>
                                     В вашем регионе менее двух часов назад сменился календарный день, иногда люди не сразу это осознают поэтому существует этот механизм.<br>
                                     До двух часов ночи "завтра" засчитывается как "сегодня", а "послезавтра" - как "завтра".<br>
-                                    Чтобы избежать эту механику добавьте "!" в конец сообщения. Например: "пары завтра!". Тогда механизм не сработает и вы, в час ночи, получите расписание на завтра.
+                                    Чтобы избежать эту механику добавьте "!" в конец сообщения (Например: "пары завтра!") или используйте кнопку ниже для принудительного показа расписания "на {dayTarget}". Тогда механизм не сработает и вы, в час ночи, получите расписание на завтра.
                                     
                                     </blockquote>
                                 </details>
@@ -399,7 +399,7 @@ public abstract class SchedMessageBuilder
 
         var result = "\n<h5> Погода: </h5>";
         foreach (var w in weatherData) {
-            result += $"{w.WeatherTextIcon} <b> {w.Time} — </b> {Convert.ToInt32(w.Temp)}° <br>\n";
+            result += $"{w.WeatherTextIcon} <b> {w.Time} — </b>{Convert.ToInt32(w.Temp)}° <br>\n";
         }
 
         result += "\n";

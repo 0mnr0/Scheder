@@ -169,7 +169,7 @@ public class Sched : ICommand
 
 
         
-        await Task.Delay(45 * 1000, cancellationToken);
+        await Task.Delay(60 * 1000, cancellationToken);
         try {
             await bot.EditMessageReplyMarkup(
                 chatId: chatId,
