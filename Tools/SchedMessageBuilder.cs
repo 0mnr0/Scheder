@@ -253,6 +253,41 @@ public abstract class SchedMessageBuilder
 
 
 
+    public static InputRichMessage AddWeather(string input, (List<byte[]>, List<InputRichMessageMedia>?) weatherImages, bool isExams = false) {
+        input += """
+                    <h5> Погода: </h5> 
+                    <tg-slideshow>
+                        <img src="tg://photo?id=w1">
+                        <img src="tg://photo?id=w2">
+                    </tg-slideshow>
+                 """;
+
+        var useCache = weatherImages.Item2 != null;
+        
+        List<InputRichMessageMedia> mediaList = [];
+        if (!useCache) {
+            var finalWeather = weatherImages.Item1;
+            var stream1 = new MemoryStream(finalWeather[0]);
+            var stream2 = new MemoryStream(finalWeather[1]);
+            mediaList.AddRange(
+            [
+                new InputRichMessageMedia
+                    { Id = "w1", Media = new InputMediaPhoto(stream1 )},
+                new InputRichMessageMedia
+                    { Id = "w2", Media = new InputMediaPhoto(stream2 )},
+            ]);
+        }
+        else {
+            mediaList.AddRange(weatherImages.Item2!);
+        }
+        
+        return new InputRichMessage {
+            Html = input,
+            Media = mediaList
+        };
+
+    }
+
 
 
 

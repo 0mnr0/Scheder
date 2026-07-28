@@ -90,56 +90,31 @@ public class Sched : ICommand
         await bot.SendChatAction(chatId, ChatAction.UploadDocument, threadId, cancellationToken: cancellationToken);
 
 
-        var (finalWeather, cachedImgId) = await bgWeatherTask;
+        var bgWeatherResult = await bgWeatherTask;
+        var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
         messageTimer.Stop();
 
         
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
         if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
-            string newText;
-            List<InputRichMessageMedia> mediaList = [];
+            InputRichMessage newRichMessage;
 
             if ((isGroup && !Behaviour.Groups.AllowWeatherImageOutput) || (isPrivateChat && !Behaviour.Users.AllowWeatherImageOutput)) {
                 var setNewText = await SchedMessageBuilder.BuildWeatherText(chatId, dayParseResult, isGroup);
                 if (setNewText is null) {
                     return;
                 }
-                newText = setNewText;
+
+                newRichMessage = new InputRichMessage {
+                    Html = messageText + setNewText
+                };
             }
             else {
-                Console.WriteLine("useCache: "+useCache);
-                newText = $"""
-                           <h5> Погода: </h5> 
-                           <tg-slideshow>
-                               <img src="tg://photo?id=w1">
-                               <img src="tg://photo?id=w2">
-                           </tg-slideshow>
-                          """;
-
-                
-                if (!useCache) {
-                    var stream1 = new MemoryStream(finalWeather[0]);
-                    var stream2 = new MemoryStream(finalWeather[1]);
-                    mediaList.AddRange(
-                    [
-                        new InputRichMessageMedia
-                            { Id = "w1", Media = new InputMediaPhoto(stream1 )},
-                        new InputRichMessageMedia
-                            { Id = "w2", Media = new InputMediaPhoto(stream2 )},
-                    ]);
-                }
-                else {
-                    mediaList.AddRange(cachedImgId!);
-                }
+                newRichMessage = SchedMessageBuilder.AddWeather(messageText, bgWeatherResult);
             }
+            
 
-            messageText += newText;
-            var irm = new InputRichMessage {
-                Html = messageText,
-                Media = mediaList
-            };
-
-            currentMessage = await bot.EditMessageText(chatId, currentMessage.Id, null, richMessage: irm, cancellationToken: cancellationToken, replyMarkup: keyboard);
+            currentMessage = await bot.EditMessageText(chatId, currentMessage.Id, null, richMessage: newRichMessage, cancellationToken: cancellationToken, replyMarkup: keyboard);
             
             if (!useCache) {
                 await Weather.SetRichImageUrls( // that's cache system
