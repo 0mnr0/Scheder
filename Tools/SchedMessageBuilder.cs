@@ -147,9 +147,11 @@ public abstract class SchedMessageBuilder
                                 """);
         }
         
-        if (exams.Count > 0)
-        {
-            messageText.Append($"""
+        if (exams.Count > 0) {
+            messageText.Append(
+                BuildExams(rawExamList, day, showDates: displayWeek)
+            );
+            /*messageText.Append($"""
                                 <br><hr/>
                                 <details>
                                 <summary> <b> ⚠️ Экзамены ({exams.Count}) </b> </summary>
@@ -173,12 +175,86 @@ public abstract class SchedMessageBuilder
 
             }
             
-            messageText.Append("</details>");
+            messageText.Append("</details>");*/
         }
 
         return messageText.ToString();
 
     }
+
+
+
+
+
+
+
+
+
+    public static string BuildExams(
+            string? raw,
+            BestDayOption.BestDayParseResult day,
+            bool showDates = false,
+            bool isStandalone = false
+        ) {
+        var examList = ParseAndSortExams(raw, day, skipDateEnd: isStandalone);
+        var messageText = new StringBuilder(220 * examList.Count + 200);
+
+        switch (isStandalone) {
+            case true:
+                messageText.Append("<h4> Предстоящие экзамены: </h4>\n\n");
+                break;
+            case false:
+                messageText.Append($"""
+                                    <br><hr/>
+                                    <details>
+                                    <summary> <b> ⚠️ Экзамены ({examList.Count}) </b> </summary>
+
+                                    """);
+                break;
+        }
+
+
+        for (var i = 0; i < examList.Count; i++)
+        {
+            var exam = examList[i];
+                
+            messageText.Append($"""
+                                <table bordered>
+                                    <thead>
+                                        <tr><th align="center"> <b> {i+1}) {exam.TeacherName}</b>  </th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th align="center"> {exam.SpecName} </th></tr>
+                                        {(showDates ? $"""<tr><th align="center">Дата: {exam.Date}</th></tr>""" : "")}
+                                    </tbody>
+                                </table>
+                                """);
+
+        }
+        switch (isStandalone) {
+            case false:
+                messageText.Append("</details>");
+                break;
+            case true when examList.Count == 0:
+                messageText.Append($"""
+                                    <br>
+                                    
+                                    <table bordered striped>
+                                        <thead>
+                                            <tr><th align="center"> Пусто 🤷 </th></tr>
+                                        </thead>
+                                    </table>
+                                    """);
+                break;
+        }
+
+        return messageText.ToString();
+    }
+
+
+
+
+
 
 
     private static (List<Lesson>, List<ExamObject>) ParseAndSort(string json, string? jsonExams, BestDayOption.BestDayParseResult day)
@@ -191,6 +267,11 @@ public abstract class SchedMessageBuilder
             .ThenBy(l => l.LessonIndex)
             .ToList();
         
+        return (sched, ParseAndSortExams(jsonExams, day));
+    }
+
+    private static List<ExamObject> ParseAndSortExams(string? jsonExams, BestDayOption.BestDayParseResult day, bool skipDateEnd = false)
+    {
         
         var exams = jsonExams != null ? (JsonSerializer.Deserialize<List<ExamObject>>(jsonExams) ?? []) : [];
 
@@ -204,10 +285,10 @@ public abstract class SchedMessageBuilder
         examsList.RemoveAll(e =>
         {
             var d = DateOnly.Parse(e.Date);
-            return d < dayStart || d > dayEnd;
+            return (skipDateEnd ? d < dayStart : d < dayStart || d > dayEnd);
         });
 
-        return (sched, examsList);
+        return examsList;
     }
     
     private static DateTime ParseDate(string date)

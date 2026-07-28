@@ -35,6 +35,7 @@ public class Sched : ICommand
         var uniqueDraft = (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var threadId = ChatTools.GetForumId(message);
         var noHumanoidFixes = msgText[^1].ToString() == "!";
+        var draftToken = new CancellationTokenSource();
         
         var forceDate = args is ["forceDate", _];
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
@@ -52,7 +53,7 @@ public class Sched : ICommand
 
         var tokenTimer = Stopwatch.StartNew();
         var draftTimer = Stopwatch.StartNew(); draftTimer.Reset();
-        await SetDraft("Работа с контекстом…", draftTimer);
+        await SetDraft("Работа с контекстом…", ChatAction.FindLocation, draftTimer);
         var day = DateExtractor.GetDay(msgText);
         var dayParseResult = await GetSched.GetDay(chatId, day, fromGroup, ignoreEarlyDay: noHumanoidFixes);
         
@@ -60,7 +61,7 @@ public class Sched : ICommand
         var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, weatherTimer);
         
         
-        await SetDraft("Парсинг токена и расписаний…", draftTimer);
+        await SetDraft("Парсинг токена и расписаний…", ChatAction.Typing, draftTimer);
         var (schedule, exams) = await GetSched.GetSchedAndExams(chatId, dayParseResult, fromGroup);
         tokenTimer.Stop(); var buildTimer = Stopwatch.StartNew();
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
@@ -86,6 +87,7 @@ public class Sched : ICommand
             replyMarkup: keyboard,
             cancellationToken: cancellationToken
         );
+        await bot.SendChatAction(chatId, ChatAction.UploadDocument, threadId, cancellationToken: cancellationToken);
 
 
         var (finalWeather, cachedImgId) = await bgWeatherTask;
@@ -207,9 +209,13 @@ public class Sched : ICommand
 
         return;
 ///////////////////////////////////////////////////////////////
-        async Task SetDraft(string draft, Stopwatch timer)
+        async Task SetDraft(string draft, ChatAction action, Stopwatch timer)
         {
+            await draftToken.CancelAsync();
+            draftToken = new CancellationTokenSource();
+            
             if (!isPrivateChat) {
+                _ = bot.SendChatAction(chatId, action, threadId, cancellationToken: draftToken.Token);
                 timer.Stop();
                 return;
             }
@@ -219,7 +225,7 @@ public class Sched : ICommand
                 draftId: uniqueDraft,
                 messageThreadId: threadId,
                 richMessage: new InputRichMessage { Html = $"<tg-thinking>{draft}</tg-thinking>" },
-                cancellationToken: cancellationToken
+                cancellationToken: draftToken.Token
             );
             timer.Stop();
         }

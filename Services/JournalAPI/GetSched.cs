@@ -39,7 +39,7 @@ public class GetSched
     }
 
 
-    private static async Task<string?> GetExamsFromApi(long uid, BestDayOption.BestDayParseResult dayData, bool fromGroup = false, string? recommendedToken = null)
+    public static async Task<string?> GetExamsFromApi(long uid, BestDayOption.BestDayParseResult dayData, bool fromGroup = false, string? recommendedToken = null)
     {
         var id = uid;
         if (fromGroup)
