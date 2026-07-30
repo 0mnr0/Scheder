@@ -42,10 +42,15 @@ public static class SettingsUi
                     ? InlineKeyboardButton.WithCallbackData("▶️", $"setting:l:{page + 1}")
                     : InlineKeyboardButton.WithCallbackData(" ", "setting:noop")
             };
-            rows.Add(nav.ToArray());
+            rows.Add([.. nav]);
         }
 
-        return ("⚙️ Настройки", new InlineKeyboardMarkup(rows));
+        return (
+            "⚙️ Параметры бота\n\n" +
+            "⚠️ Внимание\n" + 
+            "Разработчик может принудительно включать или отключать некоторые опции для всех аккаунтов. Ваши настройки не будут затронуты но поведение может отличаться",
+            new InlineKeyboardMarkup(rows)
+        );
     }
 
     public static (string Text, InlineKeyboardMarkup Keyboard) BuildDescriptionView(
