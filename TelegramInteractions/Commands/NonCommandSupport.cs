@@ -1,6 +1,7 @@
 ﻿using Scheder.Commands;
 using Scheder.Services.ContextDetection;
 using Scheder.Services.InterfacesAndHandlers;
+using Scheder.TelegramInteractions.Commands.Settings.Data;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -12,13 +13,20 @@ public class NonCommandSupport : ITextHandler
     public async Task HandleAsync(
         ITelegramBotClient bot,
         Message message,
-        CancellationToken cancellationToken)
-    {
+        CancellationToken cancellationToken) {
+
+        var state = await SettingsService.GetValue(message.Chat.Id, SettingsList.ContextDetection, cancellationToken);
+        if (state is null or 0) return; // not found or context detection is disabled
+        var fullDetection = state.Value == 2;
+        
+        
         var text = message.Text;
         if (string.IsNullOrWhiteSpace(text) || string.IsNullOrEmpty(text))
             return;
 
-        if (!text.StartsWith("пар", StringComparison.CurrentCultureIgnoreCase))
+        
+        Console.WriteLine(!fullDetection && !text.StartsWith("пар", StringComparison.CurrentCultureIgnoreCase));
+        if (!fullDetection && !text.StartsWith("пар", StringComparison.CurrentCultureIgnoreCase))
         {
             return;
         }

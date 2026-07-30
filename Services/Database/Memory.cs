@@ -29,6 +29,7 @@ public static class Memory
                 as_teacher      BOOLEAN NOT NULL DEFAULT FALSE,
                 linked_groups   JSONB   NOT NULL DEFAULT '[]',
                 reminders       JSONB   NOT NULL DEFAULT '[]',
+                settings        JSONB   NOT NULL DEFAULT '[]',
                 date_listeners  JSONB   NOT NULL DEFAULT '[]'
             );";
 
@@ -41,6 +42,7 @@ public static class Memory
                 action          TEXT,
                 as_teacher      BOOLEAN NOT NULL DEFAULT FALSE,
                 reminders       JSONB   NOT NULL DEFAULT '[]',
+                settings        JSONB   NOT NULL DEFAULT '[]',
                 date_listeners  JSONB   NOT NULL DEFAULT '[]'
             );";
 
@@ -50,8 +52,11 @@ public static class Memory
         await using var cmd2 = new NpgsqlCommand(sql2, conn);
         await cmd2.ExecuteNonQueryAsync();
 
-        await using var cmd3 = new NpgsqlCommand(@"ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT", conn);
+        await using var cmd3 = new NpgsqlCommand("ALTER TABLE users ADD COLUMN IF NOT EXISTS settings JSONB", conn);
         await cmd3.ExecuteNonQueryAsync();
+
+        await using var cmd4 = new NpgsqlCommand("ALTER TABLE tggroups ADD COLUMN IF NOT EXISTS settings JSONB", conn);
+        await cmd4.ExecuteNonQueryAsync();
     }
 
     public static class User
@@ -354,8 +359,73 @@ public static class Memory
 
             await cmd.ExecuteNonQueryAsync();
         }
-        
-        
+
+
+        // Настройки бота (Scheder.Services.Settings) хранятся в колонке users.settings (JSONB)
+        // как плоский объект вида {"0": 1, "1": 0, ...}, где ключ — SettingDefinition.Id.
+        // Колонка изначально создаётся с DEFAULT '[]' (пустой массив) — на случай, если там
+        // ещё не JSON-объект, при записи он приводится к '{}' автоматически.
+
+        public static async Task<Dictionary<int, int>> GetSettingsAsync(long uid)
+        {
+            await using var conn = GetConnection();
+            await conn.OpenAsync();
+
+            await using var cmd = new NpgsqlCommand(
+                "SELECT settings FROM users WHERE uid = @uid", conn);
+            cmd.Parameters.AddWithValue("uid", uid);
+
+            var result = await cmd.ExecuteScalarAsync();
+            if (result is not string json)
+                return new Dictionary<int, int>();
+
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+                return new Dictionary<int, int>();
+
+            var dict = new Dictionary<int, int>();
+            foreach (var prop in doc.RootElement.EnumerateObject())
+            {
+                if (int.TryParse(prop.Name, out var id) && prop.Value.ValueKind == JsonValueKind.Number)
+                    dict[id] = prop.Value.GetInt32();
+            }
+
+            return dict;
+        }
+
+        public static async Task<int?> GetSettingAsync(long uid, int settingId)
+        {
+            await using var conn = GetConnection();
+            await conn.OpenAsync();
+
+            await using var cmd = new NpgsqlCommand(
+                "SELECT settings->>@key FROM users WHERE uid = @uid AND jsonb_typeof(settings) = 'object'", conn);
+            cmd.Parameters.AddWithValue("uid", uid);
+            cmd.Parameters.AddWithValue("key", settingId.ToString());
+
+            var result = await cmd.ExecuteScalarAsync();
+            if (result is null || result == DBNull.Value)
+                return null;
+
+            return int.TryParse(result.ToString(), out var value) ? value : null;
+        }
+
+        public static async Task SetSettingAsync(long uid, int settingId, int value)
+        {
+            var patch = JsonSerializer.Serialize(new Dictionary<string, int> { [settingId.ToString()] = value });
+
+            await using var conn = GetConnection();
+            await conn.OpenAsync();
+
+            await using var cmd = new NpgsqlCommand(
+                "UPDATE users SET settings = " +
+                "(CASE WHEN jsonb_typeof(settings) = 'object' THEN settings ELSE '{}'::jsonb END) || @patch::jsonb " +
+                "WHERE uid = @uid", conn);
+            cmd.Parameters.AddWithValue("patch", patch);
+            cmd.Parameters.AddWithValue("uid", uid);
+
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 
     public static class Group
