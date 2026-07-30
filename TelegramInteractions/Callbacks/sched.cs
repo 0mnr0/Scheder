@@ -54,7 +54,7 @@ public class sched : ICallbackCommand
         var dayParseResult = await GetSched.GetForcedDay(chatId, day, isGroup);
         if (args[0] == "1") {dayParseResult.dayDisplay = DayType.Tomorrow;}
         if (args[0] == "2") {dayParseResult.dayDisplay = DayType.ReTomorrow;}
-        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup);
+        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken);
         var (schedule, exams) = await GetSched.GetSchedAndExams(chatId, dayParseResult, isGroup);
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
         

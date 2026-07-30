@@ -6,6 +6,7 @@ using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
 using Scheder.Services.Weather;
 using Scheder.TelegramInteractions.Attributes;
+using Scheder.TelegramInteractions.Commands.Settings.Data;
 using Scheder.Tools;
 using Scheder.Tools.Config;
 using Telegram.Bot;
@@ -58,7 +59,7 @@ public class Sched : ICommand
         var dayParseResult = await GetSched.GetDay(chatId, day, fromGroup, ignoreEarlyDay: noHumanoidFixes);
         
         var weatherTimer = Stopwatch.StartNew();
-        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, weatherTimer);
+        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken, weatherTimer);
         
         
         await SetDraft("Парсинг токена и расписаний…", ChatAction.Typing, draftTimer);
@@ -93,13 +94,13 @@ public class Sched : ICommand
         var bgWeatherResult = await bgWeatherTask;
         var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
         messageTimer.Stop();
-
         
+        var weatherAsText = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, cancellationToken) is 1;
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
         if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
             InputRichMessage newRichMessage;
 
-            if ((isGroup && !Behaviour.Groups.AllowWeatherImageOutput) || (isPrivateChat && !Behaviour.Users.AllowWeatherImageOutput)) {
+            if ((isGroup && !Behaviour.Groups.AllowWeatherImageOutput) || (isPrivateChat && !Behaviour.Users.AllowWeatherImageOutput) || weatherAsText) {
                 var setNewText = await SchedMessageBuilder.BuildWeatherText(chatId, dayParseResult, isGroup);
                 if (setNewText is null) {
                     return;

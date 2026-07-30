@@ -8,12 +8,22 @@ public static class SettingsRegistry
         new()
         {
             Id = SettingsList.ContextDetection,
-            Title = "Контекстная активиация",
+            Title = "Контекстная активация",
             Description = "Если в отправленном сообщении есть потребность отправлять список пар (например: \"Какие у нас завтра пары\" — бот без команды пришлет расписание на завтра. Вариант \"Всегда\" рекомендуется только в личных сообщениях",
             Type = SettingType.IntList,
             States = [0, 1, 2],
             StateLabels = ["Отключено", "Начинается со слова \"пары\"", "Всегда"],
             Default = 0
+        },
+        new()
+        {
+            Id = SettingsList.AllowWeather,
+            Title = "Погода",
+            Description = "Показывает погоду если профиль поддерживает. Появляется только в командах /exams и /пары",
+            Type = SettingType.IntList,
+            States = [0, 1, 2],
+            StateLabels = ["Отключена", "Только текстом", "Полная"],
+            Default = 2
         }
     };
 

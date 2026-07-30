@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Scheder.Services.ContextDetection;
 using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
+using Scheder.TelegramInteractions.Commands.Settings.Data;
 using Scheder.Tools.Config;
 using Telegram.Bot.Types;
 
@@ -411,9 +412,13 @@ public abstract class SchedMessageBuilder
             long chatId,
             BestDayOption.BestDayParseResult dayParseResult,
             bool isGroup,
+            CancellationToken cancellationToken,
             Stopwatch? timer = null
         ) {
-        if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput) return ([], null);
+        var weatherSettings = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, cancellationToken);
+        var (isWeatherAllowed, asText) = (weatherSettings is not 0, weatherSettings is 1);
+        
+        if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput || !isWeatherAllowed) return ([], null);
         
         var cachedWeatherUrlIds = await Weather.GetRichImageUrls(chatId, dayParseResult, isGroup);
         if (cachedWeatherUrlIds is not null && cachedWeatherUrlIds.Count > 0) {
