@@ -30,6 +30,12 @@ public static class EphemeralCommand
                 Description = "Отвязать группу",
                 IsEphemeral =  true
             },
+            new BotCommand
+            {
+                Command = "settings",
+                Description = "Настройка бота для текущего чата",
+                IsEphemeral =  true
+            },
         ]);
         Console.WriteLine("[Ephemeral] Done ");
     }
