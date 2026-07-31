@@ -9,6 +9,5 @@ await Task.Delay(Timeout.Infinite); // for docker
 
 // TODO:
 // - /notifyme
-// - /settings - Ephemeral, for admins only
 // - /daylistener
 // - /dynamicmessage - for admins only 

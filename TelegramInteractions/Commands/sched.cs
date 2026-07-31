@@ -27,7 +27,6 @@ public class Sched : ICommand
         CancellationToken cancellationToken) 
     {
         if (message.Text == null) return;
-        var messageTimer = Stopwatch.StartNew();
         var chatId = message.Chat.Id;
         var msgText = message.Text;
         var fromGroup = !ChatTools.IsPrivateChat(message);
@@ -37,6 +36,8 @@ public class Sched : ICommand
         var threadId = ChatTools.GetForumId(message);
         var noHumanoidFixes = msgText[^1].ToString() == "!";
         var draftToken = new CancellationTokenSource();
+        var metric = new PerformanceMetric();
+        metric.Start(MetricType.Total);
         
         var forceDate = args is ["forceDate", _];
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
@@ -51,22 +52,17 @@ public class Sched : ICommand
                 );
             return;
         }
-
-        var tokenTimer = Stopwatch.StartNew();
-        var draftTimer = Stopwatch.StartNew(); draftTimer.Reset();
-        await SetDraft("Работа с контекстом…", ChatAction.FindLocation, draftTimer);
-        var day = DateExtractor.GetDay(msgText);
-        var dayParseResult = await GetSched.GetDay(chatId, day, fromGroup, ignoreEarlyDay: noHumanoidFixes);
         
-        var weatherTimer = Stopwatch.StartNew();
-        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken, weatherTimer);
+        await SetDraft("Работа с контекстом…", ChatAction.FindLocation);
+        var day = DateExtractor.GetDay(msgText, metric);
+        var dayParseResult = await GetSched.GetDay(chatId, day, metric, fromGroup, ignoreEarlyDay: noHumanoidFixes);
+        
+        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken, metric: metric);
         
         
-        await SetDraft("Парсинг токена и расписаний…", ChatAction.Typing, draftTimer);
-        var (schedule, exams) = await GetSched.GetSchedAndExams(chatId, dayParseResult, fromGroup);
-        tokenTimer.Stop(); var buildTimer = Stopwatch.StartNew();
+        await SetDraft("Парсинг токена и расписаний…", ChatAction.Typing);
+        var (schedule, exams) = await GetSched.GetSchedAndExams(chatId, dayParseResult, fromGroup, metric: metric);
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
-        buildTimer.Stop();
         
         
         var keyboard = new InlineKeyboardMarkup();
@@ -81,6 +77,7 @@ public class Sched : ICommand
             ]);
         }
         
+        Console.WriteLine(("Before firs send:"+metric.getMetric(MetricType.Total)));
         var currentMessage = await bot.SendRichMessage(
             chatId: chatId,
             messageThreadId: threadId,
@@ -88,12 +85,12 @@ public class Sched : ICommand
             replyMarkup: keyboard,
             cancellationToken: cancellationToken
         );
+        metric.Stop(MetricType.Total);
         await bot.SendChatAction(chatId, ChatAction.UploadDocument, threadId, cancellationToken: cancellationToken);
 
 
         var bgWeatherResult = await bgWeatherTask;
         var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
-        messageTimer.Stop();
         
         var weatherAsText = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, cancellationToken) is 1;
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
@@ -126,18 +123,32 @@ public class Sched : ICommand
                 );
             }
         }
+        metric.StopAll();
 
+        
+        
+        /* = Total,
+         = Analyze,
+        = Build,
+        = Draft,
+        = TokenParse,
+        = DataParse,
+        = WeatherFetch,
+        = WeatherRender,*/
         var debugInfo =
             $"""
              <b> Speed Insights: </b>
-             Суммарное время ответа: {messageTimer.Elapsed.Milliseconds}мс 
+             Суммарное время ответа: {metric.getMetric(MetricType.Total)}мс 
                 
-             Парсинг токена: {tokenTimer.Elapsed.Milliseconds}мс
-             Сборка сообщения: {Math.Round(buildTimer.Elapsed.Microseconds / 1000f, 1)}мс ({buildTimer.Elapsed.Microseconds}нс)
+             Анализ контекста: {metric.getMetric(MetricType.Analyze)}мс
+             Парсинг токена: {metric.getMetric(MetricType.TokenParse)}мс
+             Парсинг Journal: {metric.getMetric(MetricType.DataParse)}мс
+             Сборка сообщения: {Math.Round(metric.getMetric(MetricType.Build) / 1000f, 1)}мс ({metric.getMetric(MetricType.Build, true)}нс)
              
-             Draft-Time: {draftTimer.Elapsed.Milliseconds}мс
-             Сборка погоды: {weatherTimer.Elapsed.Milliseconds}мс
-                
+             Парсинг погоды: {metric.getMetric(MetricType.WeatherFetch)}мс
+             Рендеринг погоды: {metric.getMetric(MetricType.WeatherRender)}мс
+             Draft-Time: {metric.getMetric(MetricType.Draft)}мс
+             
              <i>Триггер процент: {(calledViaContext ? args[1] : "—")}% </i>
              """;
 
@@ -185,25 +196,25 @@ public class Sched : ICommand
 
         return;
 ///////////////////////////////////////////////////////////////
-        async Task SetDraft(string draft, ChatAction action, Stopwatch timer)
+        async Task SetDraft(string draft, ChatAction action)
         {
-            await draftToken.CancelAsync();
-            draftToken = new CancellationTokenSource();
-            
-            if (!isPrivateChat) {
-                _ = bot.SendChatAction(chatId, action, threadId, cancellationToken: draftToken.Token);
-                timer.Stop();
-                return;
+            using (metric.Measure(MetricType.Draft)) {
+                await draftToken.CancelAsync();
+                draftToken = new CancellationTokenSource();
+
+                if (!isPrivateChat) {
+                    _ = bot.SendChatAction(chatId, action, threadId, cancellationToken: draftToken.Token);
+                    return;
+                }
+
+                await bot.SendRichMessageDraft(
+                    chatId: chatId,
+                    draftId: uniqueDraft,
+                    messageThreadId: threadId,
+                    richMessage: new InputRichMessage { Html = $"<tg-thinking>{draft}</tg-thinking>" },
+                    cancellationToken: draftToken.Token
+                );
             }
-            
-            await bot.SendRichMessageDraft(
-                chatId: chatId,
-                draftId: uniqueDraft,
-                messageThreadId: threadId,
-                richMessage: new InputRichMessage { Html = $"<tg-thinking>{draft}</tg-thinking>" },
-                cancellationToken: draftToken.Token
-            );
-            timer.Stop();
         }
     }
 }

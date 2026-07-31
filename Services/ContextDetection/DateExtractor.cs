@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using FuzzySharp;
+using Scheder.Tools;
 
 namespace Scheder.Services.ContextDetection;
-
 public static class DayType
 {
     public const string Monday = "Monday";
@@ -26,6 +26,7 @@ public static class DayType
 
 public static class DateExtractor
 {
+    private static MetricType _metric = MetricType.Analyze;
     private static readonly Dictionary<string, string> Dataset = new()
     {
         ["понедельник"] = DayType.Monday,
@@ -95,70 +96,64 @@ public static class DateExtractor
         return bestScore > 75 ? best : null;
     }
 
-    public static string GetDay(string text)
+    public static string GetDay(string text, PerformanceMetric? metric)
     {
-        var normalized = text.ToLowerInvariant().Replace("/", " ");
+        using (metric?.Measure(_metric)) {
+            var normalized = text.ToLowerInvariant().Replace("/", " ");
 
-        // 1. Точное совпадение по подстроке (быстрый путь)
-        var multiWordKeys = Dataset.Keys.Where(k => k.Contains(' ')).OrderByDescending(k => k.Length).ToList();
-        foreach (var key in multiWordKeys)
-        {
-            if (normalized.Contains(key))
-            {
-                return Dataset[key];
+            // 1. Точное совпадение по подстроке (быстрый путь)
+            var multiWordKeys = Dataset.Keys.Where(k => k.Contains(' ')).OrderByDescending(k => k.Length).ToList();
+            foreach (var key in multiWordKeys) {
+                if (normalized.Contains(key)) {
+                    return Dataset[key];
+                }
             }
+
+            var words = normalized.Split(
+                (char[]?)null, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            if (words.Count > 0 && TriggerSet.Contains(words[0])) {
+                words.RemoveAt(0);
+            }
+
+            // 2. Fuzzy-проверка биграмм — сравниваем слово к слову
+            for (var i = 0; i < words.Count - 1; i++) {
+                string? bestKey = null;
+                var bestScore = 0;
+
+                foreach (var key in multiWordKeys) {
+                    var keyWords = key.Split(' ');
+                    if (keyWords.Length != 2) continue;
+
+                    var score1 = Fuzz.Ratio(words[i], keyWords[0]);
+                    var score2 = Fuzz.Ratio(words[i + 1], keyWords[1]);
+                    var score = Math.Min(score1, score2); // оба слова должны совпадать
+
+                    if (score <= bestScore) continue;
+                    bestScore = score;
+                    bestKey = key;
+                }
+
+                if (bestKey is not null && bestScore > 60) // порог можно подобрать отдельно
+                {
+                    return Dataset[bestKey];
+                }
+            }
+
+            // 3. Прежняя логика по отдельным словам
+            foreach (var word in words) {
+                if (Dataset.TryGetValue(word, out var exact)) {
+                    return exact;
+                }
+
+                var match = FindClosest(word);
+                if (match is not null && Dataset.TryGetValue(match, out var fuzzy)) {
+                    return fuzzy;
+                }
+            }
+
+            return DayType.Today;
         }
-
-        var words = normalized.Split(
-            (char[]?)null, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        if (words.Count > 0 && TriggerSet.Contains(words[0]))
-        {
-            words.RemoveAt(0);
-        }
-
-        // 2. Fuzzy-проверка биграмм — сравниваем слово к слову
-        for (var i = 0; i < words.Count - 1; i++)
-        {
-            string? bestKey = null;
-            var bestScore = 0;
-
-            foreach (var key in multiWordKeys)
-            {
-                var keyWords = key.Split(' ');
-                if (keyWords.Length != 2) continue;
-
-                var score1 = Fuzz.Ratio(words[i], keyWords[0]);
-                var score2 = Fuzz.Ratio(words[i + 1], keyWords[1]);
-                var score = Math.Min(score1, score2); // оба слова должны совпадать
-
-                if (score <= bestScore) continue;
-                bestScore = score;
-                bestKey = key;
-            }
-
-            if (bestKey is not null && bestScore > 60) // порог можно подобрать отдельно
-            {
-                return Dataset[bestKey];
-            }
-        }
-
-        // 3. Прежняя логика по отдельным словам
-        foreach (var word in words)
-        {
-            if (Dataset.TryGetValue(word, out var exact))
-            {
-                return exact;
-            }
-
-            var match = FindClosest(word);
-            if (match is not null && Dataset.TryGetValue(match, out var fuzzy))
-            {
-                return fuzzy;
-            }
-        }
-
-        return DayType.Today;
     }
 
     public static string GetDayName(string dayName)

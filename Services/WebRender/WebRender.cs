@@ -2,10 +2,12 @@
 using System.Text.Json;
 using Microsoft.Playwright;
 using Scheder.Services.Weather;
+using Scheder.Tools;
 
 namespace Scheder.Services.WebRender;
 public class WebRender
 {
+    private static MetricType _metric = MetricType.WeatherRender;
     private static IPlaywright? _playwright;
     private static IBrowser? _browser;
     private static IBrowserContext? _context;
@@ -63,36 +65,33 @@ public class WebRender
         return page;
     }
 
-    public static async Task<List<byte[]>> RenderWeather(List<WeatherAPI.WeatherObject> weather, Stopwatch? timer)
+    public static async Task<List<byte[]>> RenderWeather(List<WeatherAPI.WeatherObject> weather, PerformanceMetric? metric)
     {
-        var dir = RenderMaterialsExtractor.Extract();
-        var indexPath = Path.Combine(dir, "weather.html");
+        using (metric?.Measure(_metric)) {
+            var dir = RenderMaterialsExtractor.Extract();
+            var indexPath = Path.Combine(dir, "weather.html");
 
-        var page = await OpenLocalFileAsync(indexPath, true);
-        try
-        {
-            await page.EvaluateAsync(@"runProd()", null);
-            await page.EvaluateAsync(@"weather => updateWeather(weather)", weather);
+            var page = await OpenLocalFileAsync(indexPath, true);
+            try {
+                await page.EvaluateAsync(@"runProd()", null);
+                await page.EvaluateAsync(@"weather => updateWeather(weather)", weather);
 
-            var element = page.Locator("#FirstTarget");
-            var firstImage = await element.ScreenshotAsync(new LocatorScreenshotOptions
-            {
-                OmitBackground = true
-            });
+                var element = page.Locator("#FirstTarget");
+                var firstImage = await element.ScreenshotAsync(new LocatorScreenshotOptions {
+                    OmitBackground = true
+                });
 
-            element = page.Locator("#SecondTarget");
-            var secondImage = await element.ScreenshotAsync(new LocatorScreenshotOptions
-            {
-                OmitBackground = true,
-                Type = ScreenshotType.Png
-            });
-
-            timer?.Stop();
-            return [firstImage, secondImage];
-        }
-        finally
-        {
-            await page.CloseAsync();
+                element = page.Locator("#SecondTarget");
+                var secondImage = await element.ScreenshotAsync(new LocatorScreenshotOptions {
+                    OmitBackground = true,
+                    Type = ScreenshotType.Png
+                });
+                
+                return [firstImage, secondImage];
+            }
+            finally {
+                await page.CloseAsync();
+            }
         }
     }
 

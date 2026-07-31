@@ -2,12 +2,14 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
+using Scheder.Tools;
 
 namespace Scheder.Services.JournalAPI;
 
 public class API
 {
     private static readonly HttpClient Client;
+    private const MetricType Metric = MetricType.TokenParse;
 
     static API()
     {
@@ -103,39 +105,41 @@ public class API
     
     
     
-    public static async Task<SchedResponse> GetSched(string token, string date, string? endDate)
+    public static async Task<SchedResponse> GetSched(string token, string date, string? endDate, PerformanceMetric? metric)
     {
-        endDate ??= date;
-        
-        var response = await GetAsync(
-            @$"https://msapi.top-academy.ru/api/v2/schedule/operations/get-by-date-range?date_start={date}&date_end={endDate}",
-            token
-        );
+        using (metric?.Measure(Metric)) {
+            endDate ??= date;
 
-        var returnValue = new SchedResponse
-        {
-            Code = (int) response.StatusCode,
-            Message = await response.Content.ReadAsStringAsync()
-        };
+            var response = await GetAsync(
+                @$"https://msapi.top-academy.ru/api/v2/schedule/operations/get-by-date-range?date_start={date}&date_end={endDate}",
+                token
+            );
 
-        return returnValue;
+            var returnValue = new SchedResponse {
+                Code = (int)response.StatusCode,
+                Message = await response.Content.ReadAsStringAsync()
+            };
+
+            return returnValue;
+        }
     }
     
     
-    public static async Task<ExamsResponse> GetExams(string token)
+    public static async Task<ExamsResponse> GetExams(string token, PerformanceMetric? metric = null)
     {
-        var response = await GetAsync(
-            @$"https://msapi.top-academy.ru/api/v2/progress/operations/student-exams",
-            token
-        );
+        using (metric?.Measure(Metric)) {
+            var response = await GetAsync(
+                @$"https://msapi.top-academy.ru/api/v2/progress/operations/student-exams",
+                token
+            );
 
-        var returnValue = new ExamsResponse
-        {
-            Code = (int) response.StatusCode,
-            Message = await response.Content.ReadAsStringAsync()
-        };
+            var returnValue = new ExamsResponse {
+                Code = (int)response.StatusCode,
+                Message = await response.Content.ReadAsStringAsync()
+            };
 
-        return returnValue;
+            return returnValue;
+        }
     }
 
 

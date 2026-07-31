@@ -14,6 +14,8 @@ namespace Scheder.Tools;
 
 public abstract class SchedMessageBuilder
 {
+    private const MetricType Metric = MetricType.Build;
+    private const MetricType WeatherFetchMetric = MetricType.WeatherFetch;
     public static string BuildMessage(string? raw, BestDayOption.BestDayParseResult day, string? rawExamList = null)
     {
         if (string.IsNullOrEmpty(raw))
@@ -413,25 +415,23 @@ public abstract class SchedMessageBuilder
             BestDayOption.BestDayParseResult dayParseResult,
             bool isGroup,
             CancellationToken cancellationToken,
-            Stopwatch? timer = null
+            PerformanceMetric? metric = null
         ) {
-        var weatherSettings = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, cancellationToken);
-        var (isWeatherAllowed, asText) = (weatherSettings is not 0, weatherSettings is 1);
-        
-        if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput || !isWeatherAllowed) return ([], null);
-        
-        var cachedWeatherUrlIds = await Weather.GetRichImageUrls(chatId, dayParseResult, isGroup);
-        if (cachedWeatherUrlIds is not null && cachedWeatherUrlIds.Count > 0) {
-            timer?.Stop();
-            return ([], cachedWeatherUrlIds);
-        }
+            var weatherSettings = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, cancellationToken);
+            var isWeatherAllowed = weatherSettings is not 0;
 
-        var weatherData = await Weather.GetWeather(chatId, dayParseResult, isGroup);
-        if (weatherData == null) {
-            timer?.Stop();
-            return ([], null);
-        }
-        
-        return (await WebRender.RenderWeather(weatherData, timer), null);
+            if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput || !isWeatherAllowed) return ([], null);
+
+            var cachedWeatherUrlIds = await Weather.GetRichImageUrls(chatId, dayParseResult, isGroup);
+            if (cachedWeatherUrlIds is not null && cachedWeatherUrlIds.Count > 0) {
+                return ([], cachedWeatherUrlIds);
+            }
+
+            var weatherData = await Weather.GetWeather(chatId, dayParseResult, isGroup, metric: metric);
+            if (weatherData == null) {
+                return ([], null);
+            }
+
+            return (await WebRender.RenderWeather(weatherData, metric), null);
     }
 }

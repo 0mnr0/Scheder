@@ -22,37 +22,38 @@ public class Weather
     }
 
 
-    public static async Task<List<WeatherAPI.WeatherObject>?> GetWeather(long uid, BestDayOption.BestDayParseResult dayObject, bool isGroup = false)
+    public static async Task<List<WeatherAPI.WeatherObject>?> GetWeather(long uid, BestDayOption.BestDayParseResult dayObject, bool isGroup = false, PerformanceMetric? metric = null)
     {
-        if (dayObject.IsWeek) return null;
-        if (Config.Env.WeatherApiToken == null) return null;
-        var day = dayObject.StartDate;
+        using (metric?.Measure(MetricType.WeatherFetch)) {
+            if (dayObject.IsWeek) return null;
+            if (Config.Env.WeatherApiToken == null) return null;
+            var day = dayObject.StartDate;
 
-        if (isGroup) {
-            var newUid = await Memory.Group.getGroupBind(uid);
-            if (!newUid.HasValue) return null;
-            uid = newUid.Value;
+            if (isGroup) {
+                var newUid = await Memory.Group.getGroupBind(uid);
+                if (!newUid.HasValue) return null;
+                uid = newUid.Value;
+            }
+
+            var targetCity = await GetCity(uid);
+            if (targetCity == null) return null;
+
+            var cachedWeather =
+                CachedWeatherService.DateExists(targetCity, day)
+                    ? CachedWeatherService.GetText(targetCity, day)
+                    : null;
+
+            if (cachedWeather != null) {
+                Console.WriteLine("[WeatherXCache] Sending cached weather response!");
+                return cachedWeather;
+            }
+
+            var response = await GetDirectWeather(targetCity, day, isGroup);
+            if (response == null) return null;
+
+            CachedWeatherService.Add(targetCity, day, response);
+            return response;
         }
-
-        var targetCity = await GetCity(uid);
-        if (targetCity == null) return null;
-        
-        var cachedWeather =
-            CachedWeatherService.DateExists(targetCity, day)
-                ? CachedWeatherService.GetText(targetCity, day)
-                : null;
-        
-        if (cachedWeather != null)
-        {
-            Console.WriteLine("[WeatherXCache] Sending cached weather response!");
-            return cachedWeather;
-        }
-
-        var response = await GetDirectWeather(targetCity, day, isGroup);
-        if (response == null) return null;
-        
-        CachedWeatherService.Add(targetCity, day, response);
-        return response;
     }
 
 

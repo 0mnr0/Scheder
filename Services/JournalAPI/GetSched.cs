@@ -5,17 +5,30 @@ namespace Scheder.Services.JournalAPI;
 
 public class GetSched
 {
-    public static async Task<BestDayOption.BestDayParseResult> GetDay(long uid, string day, bool fromGroup=false, bool ignoreEarlyDay = false)
+    private const MetricType Metric = MetricType.Analyze;
+    private const MetricType MetricParse = MetricType.DataParse;
+    public static async Task<BestDayOption.BestDayParseResult> GetDay(long uid, string day, PerformanceMetric? metric, bool fromGroup=false, bool ignoreEarlyDay = false)
     {
-        return await BestDayOption.Get(uid, day, fromGroup, ignoreEarlyDay);
+        using (metric?.Measure(Metric)) {
+            return await BestDayOption.Get(uid, day, fromGroup, ignoreEarlyDay);
+        }
     }
-    public static async Task<BestDayOption.BestDayParseResult> GetForcedDay(long uid, string day, bool fromGroup=false)
+    public static async Task<BestDayOption.BestDayParseResult> GetForcedDay(long uid, string day, PerformanceMetric? metric, bool fromGroup=false)
     {
-        return await BestDayOption.Get(uid, day, fromGroup, true, true);
+        
+        using (metric?.Measure(Metric)) {
+            return await BestDayOption.Get(uid, day, fromGroup, true, true);
+        }
     }
 
 
-    private static async Task<string?> GetSchedFromApi(long uid, BestDayOption.BestDayParseResult dayData, bool fromGroup = false, string? recommendedToken = null)
+    private static async Task<string?> GetSchedFromApi(
+            long uid,
+            BestDayOption.BestDayParseResult dayData,
+            bool fromGroup = false,
+            string? recommendedToken = null,
+            PerformanceMetric? metric = null
+        )
     {
         var id = uid;
         if (fromGroup)
@@ -31,7 +44,7 @@ public class GetSched
         var startDate = dayData.StartDate;
         var endDate = dayData.EndDate;
 
-        var response = await API.GetSched(token, startDate, endDate);
+        var response = await API.GetSched(token, startDate, endDate, metric: metric);
         var newSched = response.Message;
         
         
@@ -39,59 +52,64 @@ public class GetSched
     }
 
 
-    public static async Task<string?> GetExamsFromApi(long uid, BestDayOption.BestDayParseResult dayData, bool fromGroup = false, string? recommendedToken = null)
-    {
+    public static async Task<string?> GetExamsFromApi(
+        long uid,
+        BestDayOption.BestDayParseResult dayData,
+        bool fromGroup = false,
+        string? recommendedToken = null,
+        PerformanceMetric? metric = null
+    ) {
         var id = uid;
-        if (fromGroup)
-        {
+        if (fromGroup) {
             var newId = await CodeBunch.GetUidFromGroup(uid);
-            if (newId == null) {return null;}
-            
+            if (newId == null) {
+                return null;
+            }
+
             id = (long)newId;
         }
-        
+
         var token = recommendedToken ?? await TokenService.Get(id);
         if (token == null) return null;
-       
         
-        var response = await API.GetExams(token);
+        var response = await API.GetExams(token, metric: metric);
         var examsList = response.Message;
-        
+
         return examsList;
     }
-    
-    
-    
+
+
+
     public static async Task<(string?, string?)> GetSchedAndExams(
         long uid,
         BestDayOption.BestDayParseResult dayData,
         bool fromGroup = false,
-        string? recommendedToken = null
+        string? recommendedToken = null,
+        PerformanceMetric? metric = null
         )
     {
-        
-        var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
-        var (cachedSched, cachedExams) =
-            CachedScheduleLibrary.DateExists(uid, cacheDate)
-                ? CachedScheduleLibrary.GetText(uid, cacheDate)
-                : (null, null);
-        
-        if (cachedSched != null && cachedExams !=null)
-        {
-            Console.WriteLine("[CachedScheduleLibrary] Sending cached response!");
-            return (cachedSched, cachedExams);
-        }
-        
-        
-        var (newSched, newExams) = await ParallelTasks.Run(
-            GetSchedFromApi(uid, dayData, fromGroup, recommendedToken),
-            GetExamsFromApi(uid, dayData, fromGroup, recommendedToken)
-        );
-        CachedScheduleLibrary.Delete(uid, cacheDate);
-        CachedScheduleLibrary.Add(uid, cacheDate, newSched, newExams);
-        
-        return (newSched, newExams);
+        using (metric?.Measure(MetricParse)) {
+            var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
+            var (cachedSched, cachedExams) =
+                CachedScheduleLibrary.DateExists(uid, cacheDate)
+                    ? CachedScheduleLibrary.GetText(uid, cacheDate)
+                    : (null, null);
 
+            if (cachedSched != null && cachedExams != null) {
+                Console.WriteLine("[CachedScheduleLibrary] Sending cached response!");
+                return (cachedSched, cachedExams);
+            }
+
+
+            var (newSched, newExams) = await ParallelTasks.Run(
+                GetSchedFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric),
+                GetExamsFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric)
+            );
+            CachedScheduleLibrary.Delete(uid, cacheDate);
+            CachedScheduleLibrary.Add(uid, cacheDate, newSched, newExams);
+
+            return (newSched, newExams);
+        }
     }
 
 

@@ -51,7 +51,7 @@ public class sched : ICallbackCommand
         
         
         var day = DateExtractor.GetForcedDay(targetDay);
-        var dayParseResult = await GetSched.GetForcedDay(chatId, day, isGroup);
+        var dayParseResult = await GetSched.GetForcedDay(chatId, day, null, isGroup);
         if (args[0] == "1") {dayParseResult.dayDisplay = DayType.Tomorrow;}
         if (args[0] == "2") {dayParseResult.dayDisplay = DayType.ReTomorrow;}
         var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken);

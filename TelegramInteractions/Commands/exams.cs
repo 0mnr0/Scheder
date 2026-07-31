@@ -26,8 +26,8 @@ public class exams : ICommand
         var msgText = message.Text!;
         var noHumanoidFixes = msgText[^1].ToString() == "!";
         
-        var day = DateExtractor.GetDay(msgText);
-        var dayParseResult = await GetSched.GetDay(chatId, day, isGroup, ignoreEarlyDay: noHumanoidFixes);
+        var day = DateExtractor.GetDay(msgText, null);
+        var dayParseResult = await GetSched.GetDay(chatId, day, null, isGroup, ignoreEarlyDay: noHumanoidFixes);
         
         var exams = await GetSched.GetExamsFromApi(chatId, dayParseResult, isGroup);
         var messageText = SchedMessageBuilder.BuildExams(exams, dayParseResult, isStandalone: true, showDates: true);
