@@ -62,7 +62,7 @@ public class Sched : ICommand
         
         await SetDraft("Парсинг токена и расписаний…", ChatAction.Typing);
         var (schedule, exams) = await GetSched.GetSchedAndExams(chatId, dayParseResult, fromGroup, metric: metric);
-        var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
+        var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams, metric: metric);
         
         
         var keyboard = new InlineKeyboardMarkup();
@@ -143,7 +143,7 @@ public class Sched : ICommand
              Анализ контекста: {metric.getMetric(MetricType.Analyze)}мс
              Парсинг токена: {metric.getMetric(MetricType.TokenParse)}мс
              Парсинг Journal: {metric.getMetric(MetricType.DataParse)}мс
-             Сборка сообщения: {Math.Round(metric.getMetric(MetricType.Build) / 1000f, 1)}мс ({metric.getMetric(MetricType.Build, true)}нс)
+             Сборка сообщения: {Math.Round(metric.getMetric(MetricType.Build, true) / 1000f, 1)}мс ({metric.getMetric(MetricType.Build, true)}нс)
              
              Парсинг погоды: {metric.getMetric(MetricType.WeatherFetch)}мс
              Рендеринг погоды: {metric.getMetric(MetricType.WeatherRender)}мс
