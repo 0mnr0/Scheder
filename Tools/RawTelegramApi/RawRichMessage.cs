@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Scheder.Config;
+using Scheder.Tools.Config;
 
 namespace Scheder.Tools.RawTelegramApi;
 

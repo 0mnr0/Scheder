@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Npgsql;
-using Scheder.Config;
 using Scheder.Services.JournalAPI;
 
 namespace Scheder.Services.Database;
@@ -8,7 +7,7 @@ namespace Scheder.Services.Database;
 public static class Memory
 {
     private static readonly string
-        ConnectionString = $"Host={Env.DB_HOST};Port={Env.DB_PORT};Database={Env.DB_NAME};Username={Env.DB_USER};Password={Env.DB_PASS}";
+        ConnectionString = DatabaseTools.ConnectionString;
 
     private static NpgsqlConnection GetConnection() => new(ConnectionString);
 
@@ -16,7 +15,6 @@ public static class Memory
     
     public static async Task InitializeAsync()
     {
-        Console.WriteLine("Connect string: "+ConnectionString);
         await using var conn = GetConnection();
         await conn.OpenAsync();
 
@@ -26,6 +24,8 @@ public static class Memory
                 uid             BIGINT PRIMARY KEY,
                 auth            JSONB   NOT NULL DEFAULT '{}',
                 action          TEXT,
+                city            TEXT,
+                gmt             INT,
                 as_teacher      BOOLEAN NOT NULL DEFAULT FALSE,
                 linked_groups   JSONB   NOT NULL DEFAULT '[]',
                 reminders       JSONB   NOT NULL DEFAULT '[]',
@@ -40,6 +40,8 @@ public static class Memory
                 bind2           BIGINT,
                 bindToken       TEXT,
                 action          TEXT,
+                gmt             INT,
+                CITY            TEXT,
                 as_teacher      BOOLEAN NOT NULL DEFAULT FALSE,
                 reminders       JSONB   NOT NULL DEFAULT '[]',
                 settings        JSONB   NOT NULL DEFAULT '[]',
@@ -52,11 +54,11 @@ public static class Memory
         await using var cmd2 = new NpgsqlCommand(sql2, conn);
         await cmd2.ExecuteNonQueryAsync();
 
-        await using var cmd3 = new NpgsqlCommand("ALTER TABLE users ADD COLUMN IF NOT EXISTS settings JSONB", conn);
+        /*await using var cmd3 = new NpgsqlCommand("ALTER TABLE users ADD COLUMN IF NOT EXISTS settings JSONB", conn);
         await cmd3.ExecuteNonQueryAsync();
 
         await using var cmd4 = new NpgsqlCommand("ALTER TABLE tggroups ADD COLUMN IF NOT EXISTS settings JSONB", conn);
-        await cmd4.ExecuteNonQueryAsync();
+        await cmd4.ExecuteNonQueryAsync();*/
     }
 
     public static class User

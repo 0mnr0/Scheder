@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Scheder.Tools.Config;
 
 namespace Scheder.Services.Weather;
 
@@ -9,7 +10,7 @@ public class WeatherAPI
     public static async Task<List<WeatherObject>> Get(string city, string date)
     {
         var json = await Client.GetStringAsync(
-            $"https://api.weatherapi.com/v1/forecast.json?key={Config.Env.WeatherApiToken}&q={city}&dt={date}");
+            $"https://api.weatherapi.com/v1/forecast.json?key={Env.WeatherApiToken}&q={city}&dt={date}");
         
         var doc = JsonDocument.Parse(json);
 

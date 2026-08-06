@@ -1,5 +1,6 @@
 ﻿using Scheder.Services.Database;
 using Scheder.Tools;
+using Scheder.Tools.Config;
 using Telegram.Bot.Types;
 
 namespace Scheder.Services.Weather;
@@ -13,7 +14,7 @@ public class Weather
 
     private static async Task<List<WeatherAPI.WeatherObject>?> GetDirectWeather(string userCity, string day, bool isGroup = false)
     {
-        if (Config.Env.WeatherApiToken == null) return null;
+        if (Env.WeatherApiToken == null) return null;
         if (!userCity.Contains('/')) return await WeatherAPI.Get(userCity, day);
         
         var data = userCity.Split('/');
@@ -26,7 +27,7 @@ public class Weather
     {
         using (metric?.Measure(MetricType.WeatherFetch)) {
             if (dayObject.IsWeek) return null;
-            if (Config.Env.WeatherApiToken == null) return null;
+            if (Env.WeatherApiToken == null) return null;
             var day = dayObject.StartDate;
 
             if (isGroup) {

@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using Scheder.Commands;
-using Scheder.Config;
 using Scheder.Services.ContextDetection;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;

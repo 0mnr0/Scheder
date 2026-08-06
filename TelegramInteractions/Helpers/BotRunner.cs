@@ -1,5 +1,4 @@
-﻿using Scheder.Config;
-using Scheder.Services.ContextDetection;
+﻿using Scheder.Services.ContextDetection;
 using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI.PreFetch;
@@ -31,7 +30,7 @@ public class BotRunner {
     }
     
     public static async Task Once() {
-        var bot = new TelegramBotClient(Env.TelegramToken);
+        var bot = new TelegramBotClient(Env.TelegramToken!);
         var textHandler = new NonCommandSupport();
         var commandHandler = new CommandHandler(textHandler);
         var callbackInterface = new CallbackInterface();

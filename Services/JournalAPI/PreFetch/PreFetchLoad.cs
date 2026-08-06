@@ -1,4 +1,4 @@
-﻿using Scheder.Config;
+﻿using Scheder.Tools.Config;
 
 namespace Scheder.Services.JournalAPI.PreFetch;
 

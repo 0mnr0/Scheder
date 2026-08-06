@@ -1,5 +1,4 @@
-﻿using Scheder.Config;
-using Scheder.Tools.Config;
+﻿using Scheder.Tools.Config;
 using Telegram.Bot.Types;
 
 namespace Scheder.Services.Weather;

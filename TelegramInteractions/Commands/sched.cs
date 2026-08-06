@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Scheder.Config;
-using Scheder.Services.ContextDetection;
+﻿using Scheder.Services.ContextDetection;
 using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
@@ -39,7 +37,6 @@ public class Sched : ICommand
         var metric = new PerformanceMetric();
         metric.Start(MetricType.Total);
         
-        var forceDate = args is ["forceDate", _];
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
 
         if (isGroup && !await Memory.Group.IsGroupBind(chatId)) {
