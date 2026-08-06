@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using Scheder.Tools;
-using Serilog;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.JournalAPI;
 
@@ -74,6 +74,7 @@ public class API
             catch (Exception ex)
             {
                 Log.Warning("[Journal API]: Failed request: {ms1}, {ms2}", ex.Message, ex.Source);
+                Console.WriteLine($"Ошибка запроса: {ex.Message}, {ex.Source}");
                 await Task.Delay(delay);
             }
         }
