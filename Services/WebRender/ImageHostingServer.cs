@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using static Scheder.Tools.Logger;
 
 public class ImageHostingServer
 {
@@ -26,12 +27,12 @@ public class ImageHostingServer
 
     public static async Task Start()
     {
-        Console.WriteLine($"Starting ImageHostingServer: {$"http://{LocalAddress}:{LocalPort}/"}");
+        Log.Information("[ImageServer] Starting ImageHostingServer: {S}", $"http://{LocalAddress}:{LocalPort}/");
         Listener.Prefixes.Add($"http://{LocalAddress}:{LocalPort}/");
         _cts = new CancellationTokenSource();
         Listener.Start();
         _machineIp = await Client.GetStringAsync("https://api.ipify.org");
-        Console.WriteLine($"[ImageServer] running! (Fetched IP: {_machineIp})");
+        Log.Information("[ImageServer] running! (Fetched IP: {MachineIp})", _machineIp);
         _ = Task.Run(() => ListenLoop(_cts.Token));
     }
 
@@ -55,7 +56,7 @@ public class ImageHostingServer
             Data = image,
             ExpirationTimer = new Timer(_ =>
             {
-                Console.WriteLine($"[ImageServer] request for id={id}, known ids: {string.Join(",", Images.Keys)}");
+                Log.Verbose("[ImageServer] request for id={Id}, known ids: {Join}", id, string.Join(",", Images.Keys));
                 if (Images.TryRemove(id, out var removed))
                 {
                     removed.ExpirationTimer.Dispose();
@@ -98,7 +99,7 @@ public class ImageHostingServer
             {
                 var id = path[prefix.Length..].Trim('/');
 
-                Console.WriteLine($"[ImageServer] request for id={id}, known ids: {string.Join(",", Images.Keys)}");
+                Log.Verbose("[ImageServer] request for id={Id}, known ids: {Join}", id, string.Join(",", Images.Keys));
                 if (Images.TryGetValue(id, out var stored))
                 {
                     ctx.Response.ContentType = "image/png";

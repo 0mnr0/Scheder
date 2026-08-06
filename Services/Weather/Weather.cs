@@ -1,4 +1,5 @@
 ﻿using Scheder.Services.Database;
+using static Scheder.Tools.Logger;
 using Scheder.Tools;
 using Scheder.Tools.Config;
 using Telegram.Bot.Types;
@@ -45,7 +46,7 @@ public class Weather
                     : null;
 
             if (cachedWeather != null) {
-                Console.WriteLine("[WeatherXCache] Sending cached weather response!");
+                Log.Information("[WeatherCache] Sending cached weather response!");
                 return cachedWeather;
             }
 

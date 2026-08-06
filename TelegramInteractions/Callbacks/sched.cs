@@ -79,7 +79,6 @@ public class sched : ICallbackCommand
                 newText = setNewText;
             }
             else {
-                Console.WriteLine("useCache: "+useCache);
                 newText = $"""
                            <h5> Погода: </h5> 
                            <tg-slideshow>

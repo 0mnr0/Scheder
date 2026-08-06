@@ -61,8 +61,6 @@ public static class RawRichMessage
         var response = await Http.PostAsync(
             $"https://api.telegram.org/bot{Env.TelegramToken}/editMessageText",
             content);
- 
-        var responseText = await response.Content.ReadAsStringAsync();
     }
     
     
@@ -80,9 +78,5 @@ public static class RawRichMessage
         var response = await http.PostAsync(
             $"https://api.telegram.org/bot{Env.TelegramToken}/deleteEphemeralMessage",
             content);
- 
-        var responseText = await response.Content.ReadAsStringAsync();
-        Console.WriteLine("code:" + response.StatusCode);
-        Console.WriteLine("cont:" + responseText);
     }
 }

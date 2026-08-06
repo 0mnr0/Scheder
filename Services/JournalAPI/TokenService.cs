@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Scheder.Services.Database;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.JournalAPI;
 
@@ -18,13 +19,13 @@ public class TokenService
     {
         if (!cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null && cachedToken.Uid == uid)
         {
-            Console.WriteLine("[TokenService] Using cached token!");
+            Log.Information("[TokenService | {Uid}]  Using cached token!", uid);
             return cachedToken.Token;
         }
 
         if (!cacheUpdate)
         {
-            Console.WriteLine("[TokenService] No cached token ");
+            Log.Information("[TokenService | {Uid}] No cached token, getting new!", uid);
         }
 
 
@@ -33,10 +34,10 @@ public class TokenService
         var isExpired = lastUpdate.HasValue && IsTimerExpired(lastUpdate.Value);
          
         
-        Console.WriteLine("[TokenService] Should parse new: "+(string.IsNullOrEmpty(token) || lastUpdate == null || isExpired));
+        Log.Information("[TokenService] Should parse new: {should}", string.IsNullOrEmpty(token) || lastUpdate == null || isExpired);
         if (string.IsNullOrEmpty(token) || lastUpdate == null || isExpired || cacheUpdate)
         {
-            Console.WriteLine($"[TokenService] Cant find any fresh token, parsing new one... {(cacheUpdate ? "(Actual reason: force cache update)" : "")}");
+            Log.Information("[TokenService] Cant find any fresh token, parsing new one... {ActualReasonForceCacheUpdate}", cacheUpdate ? "(Actual reason: force cache update)" : "");
             var auth = await Memory.User.GetAuthAsync(uid);
             if (auth == null)
             {

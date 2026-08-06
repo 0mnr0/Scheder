@@ -25,7 +25,6 @@ public class NonCommandSupport : ITextHandler
             return;
 
         
-        Console.WriteLine(!fullDetection && !text.StartsWith("пар", StringComparison.CurrentCultureIgnoreCase));
         if (!fullDetection && !text.StartsWith("пар", StringComparison.CurrentCultureIgnoreCase))
         {
             return;

@@ -74,7 +74,6 @@ public class Sched : ICommand
             ]);
         }
         
-        Console.WriteLine(("Before firs send:"+metric.getMetric(MetricType.Total)));
         var currentMessage = await bot.SendRichMessage(
             chatId: chatId,
             messageThreadId: threadId,

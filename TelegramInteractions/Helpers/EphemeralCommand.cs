@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.TelegramInteractions.Helpers;
 
@@ -8,7 +9,7 @@ public static class EphemeralCommand
     public static async Task AddAll(TelegramBotClient bot)
     {
 
-        Console.WriteLine("[Ephemeral] Patching commands...");
+        Log.Information("[Ephemeral] Patching commands...");
         await bot.SetMyCommands([]); // not working without this piece of 
         
         await bot.SetMyCommands([
@@ -37,6 +38,6 @@ public static class EphemeralCommand
                 IsEphemeral =  true
             },
         ]);
-        Console.WriteLine("[Ephemeral] Done ");
+        Log.Information("[Ephemeral] Done!");
     }
 }

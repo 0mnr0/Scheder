@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using Scheder.Tools;
+using Serilog;
 
 namespace Scheder.Services.JournalAPI;
 
@@ -52,17 +53,18 @@ public class API
             username = login
         };
 
-        for (var i = 0; i < 3; i++)
+        for (var i = 1; i < 4; i++) // 3 cycles (starts from 1)
         {
+            var delay = 260 * (i * 40 + 1);
             try
             {
-                Console.WriteLine($"[Journal API] Making request ({i+1}/3)...");
+                Log.Debug("[Journal API] Making request ({I}/3)...", i);
                 var response = await PostAsync("https://msapi.top-academy.ru/api/v2/auth/login", payload);
-                Console.WriteLine($"[Journal API]: Response code: {response.StatusCode}");
+                Log.Debug("[Journal API]: Response code: {ResponseStatusCode}", response.StatusCode);
 
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    await Task.Delay(300);
+                    await Task.Delay(delay);
                     continue;
                 }
 
@@ -71,8 +73,8 @@ public class API
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка запроса: {ex.Message}, {ex.Source}");
-                await Task.Delay(300);
+                Log.Warning("[Journal API]: Failed request: {ms1}, {ms2}", ex.Message, ex.Source);
+                await Task.Delay(delay);
             }
         }
 

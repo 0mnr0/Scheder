@@ -2,6 +2,7 @@
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.InterfacesAndHandlers;
 
@@ -71,13 +72,13 @@ public class UpdateHandler : IUpdateHandler
                 case UpdateType.Subscription:
                     break;
                 default:
-                    Console.WriteLine($"[Telegram.Bot] Unknown update type: {update.Type}");
+                    Log.Error("[Telegram.Bot] Unknown update type: {UpdateType}", update.Type);
                     break;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error("[Telegram.Bot] Error: {er}", ex);
         }
     }
 
@@ -89,7 +90,7 @@ public class UpdateHandler : IUpdateHandler
         HandleErrorSource source,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine(exception);
+        Log.Fatal("[Telegram.Bot]: {e}", exception);
 
         return Task.CompletedTask;
     }

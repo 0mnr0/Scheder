@@ -18,7 +18,7 @@ public class Unbound : ICallbackCommand
         string[] args,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine("args: "+ string.Join(" ", args));
+
         var whoAsking = callbackQuery.From.Id;
         var targetChatId = long.Parse(args[0]);
         var isHardUnbound = args.Length > 1 && args[1] == "hard";
@@ -32,7 +32,6 @@ public class Unbound : ICallbackCommand
             );
             return;
         }
-        Console.WriteLine("2");
         
         var boundedTo = await Memory.Group.getGroupBind(targetChatId);
         var isUserBoundedWithTargetGroup = (await Memory.User.GetLinkedGroups(whoAsking)).Contains(targetChatId);
@@ -84,7 +83,6 @@ public class Unbound : ICallbackCommand
             return;
         }
         
-        Console.WriteLine($"{boundedTo == whoAsking} | {isUserBoundedWithTargetGroup}");
         if (boundedTo == whoAsking && isUserBoundedWithTargetGroup)
         {
             await Memory.User.UnlinkGroup(whoAsking, targetChatId);

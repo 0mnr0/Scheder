@@ -1,5 +1,6 @@
 ﻿using Scheder.Services.JournalAPI.PreFetch;
 using Scheder.Tools;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.JournalAPI;
 
@@ -96,7 +97,7 @@ public class GetSched
                     : (null, null);
 
             if (cachedSched != null && cachedExams != null) {
-                Console.WriteLine("[CachedScheduleLibrary] Sending cached response!");
+                Log.Information("[CachedScheduleLibrary | {uid}] Sending cached response!", uid);
                 return (cachedSched, cachedExams);
             }
 

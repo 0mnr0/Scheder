@@ -2,6 +2,7 @@
 using Scheder.Services.ContextDetection;
 using Scheder.Tools;
 using Scheder.Tools.Config;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.JournalAPI.PreFetch;
 
@@ -66,7 +67,7 @@ public class TokenPreFetch
 
     public static void SetFetchList(List<CacheIdAllowed> list) {
         PrefetchData = list;
-        Console.WriteLine("New Prefetch List:"+list.Count);
+        Log.Information("[TokenPreFetch] New Prefetch List: {lc}", list.Count);
     }   
 
     public static async Task ForceUpdateAll()
@@ -108,7 +109,8 @@ public class TokenPreFetch
         if (isGroup)
         {
             var newUid = await CodeBunch.GetUidFromGroup(uid);
-            Console.WriteLine($"[ {DateTime.Now:HH:mm:ss} ] newUid: "+(newUid==null));  
+            
+            Log.Debug("[TokenPreFetch] {Now:HH:mm:ss} | newUid: {uid}", DateTime.Now, newUid==null);
             if (newUid == null) {return;}
             uid = (long)newUid;
         }
@@ -120,8 +122,7 @@ public class TokenPreFetch
         List<CopyObject> parseDatesFor = [new() {Id = uid, IsGroup = isGroup}];
         parseDatesFor.AddRange(config.CopyFor);
 
-        Console.WriteLine("Range: "+parseDatesFor.Count);
-
+        Log.Debug("[TokenPreFetch] Range: {dat}", parseDatesFor.Count);
 
         foreach (var copyObject in parseDatesFor)
         {
@@ -132,10 +133,8 @@ public class TokenPreFetch
                 await GetSched.GetSchedAndExams(copyObject.Id, day, fromGroup: copyObject.IsGroup, recommendedToken: token);
             }
         }
-
-        Console.WriteLine(string.Join(", ", CachedScheduleLibrary.Cache.Keys));
-        Console.WriteLine($"[ {DateTime.Now:HH:mm:ss} ] Скрипт measureWork получил токен для: [{config.Id}]!");
-
+        Log.Debug("[TokenPreFetch] {dat}", string.Join(", ", CachedScheduleLibrary.Cache.Keys));
+        Log.Debug("[TokenPreFetch] Скрипт measureWork получил токен для: {cfg}!", config.Id);
     }
 
 

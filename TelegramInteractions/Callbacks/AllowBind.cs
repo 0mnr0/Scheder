@@ -4,6 +4,7 @@ using Scheder.TelegramInteractions.Attributes;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.TelegramInteractions.Callbacks;
 
@@ -70,7 +71,6 @@ public class AllowBind : ICallbackCommand
             if (origMessage != null)
             {
                 
-                Console.WriteLine("chatId:  " + chatId + " | receiverUserId:" + callbackQuery.From.Id + " | emid: "+Convert.ToInt32(origMessage));
                 await bot.EditEphemeralMessageText(
                     chatId: chatId,
                     receiverUserId: callbackQuery.From.Id,
@@ -97,7 +97,7 @@ public class AllowBind : ICallbackCommand
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error("[AllowBind - Callback]: {e}", e);
         }
     }
 }

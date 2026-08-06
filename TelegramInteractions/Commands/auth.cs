@@ -20,10 +20,8 @@ public class auth : ICommand
         string[] args,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine("//auth "+args);
         var whoAsking = message.From?.Id;
         var msgTxt = message.Text;
-        Console.WriteLine(msgTxt);
         if (whoAsking == null || msgTxt == null)
         {
             return;
