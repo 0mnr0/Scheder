@@ -9,12 +9,12 @@ using Scheder.Tools.Config;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.TelegramInteractions.Helpers;
 
 public class BotRunner {
-    
-    public static async Task PrepareMaterials() {
+    private static async Task CookMaterials() {
         DotNetEnv.Env.Load();
         await Memory.InitializeAsync();
         ElevatedUserConfig.DebugUID = Env.DebugUid;
@@ -26,7 +26,16 @@ public class BotRunner {
         await WebRender.EnsureInitializedAsync();
         DetectionContextRatio.InitEmbedded("Scheder.Services.ContextDetection.dataset.onnx");
         await PreFetchLoad.Run();
+        Log.Information("Materials is ready, bot can run perfectly prepared now!");
+    }
 
+    public static async Task PrepareMaterials()
+    {
+        var task = CookMaterials();
+        if (!Env.FastStart)
+        {
+            await task;
+        }
     }
     
     public static async Task Once() {
@@ -36,8 +45,14 @@ public class BotRunner {
         var callbackInterface = new CallbackInterface();
         var updateHandler = new UpdateHandler(commandHandler, callbackInterface);
 
-        
-        await EphemeralCommand.AddAll(bot);
+
+        var cmdPatch = EphemeralCommand.AddAll(bot);
+        if (!Env.FastStart)
+        {
+            await cmdPatch;
+        }
+
+
         bot.StartReceiving(
             updateHandler,
             new ReceiverOptions

@@ -10,6 +10,12 @@ public class RunConfig
     {
         
         DotNetEnv.Env.Load();
+        if (Env.FastStart)
+        {
+            Log.Warning("[FastStart] .env test skipped! Not recommended for production purposes. ");
+            return;
+        }
+        
         var isFatal = false;
         
         if (string.IsNullOrWhiteSpace(Env.TelegramToken))
