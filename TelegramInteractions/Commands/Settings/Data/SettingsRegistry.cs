@@ -24,6 +24,15 @@ public static class SettingsRegistry
             States = [0, 1, 2],
             StateLabels = ["Отключена", "Только текстом", "Полная"],
             Default = 2
+        },
+        new()
+        {
+            Id = SettingsList.AllowDataCaching,
+            Title = "Кэш",
+            Description = "Кэш сохраняется в среднем в течении 20 минут. Кэшируются: ответы, токен авторизации и список экзаменов. Кэш сбрасывается автоматически или при перезапуске бота",
+            Type = SettingType.Bool,
+            StateLabels = ["Отключен", "Разрешен"],
+            Default = 1
         }
     };
 

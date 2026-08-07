@@ -10,7 +10,6 @@ namespace Scheder.Services.JournalAPI;
 public class API
 {
     private static readonly HttpClient Client;
-    private const MetricType Metric = MetricType.TokenParse;
 
     static API()
     {
@@ -112,7 +111,7 @@ public class API
     
     public static async Task<SchedResponse> GetSched(string token, string date, string? endDate, PerformanceMetric? metric)
     {
-        using (metric?.Measure(Metric)) {
+        using (metric?.Measure(MetricType.DataParse)) {
             endDate ??= date;
 
             var response = await GetAsync(
@@ -132,7 +131,7 @@ public class API
     
     public static async Task<ExamsResponse> GetExams(string token, PerformanceMetric? metric = null)
     {
-        using (metric?.Measure(Metric)) {
+        using (metric?.Measure(MetricType.DataParse)) {
             var response = await GetAsync(
                 @$"https://msapi.top-academy.ru/api/v2/progress/operations/student-exams",
                 token

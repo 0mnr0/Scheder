@@ -1,4 +1,5 @@
 ﻿using Scheder.Services.JournalAPI.PreFetch;
+using Scheder.TelegramInteractions.Commands.Settings.Data;
 using Scheder.Tools;
 using static Scheder.Tools.Logger;
 
@@ -40,7 +41,7 @@ public class GetSched
             id = (long)newId;
         }
         
-        var (token, _) = recommendedToken is null ? await TokenService.Get(id) : (recommendedToken, ["?"]);
+        var (token, _) = recommendedToken is null ? await TokenService.Get(id, parent: uid) : (recommendedToken, ["?"]);
         if (token == null) return null;
         var startDate = dayData.StartDate;
         var endDate = dayData.EndDate;
@@ -70,7 +71,7 @@ public class GetSched
             id = (long)newId;
         }
 
-        var (token, _) = recommendedToken is null ? await TokenService.Get(id) : (recommendedToken, ["?"]);
+        var (token, _) = recommendedToken is null ? await TokenService.Get(id, parent: uid) : (recommendedToken, ["?"]);
         if (token == null) return null;
         
         var response = await API.GetExams(token, metric: metric);
@@ -87,37 +88,47 @@ public class GetSched
         bool fromGroup = false,
         string? recommendedToken = null,
         PerformanceMetric? metric = null
-        )
+    )
     {
-        using (metric?.Measure(MetricParse)) {
-            var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
-            var (cachedSched, cachedExams) =
-                CachedScheduleLibrary.DateExists(uid, cacheDate)
-                    ? CachedScheduleLibrary.GetText(uid, cacheDate)
-                    : (null, null);
+        var allowCache = await SettingsService.GetBool(uid, SettingsList.AllowDataCaching, CancellationToken.None);
+        Console.WriteLine("allowCache: "+allowCache);
+        
+        var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
+        var (cachedSched, cachedExams) =
+            CachedScheduleLibrary.DateExists(uid, cacheDate)
+                ? CachedScheduleLibrary.GetText(uid, cacheDate)
+                : (null, null);
 
-            if (cachedSched != null && cachedExams != null) {
-                Log.Information("[CachedScheduleLibrary | {uid}] Sending cached response!", uid);
-                return (cachedSched, cachedExams, ["-"]);
-            }
-
-            var token4 = (long)(fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
-            (recommendedToken, var jwt) = recommendedToken is null ? await TokenService.Get(token4) : (recommendedToken, ["?"]);
-            
-            
-            // fix for double TokenService.Get call
-            if (recommendedToken is null) return (null, null, jwt); // if there's no JWT key - return none;
-            
-            var (newSched, newExams) = await ParallelTasks.Run(
-                GetSchedFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric),
-                GetExamsFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric)
-            );
-            CachedScheduleLibrary.Delete(uid, cacheDate);
-            CachedScheduleLibrary.Add(uid, cacheDate, newSched, newExams);
-
-            return (newSched, newExams, jwt);
+        if (cachedSched != null && cachedExams != null && allowCache)
+        {
+            Log.Information("[CachedScheduleLibrary | {uid}] Sending cached response!", uid);
+            return (cachedSched, cachedExams, ["-"]);
         }
-    }
+
+        var token4 = (long)(fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
+        (recommendedToken, var jwt) =
+            recommendedToken is null ? await TokenService.Get(token4, parent: uid) : (recommendedToken, ["?"]);
+
+
+        // fix for double TokenService.Get call
+        if (recommendedToken is null) return (null, null, jwt); // if there's no JWT key - return none;
+
+        var (newSched, newExams) = await ParallelTasks.Run(
+            GetSchedFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric),
+            GetExamsFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric)
+        );
+
+        
+        CachedScheduleLibrary.Delete(uid, cacheDate);
+        if (allowCache)
+        {
+            CachedScheduleLibrary.Add(uid, cacheDate, newSched, newExams);
+        }
+
+
+        return (newSched, newExams, jwt);
+    
+}
 
 
 
