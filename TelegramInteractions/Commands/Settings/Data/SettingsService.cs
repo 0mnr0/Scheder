@@ -28,12 +28,18 @@ public class SettingsService
     public static async Task<int?> GetValue(long userId, int settingId, CancellationToken cancellationToken)
     {
         var stored = await Repo.GetValueAsync(userId, settingId, cancellationToken);
+        var defValue = SettingsRegistry.All[settingId].Default;
+        if (stored == null) return defValue;
+        
         return stored;
     }
 
     public static async Task<bool> GetBool(long userId, int settingId, CancellationToken cancellationToken)
     {
         var stored = await Repo.GetValueAsync(userId, settingId, cancellationToken);
+        var defValue = SettingsRegistry.All[settingId].Default;
+        if (stored == null) return defValue is 1;
+        
         return stored is 1;
     }
 
