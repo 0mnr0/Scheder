@@ -44,7 +44,7 @@ public class API
         return await Client.SendAsync(request);
     }
 
-    public static async Task<JsonNode?> GetAuthAsync(string login, string pass)
+    public static async Task<(JsonNode?, string[])> GetAuthAsync(string login, string pass)
     {
         var payload = new
         {
@@ -53,15 +53,17 @@ public class API
             username = login
         };
 
-        for (var i = 1; i < 4; i++) // 3 cycles (starts from 1)
+        List<string> tries = [];
+        for (var i=1; i < 4; i++) // 3 cycles (starts from 1)
         {
-            var delay = 260 + (i * 40 + 1);
+            var delay = 230 + (i * 40 + 1);
             try
             {
                 Log.Debug("[Journal API] Making request ({I}/3) ({D}ms)", i, delay);
                 var response = await PostAsync("https://msapi.top-academy.ru/api/v2/auth/login", payload);
                 Log.Debug("[Journal API]: Response code: {ResponseStatusCode}", response.StatusCode);
-
+                tries.Add(""+(int)response.StatusCode);
+                
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     await Task.Delay(delay);
@@ -69,28 +71,28 @@ public class API
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonNode.Parse(content);
+                return (JsonNode.Parse(content), [.. tries]);
             }
             catch (Exception ex)
             {
                 Log.Warning("[Journal API]: Failed request: {ms1}, {ms2}", ex.Message, ex.Source);
-                Console.WriteLine($"Ошибка запроса: {ex.Message}, {ex.Source}");
+                tries.Add("500?");
                 await Task.Delay(delay);
             }
         }
 
-        return null;
+        return (null, [.. tries]);
     }
 
-    public static async Task<string?> GetTokenAsync(string login, string password)
+    public static async Task<(string?, string[])> GetTokenAsync(string login, string password)
     {
-        var authResult = await GetAuthAsync(login, password);
-        return authResult?["access_token"]?.ToString();
+        var (authResult, tries) = await GetAuthAsync(login, password);
+        return (authResult?["access_token"]?.ToString(), tries);
     }
 
     public static async Task<string?> GetCityAsync(string login, string password)
     {
-        var authResult = await GetAuthAsync(login, password);
+        var (authResult, _) = await GetAuthAsync(login, password);
         return authResult?["city_data"]?["timezone_name"]?.ToString();
     }
 

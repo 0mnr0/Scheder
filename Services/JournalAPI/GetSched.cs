@@ -40,7 +40,7 @@ public class GetSched
             id = (long)newId;
         }
         
-        var token = recommendedToken ?? await TokenService.Get(id);
+        var (token, _) = recommendedToken is null ? await TokenService.Get(id) : (recommendedToken, ["?"]);
         if (token == null) return null;
         var startDate = dayData.StartDate;
         var endDate = dayData.EndDate;
@@ -70,7 +70,7 @@ public class GetSched
             id = (long)newId;
         }
 
-        var token = recommendedToken ?? await TokenService.Get(id);
+        var (token, _) = recommendedToken is null ? await TokenService.Get(id) : (recommendedToken, ["?"]);
         if (token == null) return null;
         
         var response = await API.GetExams(token, metric: metric);
@@ -81,7 +81,7 @@ public class GetSched
 
 
 
-    public static async Task<(string?, string?)> GetSchedAndExams(
+    public static async Task<(string?, string?, string[])> GetSchedAndExams(
         long uid,
         BestDayOption.BestDayParseResult dayData,
         bool fromGroup = false,
@@ -98,11 +98,12 @@ public class GetSched
 
             if (cachedSched != null && cachedExams != null) {
                 Log.Information("[CachedScheduleLibrary | {uid}] Sending cached response!", uid);
-                return (cachedSched, cachedExams);
+                return (cachedSched, cachedExams, ["-"]);
             }
 
-            recommendedToken ??= await TokenService.Get(uid); // fix for double TokenService.Get call
-            if (recommendedToken is null) return (null, null); // if theres no JWT key - return none;
+            (recommendedToken, var jwt) = recommendedToken is null ? await TokenService.Get(uid) : (recommendedToken, ["?"]);
+            // fix for double TokenService.Get call
+            if (recommendedToken is null) return (null, null, jwt); // if theres no JWT key - return none;
             
             var (newSched, newExams) = await ParallelTasks.Run(
                 GetSchedFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric),
@@ -111,7 +112,7 @@ public class GetSched
             CachedScheduleLibrary.Delete(uid, cacheDate);
             CachedScheduleLibrary.Add(uid, cacheDate, newSched, newExams);
 
-            return (newSched, newExams);
+            return (newSched, newExams, jwt);
         }
     }
 

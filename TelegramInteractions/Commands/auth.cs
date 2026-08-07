@@ -75,7 +75,7 @@ public class auth : ICommand
         
         
         
-        var payload = await API.GetAuthAsync(authData[0], authData[1]);
+        var (payload, _) = await API.GetAuthAsync(authData[0], authData[1]);
         if (payload == null)
         {
             await bot.EditMessageText(

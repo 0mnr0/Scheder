@@ -15,15 +15,13 @@ public class TokenService
         return DateTime.Now >= dt.AddMinutes(JwtKeepTime);
     }
 
-    public static async Task<string?> Get(long uid, bool cacheUpdate = false)
+    public static async Task<(string?, string[])> Get(long uid, bool cacheUpdate = false)
     {
-        // Here's a bug: GetSched (107 line) runs 2 funcs: GetSchedAndExams and GetSchedFromApi
-        // 2 journal's requests running
         
         if (!cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null && cachedToken.Uid == uid)
         {
             Log.Information("[TokenService | {Uid}]  Using cached token!", uid);
-            return cachedToken.Token;
+            return (cachedToken.Token, ["Cache"]);
         }
 
         if (!cacheUpdate)
@@ -44,11 +42,11 @@ public class TokenService
             var auth = await Memory.User.GetAuthAsync(uid);
             if (auth == null)
             {
-                 return null;
+                 return (null, []);
             }
             
-            var newToken = await API.GetTokenAsync(auth.Login, auth.Password);
-            if (string.IsNullOrEmpty(newToken)) return null;
+            var (newToken, tries) = await API.GetTokenAsync(auth.Login, auth.Password);
+            if (string.IsNullOrEmpty(newToken)) return (null, tries);
 
             var now = DateTime.Now;
             _ = Task.Run(async () => { await Memory.User.SetJWTAsync(uid, newToken); });
@@ -57,11 +55,12 @@ public class TokenService
             {
                 Uid = uid,
                 Token = newToken,
-                LastUpdate = now
+                LastUpdate = now,
+                Tries = tries
             };
                 
             Cache.Set(uid, fetchedToken, TimeSpan.FromMinutes(JwtKeepTime));
-            return newToken;
+            return (newToken, tries);
 
         }
          
@@ -70,7 +69,8 @@ public class TokenService
         {
             Uid = uid,
             Token = token,
-            LastUpdate = lastUpdate.Value
+            LastUpdate = lastUpdate.Value,
+            Tries = ["DBCache"]
         };
         
         
@@ -80,7 +80,7 @@ public class TokenService
             Cache.Set(uid, existingToken, timeLeft);
         }
 
-        return token;
+        return (token, ["DBCache"]);
     }
 
 
@@ -89,5 +89,7 @@ public class TokenService
         public long Uid { get; set; }
         public string Token { get; set; } = string.Empty;
         public DateTime LastUpdate { get; set; }
+        public string[] Tries { get; set; } = [];
+        public bool UsedBackup {get; set;} = false;
     }
 }

@@ -14,20 +14,12 @@ namespace Scheder.Tools;
 
 public abstract class SchedMessageBuilder
 {
-    public static string BuildMessage(string? raw, BestDayOption.BestDayParseResult day, string? rawExamList = null, PerformanceMetric? metric = null)
+    public static string BuildMessage(string? raw, BestDayOption.BestDayParseResult day, string? rawExamList = null, string[]? jwtData = null, PerformanceMetric? metric = null)
     {
         using (metric?.Measure(MetricType.Build)) {
-            if (string.IsNullOrEmpty(raw)) {
-                return """
-                       <b> <i> Токен не получен :/ </i> </b>
-                       <details>
-                           <summary> Детали: </summary>
-                           <i>Tries: 3 </i> <br>
-                           <i>Codes: [422, 422, 422] </i><br>
-                           <i>Is auth down? </i><br>
-                       </details>
-
-                       """;
+            if (string.IsNullOrEmpty(raw))
+            {
+                return BuildJwtFail(jwtData);
             }
 
             var displayWeek = day.IsWeek;
@@ -404,5 +396,29 @@ public abstract class SchedMessageBuilder
             }
 
             return (await WebRender.RenderWeather(weatherData, metric), null);
+    }
+
+
+    private static string BuildJwtFail(string[]? data)
+    {
+
+        var text = new StringBuilder(capacity: 1000);
+        text.Append("""
+                        <b> <i> Токен не получен :/ </i> </b>
+                        <details>
+                            <summary> Детали: </summary>
+                    """);
+        
+        if (data is null)
+        {
+            text.Append("<i> jwtData is null </i>");
+        } else
+        {
+            text.Append($"<p> Tries: {data.Length} </p>");
+            text.Append($"<p> Codes: [{string.Join(", ", data)}] </p>");
+        }
+        
+        text.Append("</details>");
+        return text.ToString();
     }
 }

@@ -115,7 +115,7 @@ public class TokenPreFetch
             uid = (long)newUid;
         }
 
-        var token = await TokenService.Get(uid, cacheUpdate: true);
+        var (token, _) = await TokenService.Get(uid, cacheUpdate: true);
         if (token == null) return;
 
         // PARSE AND CACHE SCHED (Today And Tomorrow)
