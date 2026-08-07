@@ -27,6 +27,15 @@ public static class SettingsRegistry
         },
         new()
         {
+            Id = SettingsList.AllowDraft,
+            Title = "Показывать Draft",
+            Description = "Показывает на какой стадии сейчас бот (В группе показывается как \"Печатает сообщение...\"). Отключите если нужна скорость ответа.",
+            Type = SettingType.Bool,
+            StateLabels = ["Отключен", "Включить"],
+            Default = 1
+        },  
+        new()
+        {
             Id = SettingsList.AllowDataCaching,
             Title = "Кэш",
             Description = "Кэш сохраняется в среднем в течении 20 минут. Кэшируются: ответы, токен авторизации и список экзаменов. Кэш сбрасывается автоматически или при перезапуске бота",

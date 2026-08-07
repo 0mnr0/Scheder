@@ -35,6 +35,8 @@ public class Sched : ICommand
         var noHumanoidFixes = msgText[^1].ToString() == "!";
         var draftToken = new CancellationTokenSource();
         var metric = new PerformanceMetric();
+        var allowDraft = await SettingsService.GetBool(chatId, SettingsList.AllowDraft, cancellationToken);
+        
         metric.Start(MetricType.Total);
         
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
@@ -123,14 +125,16 @@ public class Sched : ICommand
 
         
         
-        /* = Total,
-         = Analyze,
+        /*
+        = Total,
+        = Analyze,
         = Build,
         = Draft,
         = TokenParse,
         = DataParse,
         = WeatherFetch,
-        = WeatherRender,*/
+        = WeatherRender
+        */
         var debugInfo =
             $"""
              <b> Speed Insights: </b>
@@ -143,7 +147,7 @@ public class Sched : ICommand
              
              Парсинг погоды: {metric.getMetric(MetricType.WeatherFetch)}мс
              Рендеринг погоды: {metric.getMetric(MetricType.WeatherRender)}мс
-             Draft-Time: {metric.getMetric(MetricType.Draft)}мс
+             Draft-Time: {(allowDraft ? metric.getMetric(MetricType.Draft) : "—")}мс
              
              <i>Триггер процент: {(calledViaContext ? args[1] : "—")}% </i>
              """;
@@ -194,6 +198,8 @@ public class Sched : ICommand
 ///////////////////////////////////////////////////////////////
         async Task SetDraft(string draft, ChatAction action)
         {
+            if (!allowDraft) {return;}
+            
             using (metric.Measure(MetricType.Draft)) {
                 await draftToken.CancelAsync();
                 draftToken = new CancellationTokenSource();
