@@ -101,7 +101,9 @@ public class GetSched
                 return (cachedSched, cachedExams);
             }
 
-
+            recommendedToken ??= await TokenService.Get(uid); // fix for double TokenService.Get call
+            if (recommendedToken is null) return (null, null); // if theres no JWT key - return none;
+            
             var (newSched, newExams) = await ParallelTasks.Run(
                 GetSchedFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric),
                 GetExamsFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric)

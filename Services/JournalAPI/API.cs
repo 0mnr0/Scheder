@@ -55,10 +55,10 @@ public class API
 
         for (var i = 1; i < 4; i++) // 3 cycles (starts from 1)
         {
-            var delay = 260 * (i * 40 + 1);
+            var delay = 260 + (i * 40 + 1);
             try
             {
-                Log.Debug("[Journal API] Making request ({I}/3)...", i);
+                Log.Debug("[Journal API] Making request ({I}/3) ({D}ms)", i, delay);
                 var response = await PostAsync("https://msapi.top-academy.ru/api/v2/auth/login", payload);
                 Log.Debug("[Journal API]: Response code: {ResponseStatusCode}", response.StatusCode);
 

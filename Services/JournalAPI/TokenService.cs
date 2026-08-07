@@ -17,6 +17,9 @@ public class TokenService
 
     public static async Task<string?> Get(long uid, bool cacheUpdate = false)
     {
+        // Here's a bug: GetSched (107 line) runs 2 funcs: GetSchedAndExams and GetSchedFromApi
+        // 2 journal's requests running
+        
         if (!cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null && cachedToken.Uid == uid)
         {
             Log.Information("[TokenService | {Uid}]  Using cached token!", uid);

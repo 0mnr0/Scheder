@@ -7,7 +7,7 @@ public class Logger
 {
     
     public static readonly ILogger Log = new LoggerConfiguration()
-        .MinimumLevel.Debug()
+        .MinimumLevel.Verbose()
         .WriteTo.Console(theme: AnsiConsoleTheme.Code)
         .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day)
         .CreateLogger();
