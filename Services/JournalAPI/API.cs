@@ -56,7 +56,7 @@ public class API
         List<string> tries = [];
         for (var i=1; i < 4; i++) // 3 cycles (starts from 1)
         {
-            var delay = 230 + (i * 40 + 1);
+            var delay = 230 + (i * 40);
             try
             {
                 Log.Debug("[Journal API] Making request ({I}/3) ({D}ms)", i, delay);

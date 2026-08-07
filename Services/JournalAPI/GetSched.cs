@@ -101,9 +101,12 @@ public class GetSched
                 return (cachedSched, cachedExams, ["-"]);
             }
 
-            (recommendedToken, var jwt) = recommendedToken is null ? await TokenService.Get(uid) : (recommendedToken, ["?"]);
+            var token4 = (long)(fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
+            (recommendedToken, var jwt) = recommendedToken is null ? await TokenService.Get(token4) : (recommendedToken, ["?"]);
+            
+            
             // fix for double TokenService.Get call
-            if (recommendedToken is null) return (null, null, jwt); // if theres no JWT key - return none;
+            if (recommendedToken is null) return (null, null, jwt); // if there's no JWT key - return none;
             
             var (newSched, newExams) = await ParallelTasks.Run(
                 GetSchedFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric),
