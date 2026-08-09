@@ -100,7 +100,7 @@ public class GetSched
 
         if (cachedSched != null && cachedExams != null && allowCache)
         {
-            Log.Information("[CachedScheduleLibrary | {uid}] Sending cached response!", uid);
+            Log.Debug("[CachedScheduleLibrary | {uid}] Sending cached response!", uid);
             return (cachedSched, cachedExams, ["-"]);
         }
 

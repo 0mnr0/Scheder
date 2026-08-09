@@ -72,7 +72,7 @@ public class TokenPreFetch
 
     public static async Task ForceUpdateAll()
     {
-        Console.WriteLine("[TokenPreFetch] Called force token update. This can take a while...");
+        Log.Debug("[TokenPreFetch] Called force token update. This can take a while...");
         await OnEveryMinuteCalculations(true);
     }
 

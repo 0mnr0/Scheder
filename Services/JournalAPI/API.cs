@@ -58,9 +58,9 @@ public class API
             var delay = 230 + (i * 40);
             try
             {
-                Log.Debug("[Journal API] Making request ({I}/3) ({D}ms)", i, delay);
+                Log.Information("[Journal API] Making request ({I}/3) ({D}ms)", i, delay);
                 var response = await PostAsync("https://msapi.top-academy.ru/api/v2/auth/login", payload);
-                Log.Debug("[Journal API]: Response code: {ResponseStatusCode}", response.StatusCode);
+                Log.Information("[Journal API]: Response code: {ResponseStatusCode}", response.StatusCode);
                 tries.Add(""+(int)response.StatusCode);
                 
                 if (response.StatusCode != HttpStatusCode.OK)
