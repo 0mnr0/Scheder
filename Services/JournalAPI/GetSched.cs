@@ -91,7 +91,6 @@ public class GetSched
     )
     {
         var allowCache = await SettingsService.GetBool(uid, SettingsList.AllowDataCaching, CancellationToken.None);
-        Console.WriteLine("allowCache: "+allowCache);
         
         var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
         var (cachedSched, cachedExams) =
