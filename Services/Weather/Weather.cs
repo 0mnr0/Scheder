@@ -46,7 +46,7 @@ public class Weather
                     : null;
 
             if (cachedWeather != null) {
-                Log.Information("[WeatherCache] Sending cached weather response!");
+                Log.Debug("[WeatherCache] Sending cached weather response!");
                 return cachedWeather;
             }
 
