@@ -6,6 +6,7 @@ using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
 using Scheder.TelegramInteractions.Commands;
 using Scheder.Tools.Config;
+using Scheder.Tools.Proxy;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
@@ -14,6 +15,8 @@ using static Scheder.Tools.Logger;
 namespace Scheder.TelegramInteractions.Helpers;
 
 public class BotRunner {
+    private static TelegramBotClient _bot = new(Env.TelegramToken!);
+    
     private static async Task CookMaterials() {
         DotNetEnv.Env.Load();
         await Memory.InitializeAsync();
@@ -39,21 +42,23 @@ public class BotRunner {
     }
     
     public static async Task Once() {
-        var bot = new TelegramBotClient(Env.TelegramToken!);
+        var proxyClient = Proxy.SetAutoProxy();
+        
+        _bot = new TelegramBotClient(Env.TelegramToken!, httpClient: proxyClient);
         var textHandler = new NonCommandSupport();
         var commandHandler = new CommandHandler(textHandler);
         var callbackInterface = new CallbackInterface();
         var updateHandler = new UpdateHandler(commandHandler, callbackInterface);
 
 
-        var cmdPatch = EphemeralCommand.AddAll(bot);
+        var cmdPatch = EphemeralCommand.AddAll(_bot);
         if (!Env.FastStart)
         {
             await cmdPatch;
         }
 
 
-        bot.StartReceiving(
+        _bot.StartReceiving(
             updateHandler,
             new ReceiverOptions
             {
@@ -61,4 +66,6 @@ public class BotRunner {
             });
 
     }
+    
+    public static TelegramBotClient GetBot() => _bot;
 }
