@@ -43,9 +43,9 @@ public class PerformanceMetric {
         }
     }
 
-    public long getMetric(MetricType type, bool asNanoSeconds = false) {
+    public long GetMetric(MetricType type, bool asNanoSeconds = false) {
         var watch = _watches[type];
-        return asNanoSeconds ? watch.Elapsed.Nanoseconds : watch.ElapsedMilliseconds;
+        return asNanoSeconds ? watch.ElapsedTicks * 1000000 / Stopwatch.Frequency : watch.ElapsedMilliseconds;
     }
 
     public TimeSpan Elapsed(MetricType type) => _watches[type].Elapsed;

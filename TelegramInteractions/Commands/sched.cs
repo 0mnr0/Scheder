@@ -138,16 +138,16 @@ public class Sched : ICommand
         var debugInfo =
             $"""
              <b> Speed Insights: </b>
-             Суммарное время ответа: {metric.getMetric(MetricType.Total)}мс 
+             Суммарное время ответа: {metric.GetMetric(MetricType.Total)}мс 
                 
-             Анализ контекста: {metric.getMetric(MetricType.Analyze)}мс
-             Парсинг токена: {metric.getMetric(MetricType.TokenParse)}мс
-             Парсинг Journal: {metric.getMetric(MetricType.DataParse)}мс
-             Сборка сообщения: {Math.Round(metric.getMetric(MetricType.Build, true) / 1000f, 1)}мс ({metric.getMetric(MetricType.Build, true)}нс)
+             Анализ контекста: {metric.GetMetric(MetricType.Analyze)}мс
+             Парсинг токена: {metric.GetMetric(MetricType.TokenParse)}мс
+             Парсинг Journal: {metric.GetMetric(MetricType.DataParse)}мс
+             Сборка сообщения: {metric.GetMetric(MetricType.Build)}мс ({metric.GetMetric(MetricType.Build, true)}мкс)
              
-             Парсинг погоды: {metric.getMetric(MetricType.WeatherFetch)}мс
-             Рендеринг погоды: {metric.getMetric(MetricType.WeatherRender)}мс
-             Draft-Time: {(allowDraft ? metric.getMetric(MetricType.Draft) : "—")}мс
+             Парсинг погоды: {metric.GetMetric(MetricType.WeatherFetch)}мс
+             Рендеринг погоды: {metric.GetMetric(MetricType.WeatherRender)}мс
+             Draft-Time: {(allowDraft ? metric.GetMetric(MetricType.Draft) : "—")}мс
              
              <i>Триггер процент: {(calledViaContext ? args[1] : "—")}% </i>
              """;
