@@ -143,7 +143,7 @@ public class Sched : ICommand
              Анализ контекста: {metric.GetMetric(MetricType.Analyze)}мс
              Парсинг токена: {metric.GetMetric(MetricType.TokenParse)}мс
              Парсинг Journal: {metric.GetMetric(MetricType.DataParse)}мс
-             Сборка сообщения: {metric.GetMetric(MetricType.Build)}мс ({metric.GetMetric(MetricType.Build, true)}мкс)
+             Сборка сообщения: {metric.GetExactMetric(MetricType.Build, asNanoSeconds: true)}
              
              Парсинг погоды: {metric.GetMetric(MetricType.WeatherFetch)}мс
              Рендеринг погоды: {metric.GetMetric(MetricType.WeatherRender)}мс

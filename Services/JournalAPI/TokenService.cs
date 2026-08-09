@@ -24,7 +24,6 @@ public class TokenService
         {
 
             var allowCache = await SettingsService.GetBool(parent, SettingsList.AllowDataCaching, CancellationToken.None);
-            Console.WriteLine("forceNew: "+allowCache);
             
             if (allowCache && !cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null &&
                 cachedToken.Uid == uid)

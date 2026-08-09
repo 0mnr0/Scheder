@@ -48,6 +48,16 @@ public class PerformanceMetric {
         return asNanoSeconds ? watch.ElapsedTicks * 1000000 / Stopwatch.Frequency : watch.ElapsedMilliseconds;
     }
 
+    public string GetExactMetric(MetricType type, bool asNanoSeconds = false) {
+        var watch = _watches[type];
+        var nsTime = asNanoSeconds ? watch.ElapsedTicks * 1000000 / Stopwatch.Frequency : watch.ElapsedMilliseconds;
+        if (asNanoSeconds && nsTime > 1000 || !asNanoSeconds) {
+            return $"{watch.ElapsedMilliseconds}ms";
+        }
+
+        return $"{nsTime}mks";
+    }
+
     public TimeSpan Elapsed(MetricType type) => _watches[type].Elapsed;
 
     private sealed class StopOnDispose(Stopwatch watch) : IDisposable {
