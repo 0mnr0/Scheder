@@ -13,7 +13,7 @@ public static class SettingsRegistry
             Type = SettingType.IntList,
             States = [0, 1, 2],
             StateLabels = ["Отключено", "Начинается со слова \"пары\"", "Всегда"],
-            Default = 0
+            Default = 1
         },
         new()
         {
