@@ -50,10 +50,10 @@ public class auth : ICommand
         if (authData.Length != 2) {
             await bot.SendMessage(
                 message.Chat.Id,
-                "Неправильное количество аргументов, пожалуйста, используйте следующий синтаксис:\n\n<blockquote> <b>/auth login, password</b> </blockquote>\nЗапятая разделяет логин и пароль, пробелы игнорируются.",
+                "Неправильное количество аргументов, пожалуйста, используйте следующий синтаксис:\n\n<blockquote> <b>/auth login, password</b> </blockquote>\nЗапятая разделяет логин и пароль, пробелы стираются.",
                 messageThreadId: ChatTools.GetForumId(message),
                 parseMode: ParseMode.Html,
-                receiverUserId: whoAsking,
+                receiverUserId: isGroup ? whoAsking : null, // receiverUserId is not supported in DM
                 cancellationToken: cancellationToken
             );
             return;
