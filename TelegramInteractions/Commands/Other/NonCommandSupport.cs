@@ -1,11 +1,10 @@
-﻿using Scheder.Commands;
-using Scheder.Services.ContextDetection;
+﻿using Scheder.Services.ContextDetection;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Commands.Settings.Data;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace Scheder.TelegramInteractions.Commands;
+namespace Scheder.TelegramInteractions.Commands.Other;
 
 public class NonCommandSupport : ITextHandler
 {

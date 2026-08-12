@@ -22,4 +22,7 @@ public abstract class Behaviour {
         public static readonly int ScheduleCachingTime = 20; // [20 Minutes] How long is the schedule cache considered relevant
         public static readonly int WeatherCachingTime = 20; // [20 Minutes] How long is the weather cache considered relevant
     }
+
+
+    public static readonly string[] NonRegisteredUserCanInteractOnlyWithThisCommands = ["/start", "/auth"];
 }

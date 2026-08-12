@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using Scheder.Commands;
 using Scheder.TelegramInteractions.Attributes;
+using Scheder.TelegramInteractions.Commands.Other;
+using Scheder.Tools;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -10,6 +12,7 @@ public class CommandHandler
 {
     private readonly Dictionary<string, ICommand> _commands = new();
     private readonly ITextHandler? _textHandler;
+    private readonly Nonreg _nonregHandler = new();
 
     public CommandHandler(ITextHandler? textHandler = null)
     {
@@ -50,10 +53,16 @@ public class CommandHandler
         if (message.Text == null)
             return;
 
-        var parts = message.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
+        var parts = message.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 0)
             return;
+        
+        
+        if (ChatTools.IsPrivateChat(message) && !await CodeBunch.RegValidCheck(message)) {
+            await _nonregHandler.ExecuteAsync(bot, message, parts, cancellationToken);
+            return;
+        }
 
         var commandName = parts[0].Split('@')[0];
         

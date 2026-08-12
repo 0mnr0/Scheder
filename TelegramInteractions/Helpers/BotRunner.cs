@@ -5,6 +5,7 @@ using Scheder.Services.JournalAPI.PreFetch;
 using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
 using Scheder.TelegramInteractions.Commands;
+using Scheder.TelegramInteractions.Commands.Other;
 using Scheder.Tools.Config;
 using Scheder.Tools.Proxy;
 using Telegram.Bot;

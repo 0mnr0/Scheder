@@ -79,11 +79,11 @@ public class bindgroup : ICommand
             var sentMessage = await bot.SendMessage(
                 whoAsking,
             
-                EscapeMarkdownV2("Для выполнении команды сначала авторизируйтесь. "),
+                EscapeMarkdownV2("Для выполнении /bindgroup сначала авторизируйтесь."),
                 parseMode: ParseMode.MarkdownV2,
                 cancellationToken: cancellationToken);
             
-            await Task.Delay(1300, cancellationToken);
+            await Task.Delay(5000, cancellationToken);
             try
             {
                 await bot.DeleteMessage(sentMessage.Chat.Id, sentMessage.MessageId, cancellationToken);

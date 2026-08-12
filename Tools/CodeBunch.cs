@@ -1,5 +1,7 @@
 ﻿using Scheder.Services.Database;
+using Scheder.Tools.Config;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Scheder.Tools;
@@ -10,6 +12,17 @@ public class CodeBunch
     {
         var result = await Memory.Group.getGroupBind(groupId);
         return result;
+    }
+    
+    
+    public static async Task<bool> RegValidCheck(Message message) {
+        var command = message.Text!.Split(" ")[0];
+        if (Behaviour.NonRegisteredUserCanInteractOnlyWithThisCommands.Contains(command)) {
+            return true; // skip if user in the group
+        }
+        
+        var fromUser = message.From!.Id;
+        return await Memory.User.IsUserExistsAsync(fromUser);
     }
 
 
