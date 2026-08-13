@@ -8,7 +8,7 @@ public class SettingsService
     
     public static async Task<Dictionary<int, int>> GetEffectiveValuesAsync(long userId, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await PgSettings.GetAllValuesAsync(userId, isGroup, cancellationToken);
+        var stored = await Repo.GetAllValuesAsync(userId, isGroup, cancellationToken);
         var result = new Dictionary<int, int>();
 
         foreach (var def in SettingsRegistry.All)
@@ -21,13 +21,13 @@ public class SettingsService
 
     public static async Task<int> GetEffectiveValueAsync(long userId, SettingDefinition def, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await PgSettings.GetValueAsync(userId, def.Id, isGroup, cancellationToken);
+        var stored = await Repo.GetValueAsync(userId, def.Id, isGroup, cancellationToken);
         return stored ?? def.Default;
     }
 
     public static async Task<int?> GetValue(long userId, int settingId, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await PgSettings.GetValueAsync(userId, settingId, isGroup, cancellationToken);
+        var stored = await Repo.GetValueAsync(userId, settingId, isGroup, cancellationToken);
         var setting = SettingsRegistry.All[settingId];
         var defValue = setting.Default;
         if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
@@ -39,7 +39,7 @@ public class SettingsService
 
     public static async Task<bool> GetBool(long userId, int settingId, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await PgSettings.GetValueAsync(userId, settingId, isGroup, cancellationToken);
+        var stored = await Repo.GetValueAsync(userId, settingId, isGroup, cancellationToken);
         var setting = SettingsRegistry.All[settingId];
         var defValue = setting.Default;
         if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
@@ -68,7 +68,7 @@ public class SettingsService
             next = states[(idx + 1) % states.Length];
         }
 
-        await PgSettings.SetValueAsync(userId, def.Id, next, isGroup, cancellationToken);
+        await Repo.SetValueAsync(userId, def.Id, next, isGroup, cancellationToken);
         return next;
     }
 }
