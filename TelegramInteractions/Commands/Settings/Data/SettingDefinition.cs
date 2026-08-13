@@ -30,6 +30,8 @@ public class SettingDefinition
     /// </summary>
     public required int Default { get; init; }
 
+    public int? GroupDefault { get; init; } = null;
+
     /// <summary>
     /// Только для Type == IntList: допустимые значения и порядок переключения по кругу.
     /// </summary>

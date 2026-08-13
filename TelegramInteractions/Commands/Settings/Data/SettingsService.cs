@@ -25,19 +25,25 @@ public class SettingsService
         return stored ?? def.Default;
     }
 
-    public static async Task<int?> GetValue(long userId, int settingId, CancellationToken cancellationToken)
+    public static async Task<int?> GetValue(long userId, int settingId, CancellationToken cancellationToken, bool isGroup=false)
     {
         var stored = await Repo.GetValueAsync(userId, settingId, cancellationToken);
-        var defValue = SettingsRegistry.All[settingId].Default;
+        var setting = SettingsRegistry.All[settingId];
+        var defValue = setting.Default;
+        if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
+        
         if (stored == null) return defValue;
         
         return stored;
     }
 
-    public static async Task<bool> GetBool(long userId, int settingId, CancellationToken cancellationToken)
+    public static async Task<bool> GetBool(long userId, int settingId, CancellationToken cancellationToken, bool isGroup=false)
     {
         var stored = await Repo.GetValueAsync(userId, settingId, cancellationToken);
-        var defValue = SettingsRegistry.All[settingId].Default;
+        var setting = SettingsRegistry.All[settingId];
+        var defValue = setting.Default;
+        if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
+        
         if (stored == null) return defValue is 1;
         
         return stored is 1;

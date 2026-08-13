@@ -1,4 +1,6 @@
-﻿namespace Scheder.TelegramInteractions.Commands.Settings;
+﻿using Scheder.Tools;
+
+namespace Scheder.TelegramInteractions.Commands.Settings;
 
 using Data;
 using Services.InterfacesAndHandlers;
@@ -27,7 +29,9 @@ public class Callback : ICallbackCommand
         var chatId = callbackQuery.Message.Chat.Id;
         var messageId = callbackQuery.Message.MessageId;
         var userId = callbackQuery.From.Id;
-
+        var ephData = callbackQuery.Message.EphemeralMessageId;
+        var editAsEphemeral = ChatTools.IsGroup(callbackQuery.Message) && ephData != null;
+        
         switch (args[0])
         {
             case "noop":
@@ -40,8 +44,21 @@ public class Callback : ICallbackCommand
                 var values = await SettingsService.GetEffectiveValuesAsync(userId, cancellationToken);
                 var (text, keyboard) = SettingsUi.BuildListView(page, values);
 
-                await bot.EditMessageText(chatId, messageId, text,
-                    parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                if (editAsEphemeral && ephData != null) {
+
+                    await bot.EditEphemeralMessageText(
+                        chatId, userId, ephData.Value,
+                        text: text, replyMarkup: keyboard, cancellationToken: cancellationToken
+                    );
+
+                }
+                else {
+                    
+                    await bot.EditMessageText(chatId, messageId, text,
+                        parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                }
+                
+                
                 await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: cancellationToken);
                 return;
             }
@@ -60,8 +77,20 @@ public class Callback : ICallbackCommand
                 var value = await SettingsService.GetEffectiveValueAsync(userId, def, cancellationToken);
                 var (text, keyboard) = SettingsUi.BuildDescriptionView(def, value, page);
 
-                await bot.EditMessageText(chatId, messageId, text,
-                    parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                if (editAsEphemeral && ephData != null) {
+
+                    await bot.EditEphemeralMessageText(
+                        chatId, userId, ephData.Value,
+                        text: text, replyMarkup: keyboard, cancellationToken: cancellationToken
+                        );
+
+                }
+                else {
+                    await bot.EditMessageText(chatId, messageId, text,
+                        parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                }
+
+
                 await bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: cancellationToken);
                 return;
             }
@@ -83,8 +112,19 @@ public class Callback : ICallbackCommand
                 if (ctx == "d")
                 {
                     var (text, keyboard) = SettingsUi.BuildDescriptionView(def, newValue, page);
-                    await bot.EditMessageText(chatId, messageId, text,
-                        parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                    
+                    if (editAsEphemeral && ephData != null) {
+
+                        await bot.EditEphemeralMessageText(
+                            chatId, userId, ephData.Value,
+                            text: text, replyMarkup: keyboard, cancellationToken: cancellationToken
+                        );
+
+                    }
+                    else {
+                        await bot.EditMessageText(chatId, messageId, text,
+                            parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                    }
                 }
                 else
                 {
