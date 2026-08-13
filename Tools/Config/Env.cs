@@ -18,5 +18,22 @@ public class Env
     // PROXY
     public static readonly bool UseProxy = string.Equals(Environment.GetEnvironmentVariable("UseProxy"), "true", StringComparison.OrdinalIgnoreCase);
     public static readonly string? ProxyLine = Environment.GetEnvironmentVariable("ProxyConnection");
+    
+    // CACHEs
+    public static readonly bool DisableCaching = Environment.GetEnvironmentVariable("DisableCaching")?.ToLower() == "true";
+    public static readonly bool DisableTokenCaching = Environment.GetEnvironmentVariable("DisableTokenCaching")?.ToLower() == "true";
 
+
+
+
+
+
+
+    public static void UpdateRules() {
+        if (DisableCaching) {
+            Behaviour.Other.AllowScheduleCaching = false;
+            Behaviour.Other.AllowWeatherCaching = false;
+            Behaviour.Other.AllowTokenCaching = false;
+        }
+    }
 }

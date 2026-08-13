@@ -2,6 +2,7 @@
 using Scheder.Services.Database;
 using Scheder.TelegramInteractions.Commands.Settings.Data;
 using Scheder.Tools;
+using Scheder.Tools.Config;
 using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.JournalAPI;
@@ -20,10 +21,11 @@ public class TokenService
     public static async Task<(string?, string[])> Get(long uid, bool isGroup, bool cacheUpdate = false,
         PerformanceMetric? metric = null, long parent = 0)
     {
-        using (metric?.Measure(MetricType.TokenParse))
-        {
+        using (metric?.Measure(MetricType.TokenParse)) {
 
-            var allowCache = await SettingsService.GetBool(parent, SettingsTypeList.AllowDataCaching, isGroup, CancellationToken.None);
+            var allowCache =
+                await SettingsService.GetBool(parent, SettingsTypeList.AllowDataCaching, isGroup,
+                    CancellationToken.None) && !Env.DisableTokenCaching;
             
             if (allowCache && !cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null &&
                 cachedToken.Uid == uid)
@@ -40,7 +42,7 @@ public class TokenService
 
 
             var (token, lastUpdate) = await Memory.User.GetJWTAsync(uid);
-            var isExpired = lastUpdate.HasValue && IsTimerExpired(lastUpdate.Value);
+            var isExpired = (lastUpdate.HasValue && IsTimerExpired(lastUpdate.Value)) || Env.DisableTokenCaching;
 
 
             Log.Information("[TokenService] Should parse new: {should}",

@@ -10,6 +10,8 @@ public class RunConfig
     {
         
         DotNetEnv.Env.Load();
+        Env.UpdateRules();
+        
         if (Env.FastStart)
         {
             Log.Warning("[FastStart] .env test skipped! Not recommended for production purposes. ");
