@@ -33,6 +33,9 @@ public class Env
         if (DisableCaching) {
             Behaviour.Other.AllowScheduleCaching = false;
             Behaviour.Other.AllowWeatherCaching = false;
+        }
+        
+        if (DisableTokenCaching) {
             Behaviour.Other.AllowTokenCaching = false;
         }
     }
