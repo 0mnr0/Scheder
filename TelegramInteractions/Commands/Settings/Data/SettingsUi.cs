@@ -12,7 +12,7 @@ public static class SettingsUi
         int page,
         IReadOnlyDictionary<int, int> values)
     {
-        var all = SettingsRegistry.All;
+        var all = SettingsList.All;
         var totalPages = Math.Max(1, (int)Math.Ceiling(all.Count / (double)PageSize));
         page = Math.Clamp(page, 0, totalPages - 1);
 

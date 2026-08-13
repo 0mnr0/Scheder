@@ -90,7 +90,7 @@ public class GetSched
         PerformanceMetric? metric = null
     )
     {
-        var allowCache = await SettingsService.GetBool(uid, SettingsList.AllowDataCaching, fromGroup, CancellationToken.None);
+        var allowCache = await SettingsService.GetBool(uid, SettingsTypeList.AllowDataCaching, fromGroup, CancellationToken.None);
         
         var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
         var (cachedSched, cachedExams) =

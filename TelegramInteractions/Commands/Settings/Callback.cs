@@ -68,7 +68,7 @@ public class Callback : ICallbackCommand
             {
                 var id = int.Parse(args[1]);
                 var page = int.Parse(args[2]);
-                var def = SettingsRegistry.GetById(id);
+                var def = SettingsList.GetById(id);
                 if (def is null)
                 {
                     await bot.AnswerCallbackQuery(callbackQuery.Id, "Настройка не найдена", cancellationToken: cancellationToken);
@@ -101,7 +101,7 @@ public class Callback : ICallbackCommand
                 var id = int.Parse(args[1]);
                 var ctx = args[2];
                 var page = int.Parse(args[3]);
-                var def = SettingsRegistry.GetById(id);
+                var def = SettingsList.GetById(id);
                 if (def is null)
                 {
                     await bot.AnswerCallbackQuery(callbackQuery.Id, "Настройка не найдена", cancellationToken: cancellationToken);

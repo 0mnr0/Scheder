@@ -11,7 +11,7 @@ public class SettingsService
         var stored = await Repo.GetAllValuesAsync(userId, isGroup, cancellationToken);
         var result = new Dictionary<int, int>();
 
-        foreach (var def in SettingsRegistry.All)
+        foreach (var def in SettingsList.All)
         {
             var defValue = def.Default;
             if (isGroup && def.GroupDefault is not null) {defValue = (int) def.GroupDefault;}
@@ -25,7 +25,7 @@ public class SettingsService
     public static async Task<int> GetEffectiveValueAsync(long userId, SettingDefinition def, bool isGroup, CancellationToken cancellationToken)
     {
         var stored = await Repo.GetValueAsync(userId, def.Id, isGroup, cancellationToken);
-        var setting = SettingsRegistry.All[def.Id];
+        var setting = SettingsList.All[def.Id];
         var defValue = setting.Default;
         if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
         
@@ -35,7 +35,7 @@ public class SettingsService
     public static async Task<int?> GetValue(long userId, int settingId, bool isGroup, CancellationToken cancellationToken)
     {
         var stored = await Repo.GetValueAsync(userId, settingId, isGroup, cancellationToken);
-        var setting = SettingsRegistry.All[settingId];
+        var setting = SettingsList.All[settingId];
         var defValue = setting.Default;
         if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
         
@@ -47,7 +47,7 @@ public class SettingsService
     public static async Task<bool> GetBool(long userId, int settingId, bool isGroup, CancellationToken cancellationToken)
     {
         var stored = await Repo.GetValueAsync(userId, settingId, isGroup, cancellationToken);
-        var setting = SettingsRegistry.All[settingId];
+        var setting = SettingsList.All[settingId];
         var defValue = setting.Default;
         if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
         

@@ -23,7 +23,7 @@ public class TokenService
         using (metric?.Measure(MetricType.TokenParse))
         {
 
-            var allowCache = await SettingsService.GetBool(parent, SettingsList.AllowDataCaching, isGroup, CancellationToken.None);
+            var allowCache = await SettingsService.GetBool(parent, SettingsTypeList.AllowDataCaching, isGroup, CancellationToken.None);
             
             if (allowCache && !cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null &&
                 cachedToken.Uid == uid)

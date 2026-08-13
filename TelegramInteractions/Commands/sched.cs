@@ -1,4 +1,5 @@
-﻿using Scheder.Services.ContextDetection;
+﻿using Org.BouncyCastle.Asn1.Cmp;
+using Scheder.Services.ContextDetection;
 using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
@@ -35,7 +36,23 @@ public class Sched : ICommand
         var noHumanoidFixes = msgText[^1].ToString() == "!";
         var draftToken = new CancellationTokenSource();
         var metric = new PerformanceMetric();
-        var allowDraft = await SettingsService.GetBool(chatId, SettingsList.AllowDraft, isGroup, cancellationToken);
+        var allowDraft = await SettingsService.GetBool(chatId, SettingsTypeList.AllowDraft, isGroup, cancellationToken);
+
+        var reactionSent = false;
+        _ = SettingsService.GetBool(chatId, SettingsTypeList.AllowReactions, isGroup, cancellationToken).ContinueWith(
+            async (var) => {
+                var res = await var;
+                if (!res) return;
+                
+                await bot.SetMessageReaction(
+                    chatId,
+                    message.Id,
+                    reaction: [
+                        new ReactionTypeEmoji { Emoji = "🤔" }
+                    ], 
+                    cancellationToken: cancellationToken);
+                reactionSent = true;
+            }, cancellationToken);
         
         metric.Start(MetricType.Total);
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
@@ -91,7 +108,7 @@ public class Sched : ICommand
         var bgWeatherResult = await bgWeatherTask;
         var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
         
-        var weatherAsText = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, isGroup, cancellationToken) is 1;
+        var weatherAsText = await SettingsService.GetValue(chatId, SettingsTypeList.AllowWeather, isGroup, cancellationToken) is 1;
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
         if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
             InputRichMessage newRichMessage;
@@ -183,6 +200,8 @@ public class Sched : ICommand
 
 
         
+        if (reactionSent) await bot.SetMessageReaction(chatId, message.Id, reaction: [], cancellationToken: cancellationToken);
+        
         await Task.Delay(60 * 1000, cancellationToken);
         try {
             await bot.EditMessageReplyMarkup(
@@ -194,6 +213,7 @@ public class Sched : ICommand
         catch (Exception) {
             /* content mey not change or there's no buttons since the message sent */
         }
+
 
 
         return;

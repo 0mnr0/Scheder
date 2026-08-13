@@ -380,7 +380,7 @@ public abstract class SchedMessageBuilder
             CancellationToken cancellationToken,
             PerformanceMetric? metric = null
         ) {
-            var weatherSettings = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, isGroup, cancellationToken);
+            var weatherSettings = await SettingsService.GetValue(chatId, SettingsTypeList.AllowWeather, isGroup, cancellationToken);
             var isWeatherAllowed = weatherSettings is not 0;
 
             if (isGroup && !Behaviour.Groups.AllowWeatherImageOutput || !isWeatherAllowed) return ([], null);
