@@ -186,7 +186,7 @@ public class Sched : ICommand
                         ParseMode.Html,
                         messageThreadId: threadId,
                         cancellationToken: cancellationToken,
-                        receiverUserId: ElevatedUserConfig.DebugUID
+                        receiverUserId: id
                     );
                 }
                 else {
