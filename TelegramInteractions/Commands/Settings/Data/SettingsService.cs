@@ -13,7 +13,10 @@ public class SettingsService
 
         foreach (var def in SettingsRegistry.All)
         {
-            result[def.Id] = stored.TryGetValue(def.Id, out var v) ? v : def.Default;
+            var defValue = def.Default;
+            if (isGroup && def.GroupDefault is not null) {defValue = (int) def.GroupDefault;}
+            
+            result[def.Id] = stored.GetValueOrDefault(def.Id, defValue);
         }
 
         return result;
@@ -22,7 +25,11 @@ public class SettingsService
     public static async Task<int> GetEffectiveValueAsync(long userId, SettingDefinition def, bool isGroup, CancellationToken cancellationToken)
     {
         var stored = await Repo.GetValueAsync(userId, def.Id, isGroup, cancellationToken);
-        return stored ?? def.Default;
+        var setting = SettingsRegistry.All[def.Id];
+        var defValue = setting.Default;
+        if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
+        
+        return stored ?? defValue;
     }
 
     public static async Task<int?> GetValue(long userId, int settingId, bool isGroup, CancellationToken cancellationToken)
