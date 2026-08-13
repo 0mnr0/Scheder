@@ -13,17 +13,19 @@ public class Env
     public static readonly string? DB_USER = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
     public static readonly string? DB_PASS = Environment.GetEnvironmentVariable("DB_PASS") ?? "postgres";
     public static readonly string? PreFetchData = Environment.GetEnvironmentVariable("PreFetchData") ?? "{}";
-    public static readonly bool FastStart = string.Equals(Environment.GetEnvironmentVariable("FastStart"), "true", StringComparison.OrdinalIgnoreCase);
+    public static readonly bool FastStart = GetBool("FastStart");
     
     // PROXY
-    public static readonly bool UseProxy = string.Equals(Environment.GetEnvironmentVariable("UseProxy"), "true", StringComparison.OrdinalIgnoreCase);
+    public static readonly bool UseProxy = GetBool("UseProxy");
     public static readonly string? ProxyLine = Environment.GetEnvironmentVariable("ProxyConnection");
     
-    // CACHEs
-    public static readonly bool DisableCaching = Environment.GetEnvironmentVariable("DisableCaching")?.ToLower() == "true";
-    public static readonly bool DisableTokenCaching = Environment.GetEnvironmentVariable("DisableTokenCaching")?.ToLower() == "true";
+    // CACHE
+    private static readonly bool DisableCaching = GetBool("DisableCaching");
+    private static readonly bool DisableTokenCaching = GetBool("DisableTokenCaching");
 
-
+    // OTHER
+    public static readonly bool TalkativePerformance = GetBool("FastStart");
+    
 
 
 
@@ -38,5 +40,9 @@ public class Env
         if (DisableTokenCaching) {
             Behaviour.Other.AllowTokenCaching = false;
         }
+    }
+    
+    private static bool GetBool(string name) {
+        return string.Equals(Environment.GetEnvironmentVariable(name), "true", StringComparison.OrdinalIgnoreCase);
     }
 }

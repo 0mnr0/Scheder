@@ -175,23 +175,28 @@ public class Sched : ICommand
             if (isGroup && !Behaviour.Groups.AllowSendingResponseSpeed) { return; }
             if (isPrivateChat && !Behaviour.Users.AllowSendingResponseSpeed || isPrivateChat && !Behaviour.Users.AllowDisplaySpeedMetricToAnyone) { return; }
 
-            if (isGroup) {
-                await bot.SendMessage(
-                    chatId: chatId,
-                    text: debugInfo,
-                    ParseMode.Html,
-                    messageThreadId: threadId,
-                    cancellationToken: cancellationToken,
-                    receiverUserId: ElevatedUserConfig.DebugUID
-                );
-            }
-            else {
-                await bot.SendMessage(
-                    chatId: chatId,
-                    text: debugInfo,
-                    ParseMode.Html,
-                    cancellationToken: cancellationToken
-                );
+            long[] sendTo = [ElevatedUserConfig.DebugUID];
+            if (Env.TalkativePerformance && message.From != null && sendTo[0] != message.From.Id) { _ = sendTo.Append(message.From.Id); }
+
+            foreach (var id in sendTo) {
+                if (isGroup) {
+                    await bot.SendMessage(
+                        chatId: chatId,
+                        text: debugInfo,
+                        ParseMode.Html,
+                        messageThreadId: threadId,
+                        cancellationToken: cancellationToken,
+                        receiverUserId: ElevatedUserConfig.DebugUID
+                    );
+                }
+                else {
+                    await bot.SendMessage(
+                        chatId: chatId,
+                        text: debugInfo,
+                        ParseMode.Html,
+                        cancellationToken: cancellationToken
+                    );
+                }
             }
         }
 
