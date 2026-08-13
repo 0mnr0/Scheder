@@ -33,12 +33,12 @@ public class Unbound : ICallbackCommand
             return;
         }
         
-        var boundedTo = await Memory.Group.getGroupBind(targetChatId);
+        var boundedTo = await Memory.Group.GetGroupBind(targetChatId);
         var isUserBoundedWithTargetGroup = (await Memory.User.GetLinkedGroups(whoAsking)).Contains(targetChatId);
         
         if (isHardUnbound)
         {
-            await Memory.Group.setGroupBind(targetChatId, null);
+            await Memory.Group.SetGroupBind(targetChatId, null);
             if (boundedTo != null)
             {
                 await Memory.User.UnlinkGroup((long)boundedTo, targetChatId);
@@ -86,7 +86,7 @@ public class Unbound : ICallbackCommand
         if (boundedTo == whoAsking && isUserBoundedWithTargetGroup)
         {
             await Memory.User.UnlinkGroup(whoAsking, targetChatId);
-            await Memory.Group.setGroupBind(targetChatId, null);
+            await Memory.Group.SetGroupBind(targetChatId, null);
             await bot.AnswerCallbackQuery(
                 callbackQueryId: callbackQuery.Id,
                 text: "Привязка отозвана",

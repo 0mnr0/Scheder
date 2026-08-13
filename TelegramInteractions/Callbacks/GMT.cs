@@ -59,7 +59,7 @@ public class GMT : ICallbackCommand
                 text: "Изменения сохранены",
                 cancellationToken: cancellationToken
             );
-            await Memory.User.SetGMT(callbackQuery.From.Id, difference);
+            await Memory.User.SetGmt(callbackQuery.From.Id, difference);
             await DeleteMessage(bot, callbackQuery, cancellationToken);
             return;
         }

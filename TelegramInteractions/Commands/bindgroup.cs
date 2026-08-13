@@ -30,7 +30,7 @@ public class bindgroup : ICommand
         var isAlreadyBound = await Memory.Group.IsGroupBind(chatId);
         if (isAlreadyBound)
         {
-            var boundFor = await Memory.Group.getGroupBind(chatId);
+            var boundFor = await Memory.Group.GetGroupBind(chatId);
             var unboundAsAdmin = isAdminAsking && boundFor != whoAsking;
             List<InlineKeyboardButton> unboundButton =
             [
@@ -130,7 +130,7 @@ public class bindgroup : ICommand
                            """;
 
         var token = ChatTools.GenerateRandomString(5);
-        await Memory.Group.setGroupBindToken(message.Chat.Id, token);
+        await Memory.Group.SetGroupBindToken(message.Chat.Id, token);
 
         var keyboard = new InlineKeyboardMarkup([
             [

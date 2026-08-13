@@ -8,7 +8,7 @@ public class GmtTool
     {
         if (fromGroup)
         {
-            var linkedUser = await Memory.Group.getUserObject(uid);
+            var linkedUser = await Memory.Group.GetUserObject(uid);
             return linkedUser?.GMT ?? 0;
         }
         

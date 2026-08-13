@@ -10,7 +10,7 @@ public class CodeBunch
 {
     public static async Task<long?> GetUidFromGroup(long groupId)
     {
-        var result = await Memory.Group.getGroupBind(groupId);
+        var result = await Memory.Group.GetGroupBind(groupId);
         return result;
     }
     

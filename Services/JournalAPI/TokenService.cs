@@ -41,7 +41,7 @@ public class TokenService
 
 
 
-            var (token, lastUpdate) = await Memory.User.GetJWTAsync(uid);
+            var (token, lastUpdate) = await Memory.User.GetJwtAsync(uid);
             var isExpired = (lastUpdate.HasValue && IsTimerExpired(lastUpdate.Value)) || !Behaviour.Other.AllowTokenCaching;
 
 
@@ -62,7 +62,7 @@ public class TokenService
                 if (string.IsNullOrEmpty(newToken)) return (null, tries);
 
                 var now = DateTime.Now;
-                _ = Task.Run(async () => { await Memory.User.SetJWTAsync(uid, newToken); });
+                _ = Task.Run(async () => { await Memory.User.SetJwtAsync(uid, newToken); });
 
                 var fetchedToken = new FetchedToken
                 {

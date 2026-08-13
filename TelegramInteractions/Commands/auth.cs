@@ -96,7 +96,7 @@ public class auth : ICommand
                 authData[1]
             );
             
-            await Memory.User.SetJWTAsync(
+            await Memory.User.SetJwtAsync(
                 (long) whoAsking,
                 payload["access_token"]!.ToString()
             );

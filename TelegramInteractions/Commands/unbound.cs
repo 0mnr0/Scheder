@@ -40,7 +40,7 @@ public class unbound : ICommand
         {
 
 
-            var isBoundedTo = await Memory.Group.getGroupBind(chatId);
+            var isBoundedTo = await Memory.Group.GetGroupBind(chatId);
             if (isBoundedTo == whoTriggered)
             {
                 var keyboard = new InlineKeyboardMarkup([

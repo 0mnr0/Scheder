@@ -43,7 +43,7 @@ public class AllowBind : ICallbackCommand
             return;
         }
 
-        if (await Memory.Group.getGroupBindToken(group) != token)
+        if (await Memory.Group.GetGroupBindToken(group) != token)
         {
             await bot.AnswerCallbackQuery(
                 callbackQueryId: callbackQuery.Id,
@@ -59,8 +59,8 @@ public class AllowBind : ICallbackCommand
             text: "Ваши данные привязаны к группе!",
             cancellationToken: cancellationToken
         );
-        await Memory.Group.setGroupBindToken(group, string.Empty);
-        await Memory.Group.setGroupBind(group, callbackQuery.From.Id);
+        await Memory.Group.SetGroupBindToken(group, string.Empty);
+        await Memory.Group.SetGroupBind(group, callbackQuery.From.Id);
         await Memory.User.LinkGroup(callbackQuery.From.Id, group);
         
         

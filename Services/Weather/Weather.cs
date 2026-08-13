@@ -32,7 +32,7 @@ public class Weather
             var day = dayObject.StartDate;
 
             if (isGroup) {
-                var newUid = await Memory.Group.getGroupBind(uid);
+                var newUid = await Memory.Group.GetGroupBind(uid);
                 if (!newUid.HasValue) return null;
                 uid = newUid.Value;
             }
@@ -61,7 +61,7 @@ public class Weather
 
     private static async Task<string?> GetCity(long uid, bool isGroup = false) {
         if (isGroup) {
-            var newUid = await Memory.Group.getGroupBind(uid);
+            var newUid = await Memory.Group.GetGroupBind(uid);
             if (!newUid.HasValue) return null;
             uid = newUid.Value;
         }

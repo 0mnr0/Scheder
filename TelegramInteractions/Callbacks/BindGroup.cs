@@ -37,7 +37,7 @@ public class BindGroup : ICallbackCommand
         }
 
 
-        if (await Memory.Group.getGroupBindToken(chatId) != token || isCancel)
+        if (await Memory.Group.GetGroupBindToken(chatId) != token || isCancel)
         {
             await bot.AnswerCallbackQuery(
                 callbackQueryId: callbackQuery.Id,
