@@ -161,7 +161,7 @@ public class Sched : ICommand
              Парсинг токена: {metric.GetExactMetric(MetricType.TokenParse, asNanoSeconds: true)}
              Парсинг Journal: {metric.GetExactMetric(MetricType.DataParse, asNanoSeconds: true)}
              Сборка сообщения: {metric.GetExactMetric(MetricType.Build, asNanoSeconds: true)}
-             Отправка сообщения: {metric.GetExactMetric(MetricType.MessageSend)}
+             Доставка сообщения: {metric.GetExactMetric(MetricType.MessageSend)}
              
              Парсинг погоды: {metric.GetMetric(MetricType.WeatherFetch)}мс
              Рендеринг погоды: {metric.GetMetric(MetricType.WeatherRender)}мс

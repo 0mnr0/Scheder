@@ -25,7 +25,7 @@ public class TokenService
 
             var allowCache =
                 await SettingsService.GetBool(parent, SettingsTypeList.AllowDataCaching, isGroup,
-                    CancellationToken.None) && !Env.DisableTokenCaching;
+                    CancellationToken.None) && !Behaviour.Other.AllowTokenCaching;
             
             if (allowCache && !cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null &&
                 cachedToken.Uid == uid)
@@ -42,7 +42,7 @@ public class TokenService
 
 
             var (token, lastUpdate) = await Memory.User.GetJWTAsync(uid);
-            var isExpired = (lastUpdate.HasValue && IsTimerExpired(lastUpdate.Value)) || Env.DisableTokenCaching;
+            var isExpired = (lastUpdate.HasValue && IsTimerExpired(lastUpdate.Value)) || !Behaviour.Other.AllowTokenCaching;
 
 
             Log.Information("[TokenService] Should parse new: {should}",
