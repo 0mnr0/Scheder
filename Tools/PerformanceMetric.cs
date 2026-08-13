@@ -8,6 +8,7 @@ public enum MetricType {
     Draft,
     TokenParse,
     DataParse,
+    MessageSend,
     WeatherFetch,
     WeatherRender,
 }
@@ -52,10 +53,10 @@ public class PerformanceMetric {
         var watch = _watches[type];
         var nsTime = asNanoSeconds ? watch.ElapsedTicks * 1000000 / Stopwatch.Frequency : watch.ElapsedMilliseconds;
         if (asNanoSeconds && nsTime > 1000 || !asNanoSeconds) {
-            return $"{watch.ElapsedMilliseconds}ms";
+            return $"{watch.ElapsedMilliseconds} мс";
         }
 
-        return $"{nsTime}mks";
+        return $"{nsTime} мКс";
     }
 
     public TimeSpan Elapsed(MetricType type) => _watches[type].Elapsed;

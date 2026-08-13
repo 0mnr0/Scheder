@@ -38,7 +38,6 @@ public class Sched : ICommand
         var allowDraft = await SettingsService.GetBool(chatId, SettingsList.AllowDraft, cancellationToken);
         
         metric.Start(MetricType.Total);
-        
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
 
         if (isGroup && !await Memory.Group.IsGroupBind(chatId)) {
@@ -76,6 +75,7 @@ public class Sched : ICommand
             ]);
         }
         
+        metric.Start(MetricType.MessageSend);
         var currentMessage = await bot.SendRichMessage(
             chatId: chatId,
             messageThreadId: threadId,
@@ -83,6 +83,7 @@ public class Sched : ICommand
             replyMarkup: keyboard,
             cancellationToken: cancellationToken
         );
+        metric.Stop(MetricType.MessageSend);
         metric.Stop(MetricType.Total);
         await bot.SendChatAction(chatId, ChatAction.UploadDocument, threadId, cancellationToken: cancellationToken);
 
@@ -140,10 +141,11 @@ public class Sched : ICommand
              <b> Speed Insights: </b>
              Суммарное время ответа: {metric.GetMetric(MetricType.Total)}мс 
                 
-             Анализ контекста: {metric.GetMetric(MetricType.Analyze)}мс
-             Парсинг токена: {metric.GetMetric(MetricType.TokenParse)}мс
-             Парсинг Journal: {metric.GetMetric(MetricType.DataParse)}мс
+             Анализ контекста: {metric.GetExactMetric(MetricType.Analyze, asNanoSeconds: true)}
+             Парсинг токена: {metric.GetExactMetric(MetricType.TokenParse, asNanoSeconds: true)}
+             Парсинг Journal: {metric.GetExactMetric(MetricType.DataParse, asNanoSeconds: true)}
              Сборка сообщения: {metric.GetExactMetric(MetricType.Build, asNanoSeconds: true)}
+             Отправка сообщения: {metric.GetExactMetric(MetricType.MessageSend)}
              
              Парсинг погоды: {metric.GetMetric(MetricType.WeatherFetch)}мс
              Рендеринг погоды: {metric.GetMetric(MetricType.WeatherRender)}мс
