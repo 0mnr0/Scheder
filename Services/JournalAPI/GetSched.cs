@@ -106,7 +106,7 @@ public class GetSched
 
         var token4 = (long)(fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
         (recommendedToken, var jwt) =
-            recommendedToken is null ? await TokenService.Get(token4, fromGroup, parent: uid) : (recommendedToken, ["?"]);
+            recommendedToken is null ? await TokenService.Get(token4, fromGroup, parent: uid, metric: metric) : (recommendedToken, ["?"]);
 
 
         // fix for double TokenService.Get call
