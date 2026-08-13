@@ -129,7 +129,7 @@ public static class Memory
 
         await ExecuteNonQuery(
             $"UPDATE {table} SET settings = " +
-            "(CASE WHEN jsonb_typeof(settings) = 'object' THEN settings ELSE '{{}}'::jsonb END) || @patch::jsonb " +
+            "(CASE WHEN jsonb_typeof(settings) = 'object' THEN settings ELSE '{}'::jsonb END) || @patch::jsonb " +
             $"WHERE {idColumn} = @id",
             Param("patch", patch), Param("id", id));
     }
