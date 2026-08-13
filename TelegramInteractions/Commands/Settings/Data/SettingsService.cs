@@ -6,9 +6,9 @@ public class SettingsService
     private static readonly PgSettings Repo = new();
     
     
-    public static async Task<Dictionary<int, int>> GetEffectiveValuesAsync(long userId, CancellationToken cancellationToken)
+    public static async Task<Dictionary<int, int>> GetEffectiveValuesAsync(long userId, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await Repo.GetAllValuesAsync(userId, cancellationToken);
+        var stored = await PgSettings.GetAllValuesAsync(userId, isGroup, cancellationToken);
         var result = new Dictionary<int, int>();
 
         foreach (var def in SettingsRegistry.All)
@@ -19,15 +19,15 @@ public class SettingsService
         return result;
     }
 
-    public static async Task<int> GetEffectiveValueAsync(long userId, SettingDefinition def, CancellationToken cancellationToken)
+    public static async Task<int> GetEffectiveValueAsync(long userId, SettingDefinition def, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await Repo.GetValueAsync(userId, def.Id, cancellationToken);
+        var stored = await PgSettings.GetValueAsync(userId, def.Id, isGroup, cancellationToken);
         return stored ?? def.Default;
     }
 
-    public static async Task<int?> GetValue(long userId, int settingId, CancellationToken cancellationToken, bool isGroup=false)
+    public static async Task<int?> GetValue(long userId, int settingId, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await Repo.GetValueAsync(userId, settingId, cancellationToken);
+        var stored = await PgSettings.GetValueAsync(userId, settingId, isGroup, cancellationToken);
         var setting = SettingsRegistry.All[settingId];
         var defValue = setting.Default;
         if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
@@ -37,9 +37,9 @@ public class SettingsService
         return stored;
     }
 
-    public static async Task<bool> GetBool(long userId, int settingId, CancellationToken cancellationToken, bool isGroup=false)
+    public static async Task<bool> GetBool(long userId, int settingId, bool isGroup, CancellationToken cancellationToken)
     {
-        var stored = await Repo.GetValueAsync(userId, settingId, cancellationToken);
+        var stored = await PgSettings.GetValueAsync(userId, settingId, isGroup, cancellationToken);
         var setting = SettingsRegistry.All[settingId];
         var defValue = setting.Default;
         if (isGroup && setting.GroupDefault is not null) {defValue = (int) setting.GroupDefault;}
@@ -50,9 +50,9 @@ public class SettingsService
     }
 
 
-    public static async Task<int> ToggleAsync(long userId, SettingDefinition def, CancellationToken cancellationToken)
+    public static async Task<int> ToggleAsync(long userId, SettingDefinition def, bool isGroup, CancellationToken cancellationToken)
     {
-        var current = await GetEffectiveValueAsync(userId, def, cancellationToken);
+        var current = await GetEffectiveValueAsync(userId, def, isGroup, cancellationToken);
         int next;
 
         if (def.Type == SettingType.Bool)
@@ -68,7 +68,7 @@ public class SettingsService
             next = states[(idx + 1) % states.Length];
         }
 
-        await Repo.SetValueAsync(userId, def.Id, next, cancellationToken);
+        await PgSettings.SetValueAsync(userId, def.Id, next, isGroup, cancellationToken);
         return next;
     }
 }

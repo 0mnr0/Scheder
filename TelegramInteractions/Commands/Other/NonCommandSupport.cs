@@ -15,7 +15,7 @@ public class NonCommandSupport : ITextHandler
         Message message,
         CancellationToken cancellationToken) {
 
-        var state = await SettingsService.GetValue(message.Chat.Id, SettingsList.ContextDetection, cancellationToken, isGroup: ChatTools.IsGroup(message));
+        var state = await SettingsService.GetValue(message.Chat.Id, SettingsList.ContextDetection, ChatTools.IsGroup(message), cancellationToken);
         if (state is null or 0) return; // not found or context detection is disabled
         var fullDetection = state.Value == 2;
         

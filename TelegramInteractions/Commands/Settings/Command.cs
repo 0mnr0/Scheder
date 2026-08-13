@@ -23,7 +23,7 @@ public class Command : ICommand
         var chatId = message.Chat.Id;
         var fromId = message.From!.Id;
         var isGroup = ChatTools.IsGroup(message);
-        var values = await SettingsService.GetEffectiveValuesAsync(fromId, cancellationToken);
+        var values = await SettingsService.GetEffectiveValuesAsync(chatId, isGroup, cancellationToken);
         var (text, keyboard) = SettingsUi.BuildListView(page: 0, values);
 
         if (isGroup && !await ChatTools.IsUserAdmin(bot, chatId, fromId)) {

@@ -30,6 +30,7 @@ public class Callback : ICallbackCommand
         var messageId = callbackQuery.Message.MessageId;
         var userId = callbackQuery.From.Id;
         var ephData = callbackQuery.Message.EphemeralMessageId;
+        var isGroup = ChatTools.IsGroup(callbackQuery.Message);
         var editAsEphemeral = ChatTools.IsGroup(callbackQuery.Message) && ephData != null;
         
         switch (args[0])
@@ -41,7 +42,7 @@ public class Callback : ICallbackCommand
             case "l":
             {
                 var page = int.Parse(args[1]);
-                var values = await SettingsService.GetEffectiveValuesAsync(userId, cancellationToken);
+                var values = await SettingsService.GetEffectiveValuesAsync(chatId, isGroup, cancellationToken);
                 var (text, keyboard) = SettingsUi.BuildListView(page, values);
 
                 if (editAsEphemeral && ephData != null) {
@@ -74,7 +75,7 @@ public class Callback : ICallbackCommand
                     return;
                 }
 
-                var value = await SettingsService.GetEffectiveValueAsync(userId, def, cancellationToken);
+                var value = await SettingsService.GetEffectiveValueAsync(chatId, def, isGroup, cancellationToken);
                 var (text, keyboard) = SettingsUi.BuildDescriptionView(def, value, page);
 
                 if (editAsEphemeral && ephData != null) {
@@ -107,7 +108,7 @@ public class Callback : ICallbackCommand
                     return;
                 }
 
-                var newValue = await SettingsService.ToggleAsync(userId, def, cancellationToken);
+                var newValue = await SettingsService.ToggleAsync(chatId, def, isGroup, cancellationToken);
 
                 if (ctx == "d")
                 {
@@ -128,7 +129,7 @@ public class Callback : ICallbackCommand
                 }
                 else
                 {
-                    var values = await SettingsService.GetEffectiveValuesAsync(userId, cancellationToken);
+                    var values = await SettingsService.GetEffectiveValuesAsync(chatId, isGroup, cancellationToken);
                     var (text, keyboard) = SettingsUi.BuildListView(page, values);
                     await bot.EditMessageText(chatId, messageId, text,
                         parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);

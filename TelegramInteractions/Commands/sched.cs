@@ -35,7 +35,7 @@ public class Sched : ICommand
         var noHumanoidFixes = msgText[^1].ToString() == "!";
         var draftToken = new CancellationTokenSource();
         var metric = new PerformanceMetric();
-        var allowDraft = await SettingsService.GetBool(chatId, SettingsList.AllowDraft, cancellationToken);
+        var allowDraft = await SettingsService.GetBool(chatId, SettingsList.AllowDraft, isGroup, cancellationToken);
         
         metric.Start(MetricType.Total);
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
@@ -91,7 +91,7 @@ public class Sched : ICommand
         var bgWeatherResult = await bgWeatherTask;
         var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
         
-        var weatherAsText = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, cancellationToken) is 1;
+        var weatherAsText = await SettingsService.GetValue(chatId, SettingsList.AllowWeather, isGroup, cancellationToken) is 1;
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
         if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
             InputRichMessage newRichMessage;

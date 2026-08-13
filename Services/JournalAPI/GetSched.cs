@@ -41,7 +41,7 @@ public class GetSched
             id = (long)newId;
         }
         
-        var (token, _) = recommendedToken is null ? await TokenService.Get(id, parent: uid) : (recommendedToken, ["?"]);
+        var (token, _) = recommendedToken is null ? await TokenService.Get(id, fromGroup, parent: uid) : (recommendedToken, ["?"]);
         if (token == null) return null;
         var startDate = dayData.StartDate;
         var endDate = dayData.EndDate;
@@ -71,7 +71,7 @@ public class GetSched
             id = (long)newId;
         }
 
-        var (token, _) = recommendedToken is null ? await TokenService.Get(id, parent: uid) : (recommendedToken, ["?"]);
+        var (token, _) = recommendedToken is null ? await TokenService.Get(id, fromGroup, parent: uid) : (recommendedToken, ["?"]);
         if (token == null) return null;
         
         var response = await API.GetExams(token, metric: metric);
@@ -90,7 +90,7 @@ public class GetSched
         PerformanceMetric? metric = null
     )
     {
-        var allowCache = await SettingsService.GetBool(uid, SettingsList.AllowDataCaching, CancellationToken.None);
+        var allowCache = await SettingsService.GetBool(uid, SettingsList.AllowDataCaching, fromGroup, CancellationToken.None);
         
         var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
         var (cachedSched, cachedExams) =
@@ -106,7 +106,7 @@ public class GetSched
 
         var token4 = (long)(fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
         (recommendedToken, var jwt) =
-            recommendedToken is null ? await TokenService.Get(token4, parent: uid) : (recommendedToken, ["?"]);
+            recommendedToken is null ? await TokenService.Get(token4, fromGroup, parent: uid) : (recommendedToken, ["?"]);
 
 
         // fix for double TokenService.Get call

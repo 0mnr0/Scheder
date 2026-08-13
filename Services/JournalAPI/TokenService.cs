@@ -17,13 +17,13 @@ public class TokenService
         return DateTime.Now >= dt.AddMinutes(JwtKeepTime);
     }
 
-    public static async Task<(string?, string[])> Get(long uid, bool cacheUpdate = false,
+    public static async Task<(string?, string[])> Get(long uid, bool isGroup, bool cacheUpdate = false,
         PerformanceMetric? metric = null, long parent = 0)
     {
         using (metric?.Measure(MetricType.TokenParse))
         {
 
-            var allowCache = await SettingsService.GetBool(parent, SettingsList.AllowDataCaching, CancellationToken.None);
+            var allowCache = await SettingsService.GetBool(parent, SettingsList.AllowDataCaching, isGroup, CancellationToken.None);
             
             if (allowCache && !cacheUpdate && Cache.TryGetValue(uid, out FetchedToken? cachedToken) && cachedToken != null &&
                 cachedToken.Uid == uid)

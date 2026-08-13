@@ -557,6 +557,67 @@ public static class Memory
 
             return Convert.ToString(result);
         }
+        
+        public static async Task<Dictionary<int, int>> GetSettingsAsync(long uid)
+        {
+            await using var conn = GetConnection();
+            await conn.OpenAsync();
+
+            await using var cmd = new NpgsqlCommand(
+                "SELECT settings FROM tggroups WHERE groupid = @uid", conn);
+            cmd.Parameters.AddWithValue("uid", uid);
+
+            var result = await cmd.ExecuteScalarAsync();
+            if (result is not string json)
+                return new Dictionary<int, int>();
+
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+                return new Dictionary<int, int>();
+
+            var dict = new Dictionary<int, int>();
+            foreach (var prop in doc.RootElement.EnumerateObject())
+            {
+                if (int.TryParse(prop.Name, out var id) && prop.Value.ValueKind == JsonValueKind.Number)
+                    dict[id] = prop.Value.GetInt32();
+            }
+
+            return dict;
+        }
+
+        public static async Task<int?> GetSettingAsync(long uid, int settingId)
+        {
+            await using var conn = GetConnection();
+            await conn.OpenAsync();
+
+            await using var cmd = new NpgsqlCommand(
+                "SELECT settings->>@key FROM tggroups WHERE groupid = @uid AND jsonb_typeof(settings) = 'object'", conn);
+            cmd.Parameters.AddWithValue("uid", uid);
+            cmd.Parameters.AddWithValue("key", settingId.ToString());
+
+            var result = await cmd.ExecuteScalarAsync();
+            if (result is null || result == DBNull.Value)
+                return null;
+
+            return int.TryParse(result.ToString(), out var value) ? value : null;
+        }
+
+        public static async Task SetSettingAsync(long uid, int settingId, int value)
+        {
+            var patch = JsonSerializer.Serialize(new Dictionary<string, int> { [settingId.ToString()] = value });
+
+            await using var conn = GetConnection();
+            await conn.OpenAsync();
+
+            await using var cmd = new NpgsqlCommand(
+                "UPDATE tggroups SET settings = " +
+                "(CASE WHEN jsonb_typeof(settings) = 'object' THEN settings ELSE '{}'::jsonb END) || @patch::jsonb " +
+                "WHERE groupid = @uid", conn);
+            cmd.Parameters.AddWithValue("patch", patch);
+            cmd.Parameters.AddWithValue("uid", uid);
+
+            await cmd.ExecuteNonQueryAsync();
+        }
 
         
     }

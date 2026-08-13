@@ -115,7 +115,7 @@ public class TokenPreFetch
             uid = (long)newUid;
         }
 
-        var (token, _) = await TokenService.Get(uid, cacheUpdate: true, parent: uid); //this is system service, end-user cant reach here so parent value is forced;
+        var (token, _) = await TokenService.Get(uid, isGroup, cacheUpdate: true, parent: uid); //this is system service, end-user cant reach here so parent value is forced;
         if (token == null) return;
 
         // PARSE AND CACHE SCHED (Today And Tomorrow)
