@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Npgsql;
 using NpgsqlTypes;
 using Scheder.Services.JournalAPI;
@@ -49,6 +50,21 @@ public static class Memory
         cmd.Parameters.AddRange(parameters);
         await using var reader = await cmd.ExecuteReaderAsync();
         return await reader.ReadAsync() ? map(reader) : default;
+    }
+
+    private static async Task<List<T>> ExecuteReaderList<T>(
+        string sql,
+        Func<NpgsqlDataReader, T> map,
+        params NpgsqlParameter[] parameters)
+    {
+        var list = new List<T>();
+        await using var conn = await OpenConnectionAsync();
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddRange(parameters);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+            list.Add(map(reader));
+        return list;
     }
 
 
@@ -132,6 +148,91 @@ public static class Memory
             "(CASE WHEN jsonb_typeof(settings) = 'object' THEN settings ELSE '{}'::jsonb END) || @patch::jsonb " +
             $"WHERE {idColumn} = @id",
             Param("patch", patch), Param("id", id));
+    }
+
+
+    private static async Task<DayListener> AddDayListenerCoreAsync(string table, string idColumn, long id, string date, int? threadId = null)
+    {
+        var listener = new DayListener { Date = date, Hash = Guid.NewGuid().ToString("N"), ThreadId = threadId };
+        var json = JsonSerializer.Serialize(listener);
+
+        await ExecuteNonQuery(
+            $"UPDATE {table} SET date_listeners = date_listeners || @item::jsonb WHERE {idColumn} = @id",
+            Param("item", json), Param("id", id));
+
+        return listener;
+    }
+
+    private static async Task<List<DayListener>> GetDayListenersCoreAsync(string table, string idColumn, long id)
+    {
+        var json = (string?)await ExecuteScalar(
+            $"SELECT date_listeners FROM {table} WHERE {idColumn} = @id", Param("id", id));
+
+        if (json is null)
+            return [];
+
+        return JsonSerializer.Deserialize<List<DayListener>>(json) ?? [];
+    }
+
+    private static Task RemoveDayListenerByDateCoreAsync(string table, string idColumn, long id, string date) =>
+        ExecuteNonQuery(
+            $"""
+             UPDATE {table} SET date_listeners =
+                 ( SELECT COALESCE(jsonb_agg(value), '[]'::jsonb)
+                     FROM jsonb_array_elements(date_listeners) AS t(value)
+                     WHERE value->>'date' <> @date
+                 ) WHERE {idColumn} = @id
+             """,
+            Param("id", id), Param("date", date));
+
+    private static Task RemoveDayListenerByHashCoreAsync(string table, string idColumn, long id, string hash) =>
+        ExecuteNonQuery(
+            $"""
+             UPDATE {table} SET date_listeners =
+                 ( SELECT COALESCE(jsonb_agg(value), '[]'::jsonb)
+                     FROM jsonb_array_elements(date_listeners) AS t(value)
+                     WHERE value->>'hash' <> @hash
+                 ) WHERE {idColumn} = @id
+             """,
+            Param("id", id), Param("hash", hash));
+
+    private static Task ClearDayListenersCoreAsync(string table, string idColumn, long id) =>
+        ExecuteNonQuery(
+            $"UPDATE {table} SET date_listeners = '[]'::jsonb WHERE {idColumn} = @id",
+            Param("id", id));
+
+    private static Task UpdateDayListenerCoreAsync(string table, string idColumn, long id, string date, string newHash) =>
+        ExecuteNonQuery(
+            $"""
+             UPDATE {table} SET date_listeners =
+                 ( SELECT COALESCE(jsonb_agg(
+                             CASE WHEN value->>'date' = @date
+                                  THEN jsonb_set(value, ARRAY['hash'], to_jsonb(@newHash::text))
+                                  ELSE value END
+                          ), '[]'::jsonb)
+                     FROM jsonb_array_elements(date_listeners) AS t(value)
+                 ) WHERE {idColumn} = @id
+             """,
+            Param("id", id), Param("date", date), Param("newHash", newHash));
+
+    /// <summary>
+    /// Возвращает список всех юзеров и групп, у которых date_listeners.Length > 0.
+    /// </summary>
+    public static async Task<List<(long Id, bool IsGroup)>> GetAllWithDayListeners()
+    {
+        var result = new List<(long Id, bool IsGroup)>();
+
+        var users = await ExecuteReaderList(
+            "SELECT uid FROM users WHERE jsonb_array_length(date_listeners) > 0",
+            reader => reader.GetInt64(0));
+        result.AddRange(users.Select(uid => (uid, false)));
+
+        var groups = await ExecuteReaderList(
+            "SELECT groupid FROM tggroups WHERE jsonb_array_length(date_listeners) > 0",
+            reader => reader.GetInt64(0));
+        result.AddRange(groups.Select(groupId => (groupId, true)));
+
+        return result;
     }
 
 
@@ -300,6 +401,32 @@ public static class Memory
 
         public static Task SetSettingAsync(long uid, int settingId, int value) =>
             SetSettingCoreAsync("users", "uid", uid, settingId, value);
+
+        /// <summary>Добавляет day-listener на дату <paramref name="date"/> и возвращает созданный объект (с хешем).</summary>
+        public static Task<DayListener> AddDayListener(long uid, string date, int? threadId = null) =>
+            AddDayListenerCoreAsync("users", "uid", uid, date, threadId);
+
+        public static Task<List<DayListener>> GetDayListeners(long uid) =>
+            GetDayListenersCoreAsync("users", "uid", uid);
+
+        /// <summary>Удаляет один day-listener с указанной датой.</summary>
+        public static Task RemoveDayListener(long uid, string date) =>
+            RemoveDayListenerByDateCoreAsync("users", "uid", uid, date);
+
+        /// <summary>Удаляет конкретный day-listener (по его хешу).</summary>
+        public static Task RemoveDayListener(long uid, DayListener listener) =>
+            RemoveDayListenerByHashCoreAsync("users", "uid", uid, listener.Hash);
+
+        public static Task ClearDayListeners(long uid) =>
+            ClearDayListenersCoreAsync("users", "uid", uid);
+
+        /// <summary>Обновляет хеш day-listener'а с указанной датой на <paramref name="newHash"/>.</summary>
+        public static Task UpdateDayListener(long uid, string date, string newHash) =>
+            UpdateDayListenerCoreAsync("users", "uid", uid, date, newHash);
+        
+        public static Task UpdateDayListener(long uid, DayListener listener) =>
+            UpdateDayListenerCoreAsync("users", "uid", uid,
+                listener.Date, listener.Hash);
     }
 
     public static class Group
@@ -386,6 +513,35 @@ public static class Memory
 
         public static Task SetSettingAsync(long groupId, int settingId, int value) =>
             SetSettingCoreAsync("tggroups", "groupid", groupId, settingId, value);
+        
+        public static Task<DayListener> AddDayListener(long groupId, string date, int? threadId) =>
+            AddDayListenerCoreAsync("tggroups", "groupid", groupId, date, threadId);
+
+        public static Task<List<DayListener>> GetDayListeners(long groupId) =>
+            GetDayListenersCoreAsync("tggroups", "groupid", groupId);
+        
+        public static Task RemoveDayListener(long groupId, string date) =>
+            RemoveDayListenerByDateCoreAsync("tggroups", "groupid", groupId, date);
+        public static Task RemoveDayListener(long groupId, DayListener listener) =>
+            RemoveDayListenerByHashCoreAsync("tggroups", "groupid", groupId, listener.Hash);
+        public static Task ClearDayListeners(long groupId) =>
+            ClearDayListenersCoreAsync("tggroups", "groupid", groupId);
+        public static Task UpdateDayListener(long groupId, string date, string newHash) =>
+            UpdateDayListenerCoreAsync("tggroups", "groupid", groupId, date, newHash);
+        public static Task UpdateDayListener(long groupId, DayListener listener) =>
+            UpdateDayListenerCoreAsync("tggroups", "groupid", groupId, listener.Date, listener.Hash);
+    }
+
+    public class DayListener
+    {
+        [JsonPropertyName("date")]
+        public string Date { get; set; } = "";
+
+        [JsonPropertyName("hash")]
+        public string Hash { get; set; } = "";
+        
+        [JsonPropertyName("threadId")]
+        public int? ThreadId { get; set; } = 0;
     }
 
     public class UserRecord

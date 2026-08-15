@@ -14,7 +14,15 @@ namespace Scheder.Tools;
 
 public abstract class SchedMessageBuilder
 {
-    public static string BuildMessage(string? raw, BestDayOption.BestDayParseResult day, string? rawExamList = null, string[]? jwtData = null, PerformanceMetric? metric = null)
+    public static string BuildMessage(
+        string? raw,
+        BestDayOption.BestDayParseResult day,
+        string? rawExamList = null,
+        string[]? jwtData = null,
+        PerformanceMetric? metric = null,
+        bool asChange = false,
+        bool showDateInTitle = false
+    )
     {
         using (metric?.Measure(MetricType.Build)) {
             if (string.IsNullOrEmpty(raw))
@@ -22,10 +30,10 @@ public abstract class SchedMessageBuilder
                 return BuildJwtFail(jwtData);
             }
 
+            if (asChange) { showDateInTitle = true;}
             var displayWeek = day.IsWeek;
-            var dayName = DateExtractor.GetDayName(day.dayDisplay);
+            var dayName = showDateInTitle ? day.dayDisplay : DateExtractor.GetDayName(day.dayDisplay);
             var dateDisplay = (displayWeek ? $"{day.StartDate} — {day.EndDate}" : day.StartDate).Replace("-", ".");
-
 
             var (lessons, exams) = ParseAndSort(raw, rawExamList, day);
             var messageSize = 512
@@ -35,9 +43,16 @@ public abstract class SchedMessageBuilder
             var messageText = new StringBuilder(capacity: messageSize);
 
             var unixTime = CodeBunch.GetUnixFromDateTime(day, lessons);
+
+            if (asChange) {
+                messageText.Append($"<h4> Изменились пары на {dayName}: </h4>");
+            }
+            else {
+                messageText.Append($"<h4> <b> Пары на {dayName}: </b> </h4>");
+            }
+            
             messageText.Append(
                 $"""
-                 <h4> <b> Пары на {dayName}: </b> </h4>
                  <a> (<tg-time unix="{unixTime}" format="wDT">{dateDisplay}</tg-time>, {lessons.Count * 1.5}ч) </a> 
 
                  <br>

@@ -1,4 +1,5 @@
-﻿using Scheder.Services.ContextDetection;
+﻿using System.Globalization;
+using Scheder.Services.ContextDetection;
 
 namespace Scheder.Tools;
 
@@ -118,9 +119,36 @@ public static class BestDayOption
             throw new ArgumentException($"Unknown day name: {dayName}", nameof(dayName));
 
         var daysToAdd = ((int)targetDay - (int)date.DayOfWeek + 7) % 7;
-
         return date.AddDays(daysToAdd);
     }
+
+    
+
+    public static BestDayParseResult GetFromJournalStringFormat(string date) // "yyyy-mm-dd"
+    {
+        var dayName = DateExtractor.GetDayNameByDate(date);
+        var dTime = DateTime.ParseExact(
+            date,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture
+        );
+        
+        return new BestDayParseResult {
+            dayType = dayName,
+            dayParsedName = DateExtractor.GetDayName(dayName),
+            dayDisplay = date,
+            dayDiff = 0,
+            StartDate = date,
+            EndDate = date,
+            DateStart = dTime,
+            DateEnd = dTime,
+            IsWeek = false,
+            IsEarlyDayMoveFix = false
+        };
+    }
+    
+    
+    
 
 
     public class BestDayParseResult

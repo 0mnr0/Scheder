@@ -178,6 +178,27 @@ public static class DateExtractor
         };
     }
 
+    public static string GetDayNameByDate(string date) {
+        var dateTime = DateTime.ParseExact(
+            date,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture
+        );
+
+        string[] days =
+        {
+            DayType.Monday,
+            DayType.Tuesday,
+            DayType.Wednesday,
+            DayType.Thursday,
+            DayType.Friday,
+            DayType.Saturday,
+            DayType.Sunday
+        };
+
+        return days[(int)dateTime.DayOfWeek];
+    }
+
     public static string GetMonthName(DateTime date)
     {
         var currentMonth = date.Month;
