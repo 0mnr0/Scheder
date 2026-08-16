@@ -5,8 +5,13 @@ namespace Scheder.Tools;
 
 public static class BestDayOption
 {
-    public static async Task<BestDayParseResult> Get(long uid, string day, bool fromGroup = false, bool ignoreEarlyDay = false, bool asForced = false)
-    {
+    public static async Task<BestDayParseResult> Get(long uid, (string parsedDay, string dayType) dayData, bool fromGroup = false, bool ignoreEarlyDay = false, bool asForced = false) {
+        var day = dayData.parsedDay;
+        var dayType = dayData.dayType;
+        if (dayType == DayDefinition.Date) {
+            return BuildDate(dayData);
+        }
+        
         var timeShift = await GmtTool.Get(uid, fromGroup); // (from -24 to +24 hours int)
         var clientHour = DateTime.Now.AddHours(timeShift);
         var response = new BestDayParseResult();
@@ -113,6 +118,33 @@ public static class BestDayOption
         return response;
     }
 
+    private static BestDayParseResult BuildDate((string, string) dayData) {
+        var date = dayData.Item1;
+        
+        var dTime = DateTime.ParseExact(
+            date,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture
+        );
+        
+        var dayName = DateExtractor.GetDayNameByDate(date);
+        var dayDisplay = Declensions.GetDeclensionDayTitle(dTime);
+
+        return new BestDayParseResult {
+            dayType = dayName,
+            dayParsedName = dayDisplay,
+            dayDisplay = dayDisplay,
+            dayDiff = 0,
+            StartDate = date,
+            EndDate = date,
+            DateStart = dTime,
+            DateEnd = dTime,
+            IsWeek = false,
+            IsEarlyDayMoveFix = false,
+            ExactDate = true
+        };
+    }
+
     private static DateTime GetNearestDay(DateTime date, string dayName)
     {
         if (!Enum.TryParse<DayOfWeek>(dayName, out var targetDay))
@@ -163,5 +195,6 @@ public static class BestDayOption
         public DateTime DateEnd { get; set; }
         public bool IsWeek { get; set; }
         public bool IsEarlyDayMoveFix { get; set; }
+        public bool ExactDate { get; set; } = false;
     }
 }

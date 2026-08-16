@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using FuzzySharp;
 using Scheder.Tools;
 
@@ -22,6 +23,12 @@ public static class DayType
     public const string Week = "WEEK";
     public const string NextWeek = "NextWEEK";
     public const string PrevWeek = "PrevWEEK";
+}
+
+public static class DayDefinition {
+    public const string Day = "Day";
+    public const string Date = "Date";
+    public const string Unknown = "Unknown";
 }
 
 public static class DateExtractor
@@ -74,6 +81,11 @@ public static class DateExtractor
 
     private static readonly List<string> AllWords = Dataset.Keys.ToList();
 
+    private static readonly Regex IsoDateRegex = new(@"^(\d{4})-(\d{1,2})-(\d{1,2})$", RegexOptions.Compiled);
+    private static readonly Regex DayMonthYearRegex = new(@"^(\d{1,2})\.(\d{1,2})\.(\d{4})$", RegexOptions.Compiled);
+    private static readonly Regex DayMonthRegex = new(@"^(\d{1,2})\.(\d{1,2})$", RegexOptions.Compiled);
+    private static readonly Regex DayOnlyRegex = new(@"^(\d{1,2})$", RegexOptions.Compiled);
+
     private static string? FindClosest(string word)
     {
         var candidates = AllWords.Where(w => Math.Abs(w.Length - word.Length) <= 1).ToList();
@@ -96,7 +108,64 @@ public static class DateExtractor
         return bestScore > 75 ? best : null;
     }
 
-    public static string GetDay(string text, PerformanceMetric? metric)
+    /// <summary>
+    /// Пытается распознать явную дату в отдельном слове/токене.
+    /// Поддерживает форматы: yyyy-MM-dd, dd.MM.yyyy, dd.MM (текущий год), dd (текущие месяц и год).
+    /// </summary>
+    private static bool TryParseDateWord(string word, out string isoDate)
+    {
+        isoDate = string.Empty;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var isoMatch = IsoDateRegex.Match(word);
+        if (isoMatch.Success)
+        {
+            var year = int.Parse(isoMatch.Groups[1].Value);
+            var month = int.Parse(isoMatch.Groups[2].Value);
+            var day = int.Parse(isoMatch.Groups[3].Value);
+            return TryBuildDate(year, month, day, out isoDate);
+        }
+
+        var dmyMatch = DayMonthYearRegex.Match(word);
+        if (dmyMatch.Success)
+        {
+            var day = int.Parse(dmyMatch.Groups[1].Value);
+            var month = int.Parse(dmyMatch.Groups[2].Value);
+            var year = int.Parse(dmyMatch.Groups[3].Value);
+            return TryBuildDate(year, month, day, out isoDate);
+        }
+
+        var dmMatch = DayMonthRegex.Match(word);
+        if (dmMatch.Success)
+        {
+            var day = int.Parse(dmMatch.Groups[1].Value);
+            var month = int.Parse(dmMatch.Groups[2].Value);
+            return TryBuildDate(today.Year, month, day, out isoDate);
+        }
+
+        var dayOnlyMatch = DayOnlyRegex.Match(word);
+        if (dayOnlyMatch.Success)
+        {
+            var day = int.Parse(dayOnlyMatch.Groups[1].Value);
+            return TryBuildDate(today.Year, today.Month, day, out isoDate);
+        }
+
+        return false;
+    }
+
+    private static bool TryBuildDate(int year, int month, int day, out string isoDate)
+    {
+        isoDate = string.Empty;
+
+        if (month is < 1 or > 12) return false;
+        if (year is < 1 or > 9999) return false;
+        if (day < 1 || day > DateTime.DaysInMonth(year, month)) return false;
+
+        isoDate = new DateOnly(year, month, day).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return true;
+    }
+
+    public static (string, string) GetDay(string text, PerformanceMetric? metric)
     {
         using (metric?.Measure(_metric)) {
             var normalized = text.ToLowerInvariant().Replace("/", " ");
@@ -105,7 +174,7 @@ public static class DateExtractor
             var multiWordKeys = Dataset.Keys.Where(k => k.Contains(' ')).OrderByDescending(k => k.Length).ToList();
             foreach (var key in multiWordKeys) {
                 if (normalized.Contains(key)) {
-                    return Dataset[key];
+                    return (Dataset[key], DayDefinition.Day);
                 }
             }
 
@@ -116,7 +185,14 @@ public static class DateExtractor
                 words.RemoveAt(0);
             }
 
-            // 2. Fuzzy-проверка биграмм — сравниваем слово к слову
+            // 2. Явные даты (yyyy-MM-dd, dd.MM.yyyy, dd.MM, dd)
+            foreach (var word in words) {
+                if (TryParseDateWord(word, out var isoDate)) {
+                    return (isoDate, DayDefinition.Date);
+                }
+            }
+
+            // 3. Fuzzy-проверка биграмм — сравниваем слово к слову
             for (var i = 0; i < words.Count - 1; i++) {
                 string? bestKey = null;
                 var bestScore = 0;
@@ -136,23 +212,23 @@ public static class DateExtractor
 
                 if (bestKey is not null && bestScore > 60) // порог можно подобрать отдельно
                 {
-                    return Dataset[bestKey];
+                    return (Dataset[bestKey], DayDefinition.Day);
                 }
             }
 
-            // 3. Прежняя логика по отдельным словам
+            // 4. Прежняя логика по отдельным словам
             foreach (var word in words) {
                 if (Dataset.TryGetValue(word, out var exact)) {
-                    return exact;
+                    return (exact, DayDefinition.Day);
                 }
 
                 var match = FindClosest(word);
                 if (match is not null && Dataset.TryGetValue(match, out var fuzzy)) {
-                    return fuzzy;
+                    return (fuzzy, DayDefinition.Day);
                 }
             }
 
-            return DayType.Today;
+            return (DayType.Today, DayDefinition.Unknown);
         }
     }
 
@@ -185,8 +261,7 @@ public static class DateExtractor
             CultureInfo.InvariantCulture
         );
 
-        string[] days =
-        {
+        string[] days = [
             DayType.Monday,
             DayType.Tuesday,
             DayType.Wednesday,
@@ -194,7 +269,7 @@ public static class DateExtractor
             DayType.Friday,
             DayType.Saturday,
             DayType.Sunday
-        };
+        ];
 
         return days[(int)dateTime.DayOfWeek];
     }
@@ -221,38 +296,37 @@ public static class DateExtractor
     }
 
 
-    public static string GetForcedDay(string dateValue) {
+    public static (string, string) GetForcedDay(string dateValue) {
         
         var date = DateOnly.ParseExact(dateValue, "yyyy-MM-dd", CultureInfo.InvariantCulture);
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         if (date == today)
-            return DayType.Today;
+            return (DayType.Today, DayDefinition.Day);
 
         if (date == today.AddDays(-1))
-            return DayType.Yesterday;
+            return (DayType.Yesterday, DayDefinition.Day);
 
         if (date == today.AddDays(-2))
-            return DayType.ReYesterday;
+            return (DayType.ReYesterday, DayDefinition.Day);
 
         if (date == today.AddDays(1))
-            return DayType.Tomorrow;
+            return (DayType.Tomorrow, DayDefinition.Day);
 
         if (date == today.AddDays(2))
-            return DayType.ReTomorrow;
+            return (DayType.ReTomorrow, DayDefinition.Day);
 
         return date.DayOfWeek switch
         {
-            DayOfWeek.Monday => DayType.Monday,
-            DayOfWeek.Tuesday => DayType.Tuesday,
-            DayOfWeek.Wednesday => DayType.Wednesday,
-            DayOfWeek.Thursday => DayType.Thursday,
-            DayOfWeek.Friday => DayType.Friday,
-            DayOfWeek.Saturday =>  DayType.Saturday,
-            DayOfWeek.Sunday => DayType.Sunday,
-            _ => dateValue
+            DayOfWeek.Monday => (DayType.Monday, DayDefinition.Day),
+            DayOfWeek.Tuesday => (DayType.Tuesday, DayDefinition.Day),
+            DayOfWeek.Wednesday => (DayType.Wednesday, DayDefinition.Day),
+            DayOfWeek.Thursday => (DayType.Thursday, DayDefinition.Day),
+            DayOfWeek.Friday => (DayType.Friday, DayDefinition.Day),
+            DayOfWeek.Saturday =>  (DayType.Saturday, DayDefinition.Day),
+            DayOfWeek.Sunday => (DayType.Sunday, DayDefinition.Day),
+            _ => (dateValue, DayDefinition.Unknown)
         };
         
     }
 }
-

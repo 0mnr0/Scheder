@@ -129,7 +129,8 @@ public class TokenPreFetch
             List<string> parseDatesList = [DayType.Today, DayType.Tomorrow];
             foreach (var parseDate in parseDatesList)
             {
-                var day = await GetSched.GetDay(copyObject.Id, parseDate, null, copyObject.IsGroup);
+                var dateObject = (parseDate, DayDefinition.Day);
+                var day = await GetSched.GetDay(copyObject.Id, dateObject, null, copyObject.IsGroup);
                 await GetSched.GetSchedAndExams(copyObject.Id, day, fromGroup: copyObject.IsGroup, recommendedToken: token);
             }
         }

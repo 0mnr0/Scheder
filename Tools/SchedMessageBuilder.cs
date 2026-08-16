@@ -31,6 +31,7 @@ public abstract class SchedMessageBuilder
             }
 
             if (asChange) { showDateInTitle = true;}
+            if (day.ExactDate) { showDateInTitle = true;}
             var displayWeek = day.IsWeek;
             var dayName = showDateInTitle ? day.dayDisplay : DateExtractor.GetDayName(day.dayDisplay);
             var dateDisplay = (displayWeek ? $"{day.StartDate} — {day.EndDate}" : day.StartDate).Replace("-", ".");

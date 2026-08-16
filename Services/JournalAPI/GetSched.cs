@@ -9,13 +9,13 @@ public class GetSched
 {
     private const MetricType Metric = MetricType.Analyze;
     private const MetricType MetricParse = MetricType.DataParse;
-    public static async Task<BestDayOption.BestDayParseResult> GetDay(long uid, string day, PerformanceMetric? metric, bool fromGroup=false, bool ignoreEarlyDay = false)
+    public static async Task<BestDayOption.BestDayParseResult> GetDay(long uid, (string, string) day, PerformanceMetric? metric, bool fromGroup=false, bool ignoreEarlyDay = false)
     {
         using (metric?.Measure(Metric)) {
             return await BestDayOption.Get(uid, day, fromGroup, ignoreEarlyDay);
         }
     }
-    public static async Task<BestDayOption.BestDayParseResult> GetForcedDay(long uid, string day, PerformanceMetric? metric, bool fromGroup=false)
+    public static async Task<BestDayOption.BestDayParseResult> GetForcedDay(long uid, (string, string) day, PerformanceMetric? metric, bool fromGroup=false)
     {
         
         using (metric?.Measure(Metric)) {
