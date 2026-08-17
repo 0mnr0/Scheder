@@ -23,9 +23,10 @@ public class datewatch : ICommand {
         var whoAsked = message.From!.Id;
         var isGroup = ChatTools.IsGroup(message);
         var threadId = ChatTools.GetForumId(message);
-        var isPrivateChat = ChatTools.IsPrivateChat(message);
-
-        if (isGroup && !await ChatTools.IsUserAdmin(bot, chatId, whoAsked)) {
+        var isUserNotAllowed = isGroup && !Behaviour.Groups.AllowNonAdminsToDateWatch && !await ChatTools.IsUserAdmin(bot, chatId, whoAsked);
+        // asking user is in group && this command is not allowed to run for usual users && he is not admin
+        
+        if (isGroup && isUserNotAllowed) {
             var msg = await bot.SendMessage(
                 chatId: chatId,
                 "Эту команду можно выполнять только администраторам группы!",

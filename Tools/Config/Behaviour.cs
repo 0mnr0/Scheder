@@ -5,6 +5,7 @@ public abstract class Behaviour {
     public abstract class Groups {
         public static readonly bool AllowWeatherImageOutput = true;
         public static readonly bool AllowSendingResponseSpeed = true; // Sends response time to specific UID (as new ephemeral message (visible for this ID only))
+        public static readonly bool AllowNonAdminsToDateWatch = true; // Defines, is usual users is allowed to use /datewatch command
     }
     
     public abstract class Users {
@@ -18,7 +19,7 @@ public abstract class Behaviour {
         
         public static bool AllowScheduleCaching = true; // enable caching system for schedule
         public static bool AllowWeatherCaching = true; // enable caching system for weather
-        public static bool AllowTokenCaching = true; // enable caching system for weather
+        public static bool AllowTokenCaching = true; // enable caching system for auth token
         
         public static readonly int ScheduleCachingTime = 20; // [20 Minutes] How long is the schedule cache considered relevant
         public static readonly int WeatherCachingTime = 20; // [20 Minutes] How long is the weather cache considered relevant

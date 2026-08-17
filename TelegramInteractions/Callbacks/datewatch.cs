@@ -1,8 +1,8 @@
-﻿using System.Buffers;
-using Scheder.Services.DateWatcher;
+﻿using Scheder.Services.DateWatcher;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
+using Scheder.Tools.Config;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -23,8 +23,9 @@ public class datewatch : ICallbackCommand {
         var isAdmin = await ChatTools.IsUserAdmin(bot, chatId, whoAsked);
         var action = args[0]; // [RM - Remove, CM - Confirm]
         var targetDate = args[1];
+        var isUserNotAllowed = isGroup && !Behaviour.Groups.AllowNonAdminsToDateWatch && !isAdmin;
 
-        if (isGroup && !isAdmin) {
+        if (isGroup && !isUserNotAllowed) {
             await bot.AnswerCallbackQuery(
                 callbackQueryId: callbackQuery.Id,
                 text: "Вы должны быть администратором в группе для выполнения этой команды!",
@@ -84,7 +85,7 @@ public class datewatch : ICallbackCommand {
                             cancellationToken: cancellationToken);
                     }
                 }
-                catch (Exception _) {
+                catch (Exception) {
                     // ignored
                 }
 
