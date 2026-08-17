@@ -26,4 +26,5 @@ public abstract class Behaviour {
 
 
     public static readonly string[] NonRegisteredUserCanInteractOnlyWithThisCommands = ["/start", "/auth"];
+    public static readonly int MaxDayListenersPerChat = 3;
 }

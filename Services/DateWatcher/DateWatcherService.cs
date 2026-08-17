@@ -81,12 +81,14 @@ public class DateWatcherService {
             Logger.Log.Information("[DateWatcher | {Uid} (isGroup: {IsGroup}] New HashCode: {NewHashCode})", uid, isGroup, newHashCode);
             
             await SchedHandler.ExecuteAsync(_bot, uid, dayList.ThreadId, msgText, _bot.GlobalCancelToken);
-            
-            await memorySource.UpdateDayListener(uid, new Memory.DayListener {
-                Date = dayList.Date,
-                Hash = dayList.Hash,
-                ThreadId = dayList.ThreadId
-            });
+
+            if (!dayHash.Equals("None")) { // skips first notification
+                await memorySource.UpdateDayListener(uid, new Memory.DayListener {
+                    Date = dayList.Date,
+                    Hash = newHashCode,
+                    ThreadId = dayList.ThreadId
+                });
+            }
 
         }
     }

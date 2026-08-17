@@ -153,7 +153,7 @@ public static class Memory
 
     private static async Task<DayListener> AddDayListenerCoreAsync(string table, string idColumn, long id, string date, int? threadId = null)
     {
-        var listener = new DayListener { Date = date, Hash = Guid.NewGuid().ToString("N"), ThreadId = threadId };
+        var listener = new DayListener { Date = date, Hash = "None", ThreadId = threadId };
         var json = JsonSerializer.Serialize(listener);
 
         await ExecuteNonQuery(
