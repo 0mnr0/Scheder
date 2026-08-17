@@ -31,7 +31,7 @@ div.background {
 
 div.background img[bg] {
     position: absolute;
-    left: 50%;
+    left: calc(50% + 3px);
     top: -100%;
     filter: blur(10px) brightness(0.5);
     transform: scale(8);
@@ -65,16 +65,31 @@ img[visible] {
 }
 
 div.weather {
-    width: 360px;
+    width: 365px;
     height: 80px;
     gap: 7px;
     display: flex;
     justify-content: space-evenly;
     flex-direction: row;
-    padding: 5px;
-    padding-left: 7px;
+    padding: 5px 5px 3px;
 }
 
+body.list div.weather {
+    width: fit-content;
+    height: fit-content;
+    flex-direction: column;
+    padding: 0;
+}
+
+body.list {
+    flex-direction: row;
+    gap: 10px 8px;
+}
+
+body.list div.weather div.display {
+    height: 80px;
+    width: 179px;
+}
 
 div.weather div.display {
     display: flex;

@@ -17,14 +17,14 @@
   --mouse-x: 0px;
   --mouse-y: 0px;
   
-  --radius: 200px; 
+  --radius: 100px; 
   
   transition: --radius 0.3s ease-out !important;
 
   mask-image:
     radial-gradient(circle var(--radius) at var(--mouse-x) var(--mouse-y), transparent 60%, #000 100%),
-    linear-gradient(90deg, #000 50%, rgb(0 0 0 / 20%) 0),
-    linear-gradient(#000 50%, rgb(0 0 0 / 20%) 0);
+    linear-gradient(90deg, #000 50%, rgb(0 0 0 / 15%) 0),
+    linear-gradient(#000 50%, rgb(0 0 0 / 15%) 0);
 
   mask-size: 
     100% 100%, 
