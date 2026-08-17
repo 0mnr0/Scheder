@@ -78,16 +78,16 @@ public class DateWatcherService {
             var newHashCode = CodeBunch.GetTextHash(msgText);
             
             if (newHashCode.Equals(dayHash)) {return;} // nothing changed
-            Logger.Log.Information("[DateWatcher | {Uid} (isGroup: {IsGroup}] New HashCode: {NewHashCode})", uid, isGroup, newHashCode);
+            Logger.Log.Information("[DateWatcher | {Uid} (isGroup: {IsGroup})] Parsed HashCode: {NewHashCode} | Old HashCode: {oldHash}", uid, isGroup, newHashCode, dayHash);
             
-            await SchedHandler.ExecuteAsync(_bot, uid, dayList.ThreadId, msgText, _bot.GlobalCancelToken);
+            await memorySource.UpdateDayListener(uid, new Memory.DayListener {
+                Date = dayList.Date, 
+                Hash = newHashCode,
+                ThreadId = dayList.ThreadId
+            });
 
             if (!dayHash.Equals("None")) { // skips first notification
-                await memorySource.UpdateDayListener(uid, new Memory.DayListener {
-                    Date = dayList.Date,
-                    Hash = newHashCode,
-                    ThreadId = dayList.ThreadId
-                });
+                await SchedHandler.ExecuteAsync(_bot, uid, dayList.ThreadId, msgText, _bot.GlobalCancelToken);
             }
 
         }

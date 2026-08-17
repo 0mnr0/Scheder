@@ -59,5 +59,5 @@ public class UserSource : IEntitySource {
         Memory.User.UpdateDayListener(uid, date, newHash);
     
     public Task UpdateDayListener(long uid, Memory.DayListener listener) =>
-        Memory.Group.UpdateDayListener(uid, listener);
+        Memory.User.UpdateDayListener(uid, listener);
 }
