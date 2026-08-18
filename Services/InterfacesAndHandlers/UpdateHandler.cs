@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using Scheder.Tools.Config;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -32,6 +33,8 @@ public class UpdateHandler : IUpdateHandler
             switch (update.Type)
             {
                 case UpdateType.Message when update.Message != null:
+                    if (Env.ProdPrepare && update.Message.From != null && update.Message.From.Id != Env.DebugUid) return;
+                    
                     await _commandHandler.HandleAsync(
                         botClient,
                         update.Message,
@@ -39,6 +42,8 @@ public class UpdateHandler : IUpdateHandler
                     break;
 
                 case UpdateType.CallbackQuery:
+                    if (Env.ProdPrepare && update.CallbackQuery?.From != null && update.CallbackQuery.From.Id != Env.DebugUid) return;
+                    
                     await _callbackInterface.HandleCallbackAsync(
                         botClient,
                         update,

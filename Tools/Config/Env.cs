@@ -25,9 +25,8 @@ public class Env
 
     // OTHER
     public static readonly bool TalkativePerformance = GetBool("FastStart");
+    public static readonly bool ProdPrepare = GetBool("ProdPrepare");
     
-
-
 
 
 
