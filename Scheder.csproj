@@ -43,5 +43,9 @@
       <HintPath>Tools\Proxy\Socks5E-LIB.dll</HintPath>
     </Reference>
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Services\TheMascot\icons\" />
+  </ItemGroup>
 
 </Project>
