@@ -30,6 +30,7 @@ public class BotRunner {
         CachedWeatherService.StartCleanupThread();
 
         await WebRender.EnsureInitializedAsync();
+        WebRender.PrewarmWeatherPage();
         DetectionContextRatio.InitEmbedded("Scheder.Services.ContextDetection.dataset.onnx");
         await PreFetchLoad.Run();
         Log.Information("Materials is ready, bot can run perfectly prepared now!");

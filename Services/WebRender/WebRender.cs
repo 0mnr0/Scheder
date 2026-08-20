@@ -1,17 +1,18 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using Scheder.Services.Weather;
 using Scheder.Tools;
 
 namespace Scheder.Services.WebRender;
 public class WebRender
 {
-    private static MetricType _metric = MetricType.WeatherRender;
+    private static readonly MetricType Metric = MetricType.WeatherRender;
     private static IPlaywright? _playwright;
     private static IBrowser? _browser;
     private static IBrowserContext? _context;
     private static readonly SemaphoreSlim Lock = new(1, 1);
+    
+    private static Task<IPage>? _pendingWeatherPage;
+    private static readonly Lock PendingPageGate = new();
 
     public static async Task EnsureInitializedAsync()
     {
@@ -65,15 +66,42 @@ public class WebRender
         return page;
     }
 
+    private static async Task<IPage> PrepareWeatherPageAsync()
+    {
+        var dir = RenderMaterialsExtractor.Extract();
+        var indexPath = Path.Combine(dir, "weather.html");
+
+        var page = await OpenLocalFileAsync(indexPath, true);
+        await page.EvaluateAsync("runProd()");
+        return page;
+    }
+
+    private static Task<IPage> RentWeatherPageAsync()
+    {
+        Task<IPage> task;
+        lock (PendingPageGate)
+        {
+            task = _pendingWeatherPage ??= PrepareWeatherPageAsync();
+            _pendingWeatherPage = null;
+        }
+        return task;
+    }
+    
+    private static void ScheduleNextWeatherPage()
+    {
+        lock (PendingPageGate)
+        {
+            _pendingWeatherPage ??= PrepareWeatherPageAsync();
+        }
+    }
+    
+    public static void PrewarmWeatherPage() => ScheduleNextWeatherPage();
+
     public static async Task<List<byte[]>> RenderWeather(List<WeatherAPI.WeatherObject> weather, PerformanceMetric? metric)
     {
-        using (metric?.Measure(_metric)) {
-            var dir = RenderMaterialsExtractor.Extract();
-            var indexPath = Path.Combine(dir, "weather.html");
-
-            var page = await OpenLocalFileAsync(indexPath, true);
+        using (metric?.Measure(Metric)) {
+            var page = await RentWeatherPageAsync();
             try {
-                await page.EvaluateAsync(@"runProd()", null);
                 await page.EvaluateAsync(@"weather => updateWeather(weather)", weather);
 
                 var element = page.Locator("#FirstTarget");
@@ -91,6 +119,7 @@ public class WebRender
             }
             finally {
                 await page.CloseAsync();
+                ScheduleNextWeatherPage();
             }
         }
     }
@@ -109,5 +138,10 @@ public class WebRender
         }
         _playwright?.Dispose();
         _playwright = null;
+
+        lock (PendingPageGate)
+        {
+            _pendingWeatherPage = null;
+        }
     }
 }
