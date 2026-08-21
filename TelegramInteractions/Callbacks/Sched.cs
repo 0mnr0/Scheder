@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using Scheder.Commands;
+using JetBrains.Annotations;
 using Scheder.Services.ContextDetection;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
@@ -13,11 +13,10 @@ using Telegram.Bot.Types;
 
 namespace Scheder.TelegramInteractions.Callbacks;
 
-
+[UsedImplicitly]
 [Callback("sched", IgnoreSplitter=false)]
-public class sched : ICallbackCommand
+public class Sched : ICallbackCommand
 {
-    private readonly Sched _schedCommand = new();
     
     public async Task ExecuteAsync(
         ITelegramBotClient bot,
@@ -25,7 +24,6 @@ public class sched : ICallbackCommand
         string[] args,
         CancellationToken cancellationToken)
     {
-        var whoAsking = callbackQuery.From.Id;
         var message = callbackQuery.Message!;
         var chatId = message.Chat.Id;
         var isGroup = ChatTools.IsGroup(message);
@@ -51,8 +49,8 @@ public class sched : ICallbackCommand
         
         var day = DateExtractor.GetForcedDay(targetDay);
         var dayParseResult = await GetSched.GetForcedDay(chatId, day, null, isGroup);
-        if (args[0] == "1") {dayParseResult.dayDisplay = DayType.Tomorrow;}
-        if (args[0] == "2") {dayParseResult.dayDisplay = DayType.ReTomorrow;}
+        if (args[0] == "1") {dayParseResult.DayDisplay = DayType.Tomorrow;}
+        if (args[0] == "2") {dayParseResult.DayDisplay = DayType.ReTomorrow;}
         var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken);
         var (schedule, exams, _) = await GetSched.GetSchedAndExams(chatId, dayParseResult, isGroup);
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
@@ -110,7 +108,7 @@ public class sched : ICallbackCommand
                 Media = mediaList
             };
 
-            currentMessage = await bot.EditMessageText(chatId, currentMessage.Id, null, richMessage: irm, cancellationToken: cancellationToken);
+            await bot.EditMessageText(chatId, currentMessage.Id, null, richMessage: irm, cancellationToken: cancellationToken);
             
             if (!useCache) {
                 await Weather.SetRichImageUrls(
@@ -121,10 +119,6 @@ public class sched : ICallbackCommand
                 );
             }
         }
-
-
-
-        //await _schedCommand.ExecuteAsync(bot, message, ["forceDate", targetDay], cancellationToken);
     }
 
 

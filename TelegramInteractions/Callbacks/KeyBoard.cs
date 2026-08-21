@@ -19,7 +19,7 @@ public class KeyBoard : ICallbackCommand
         var isMsgDelete = args[0] == "deleteMsg";
         var isEphMsgDelete = args[0] == "deleteEphMsg";
 
-        if (isDelete)
+        if (isDelete && callbackQuery.Message is not null)
         {
             await bot.EditMessageReplyMarkup(
                 callbackQuery.Message.Chat.Id,
@@ -27,7 +27,7 @@ public class KeyBoard : ICallbackCommand
                 cancellationToken: cancellationToken);
         }
         
-        if (isMsgDelete)
+        if (isMsgDelete && callbackQuery.Message is not null)
         {
             await bot.DeleteMessage(
                 callbackQuery.Message.Chat.Id,
@@ -35,7 +35,7 @@ public class KeyBoard : ICallbackCommand
                 cancellationToken: cancellationToken);
         }
         
-        if (isEphMsgDelete)
+        if (isEphMsgDelete && callbackQuery.Message is not null)
         {
             await bot.DeleteEphemeralMessage(
                 chatId:callbackQuery.Message.Chat.Id,

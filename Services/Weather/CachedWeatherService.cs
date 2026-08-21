@@ -7,7 +7,7 @@ public abstract class CachedWeatherService
 {
     public class WeatherCacheEntry
     {
-        public List<WeatherAPI.WeatherObject> Parsed { get; set; }
+        public required List<WeatherAPI.WeatherObject> Parsed { get; init; }
         public DateTime Update { get; init; }
         public List<byte[]>? RichImages { get; set; }
     }

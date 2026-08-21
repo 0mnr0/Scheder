@@ -1,4 +1,5 @@
-﻿using Scheder.Services.InterfacesAndHandlers;
+﻿using JetBrains.Annotations;
+using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Telegram.Bot;
@@ -8,8 +9,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Scheder.TelegramInteractions.Commands;
 
+[UsedImplicitly]
 [Command("/gmt")]
-public class gmt : ICommand
+public class Gmt : ICommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,
@@ -17,11 +19,8 @@ public class gmt : ICommand
         string[] args,
         CancellationToken cancellationToken)
     {
-        var msg = message;
-        
-        
         if (!ChatTools.IsPrivateChat(message)) {
-            await bot.SendMessage(msg.Chat.Id, "Эта функция настраивается в личных сообщениях тем, кто привязал группу.", cancellationToken: cancellationToken);
+            await bot.SendMessage(message.Chat.Id, "Эта функция настраивается в личных сообщениях тем, кто привязал группу.", cancellationToken: cancellationToken);
             return;
         }
 
@@ -63,7 +62,7 @@ public class gmt : ICommand
             ]
         ]);
         await bot.SendMessage(
-            msg.Chat.Id,
+            message.Chat.Id,
             MDTools.EscapeMarkdownV2($"<b>Какое у вас время?</b>\n00:{currentMinutes}"),
             replyMarkup: keyboard,
             parseMode: ParseMode.Html,

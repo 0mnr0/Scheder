@@ -1,4 +1,5 @@
-﻿using Scheder.Services.ContextDetection;
+﻿using JetBrains.Annotations;
+using Scheder.Services.ContextDetection;
 using Scheder.Services.Database;
 using Scheder.Services.DateWatcher;
 using Scheder.Services.InterfacesAndHandlers;
@@ -12,8 +13,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Scheder.TelegramInteractions.Commands;
 
+[UsedImplicitly]
 [Command("/datewatch")]
-public class datewatch : ICommand {
+public class Datewatch : ICommand {
     
     public async Task ExecuteAsync(ITelegramBotClient bot, Message message, string[] args, CancellationToken cancellationToken) {
         if (message.Text is null) return;

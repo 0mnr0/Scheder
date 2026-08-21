@@ -3,7 +3,7 @@
 public class Soul {
     private const int UpdateTimeCheck = 10;
     private static bool _onStartupTimeSkipped;
-    private static string CurrentState;
+    private static string _currentState = string.Empty;
     
     private static class Feelings {
         public static double Happiness = 66; // 0 - Bad Mood, 100 - Absolute happiness
@@ -42,17 +42,17 @@ public class Soul {
         var now = DateTime.Now;
         var hour = now.Hour;
 
-        CurrentState = hour switch {
+        _currentState = hour switch {
             0 => MascotStates.DailyActions.WannaSleep,
             1 or 2 or 3 or 4 or 5 or 6 => MascotStates.DailyActions.Sleeping,
             7 or 8 => MascotStates.DailyActions.WakingUp,
             9 or 10 or 11 or 12 or 13 or 14 or 15 or 16 or 17 or 18 or 19 or 20 => MascotStates.DailyActions.Active,
             21 or 22 => MascotStates.DailyActions.Tired,
             23 => MascotStates.DailyActions.WannaSleep,
-            _ => CurrentState
+            _ => _currentState
         };
 
-        switch (CurrentState) {
+        switch (_currentState) {
             case "Sleeping":
                 Feelings.Fatigue -= 3;
                 Feelings.Happiness += 2.5;

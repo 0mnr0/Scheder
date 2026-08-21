@@ -4,7 +4,7 @@
 public class CallbackAttribute : Attribute
 {
     public string[] Names { get; }
-    public bool IgnoreSplitter { get; set; } = false;
+    public bool IgnoreSplitter { get; set; }
 
     public CallbackAttribute(params string[] names)
     {

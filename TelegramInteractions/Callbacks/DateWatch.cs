@@ -1,4 +1,5 @@
-﻿using Scheder.Services.DateWatcher;
+﻿using JetBrains.Annotations;
+using Scheder.Services.DateWatcher;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
@@ -9,9 +10,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Scheder.TelegramInteractions.Callbacks;
 
-
+[UsedImplicitly]
 [Callback("datewatch", IgnoreSplitter=false)]
-public class datewatch : ICallbackCommand {
+public class DateWatch : ICallbackCommand {
     
     public async Task ExecuteAsync(ITelegramBotClient bot, CallbackQuery callbackQuery, string[] args,
         CancellationToken cancellationToken) {

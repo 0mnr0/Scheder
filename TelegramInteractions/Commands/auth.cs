@@ -1,4 +1,5 @@
-﻿using Scheder.Services.Database;
+﻿using JetBrains.Annotations;
+using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
 using Scheder.TelegramInteractions.Attributes;
@@ -10,9 +11,9 @@ using static Scheder.Tools.MDTools;
 
 namespace Scheder.TelegramInteractions.Commands;
 
-
+[UsedImplicitly]
 [Command("/auth")]
-public class auth : ICommand
+public class Auth : ICommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,

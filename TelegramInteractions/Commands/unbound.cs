@@ -1,4 +1,5 @@
-﻿using Scheder.Services.Database;
+﻿using JetBrains.Annotations;
+using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
@@ -9,9 +10,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Scheder.TelegramInteractions.Commands;
 
-
+[UsedImplicitly]
 [Command("/unbound")]
-public class unbound : ICommand
+public class Unbound : ICommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,

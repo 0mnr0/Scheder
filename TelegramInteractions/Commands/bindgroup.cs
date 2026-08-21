@@ -1,4 +1,5 @@
-﻿using Scheder.Services.Database;
+﻿using JetBrains.Annotations;
+using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
@@ -10,8 +11,9 @@ using static Scheder.Tools.MDTools;
 
 namespace Scheder.TelegramInteractions.Commands;
 
+[UsedImplicitly]
 [Command("/bindgroup")]
-public class bindgroup : ICommand
+public class Bindgroup : ICommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,

@@ -33,7 +33,7 @@ public abstract class SchedMessageBuilder
             if (asChange) { showDateInTitle = true;}
             if (day.ExactDate) { showDateInTitle = true;}
             var displayWeek = day.IsWeek;
-            var dayName = showDateInTitle ? day.dayDisplay : DateExtractor.GetDayName(day.dayDisplay);
+            var dayName = showDateInTitle ? day.DayDisplay : DateExtractor.GetDayName(day.DayDisplay);
             var dateDisplay = (displayWeek ? $"{day.StartDate} — {day.EndDate}" : day.StartDate).Replace("-", ".");
 
             var (lessons, exams) = ParseAndSort(raw, rawExamList, day);
@@ -134,7 +134,7 @@ public abstract class SchedMessageBuilder
             }
 
             if (day.IsEarlyDayMoveFix) {
-                var dayTarget = DateExtractor.GetDayName(day.dayType);
+                var dayTarget = DateExtractor.GetDayName(day.DayType);
                 messageText.Append($"""
                                     <details>
                                         <summary> ⚠️ Внимание! </summary>

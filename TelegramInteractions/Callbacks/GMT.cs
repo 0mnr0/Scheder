@@ -1,4 +1,5 @@
-﻿using Scheder.Services.Database;
+﻿using JetBrains.Annotations;
+using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Telegram.Bot;
@@ -9,9 +10,9 @@ using static Scheder.Tools.MDTools;
 
 namespace Scheder.TelegramInteractions.Callbacks;
 
-
+[UsedImplicitly]
 [Callback("gmt", IgnoreSplitter=false)]
-public class GMT : ICallbackCommand
+public class Gmt : ICallbackCommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,
@@ -105,7 +106,7 @@ public class GMT : ICallbackCommand
                 replyMarkup: keyboard,
                 cancellationToken: cancellationToken);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await bot.AnswerCallbackQuery(
                 callbackQueryId: callbackQuery.Id,
@@ -116,23 +117,12 @@ public class GMT : ICallbackCommand
     }
     
     
-    private async Task DeleteMessage(ITelegramBotClient bot, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    private static async Task DeleteMessage(ITelegramBotClient bot, CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
         if (callbackQuery.Message != null)
             await bot.DeleteMessage(
                 chatId: callbackQuery.Message.Chat.Id,
                 messageId: callbackQuery.Message.MessageId,
                 cancellationToken: cancellationToken);
-    }
-    
-    private async Task OutOfBound(ITelegramBotClient bot, CallbackQuery callbackQuery, CancellationToken cancellationToken, bool IsAboveLimit)
-    {
-
-        var limitType = IsAboveLimit ? "верхнюю " : "нижнюю";
-        await bot.AnswerCallbackQuery(
-            callbackQueryId: callbackQuery.Id,
-            text: $"Вы пытаетесь выйти за {limitType} границу",
-            cancellationToken: cancellationToken
-        );
     }
 }

@@ -1,4 +1,5 @@
-﻿using Scheder.Services.Database;
+﻿using JetBrains.Annotations;
+using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
@@ -8,8 +9,10 @@ using Telegram.Bot.Types.Enums;
 
 namespace Scheder.TelegramInteractions.Commands;
 
+
+[UsedImplicitly]
 [Command("/start")]
-public class start : ICommand
+public class Start : ICommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,
@@ -27,7 +30,7 @@ public class start : ICommand
 
 
         var wasRegistered = await Memory.User.IsUserExistsAsync((long) whoAsking);
-        var isGroup = ChatTools.IsForum(message);
+        // var isGroup = ChatTools.IsForum(message);
 
         var txt = $"""
                    Доброе время суток! Это бот для получения расписания для Top-Academy. Чтобы начать работать с ботом, пожалуйста пришлите ваш логин и пароль в формате:

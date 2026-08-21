@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection.Metadata;
+using JetBrains.Annotations;
 using Scheder.Services.ContextDetection;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
@@ -11,9 +12,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Scheder.TelegramInteractions.Commands;
 
-
+[UsedImplicitly]
 [Command("/exams")]
-public class exams : ICommand
+public class Exams : ICommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,
@@ -32,7 +33,7 @@ public class exams : ICommand
         var exams = await GetSched.GetExamsFromApi(chatId, dayParseResult, isGroup);
         var messageText = SchedMessageBuilder.BuildExams(exams, dayParseResult, isStandalone: true, showDates: true);
         
-        var currentMessage = await bot.SendRichMessage(
+        await bot.SendRichMessage(
             chatId: chatId,
             messageThreadId: ChatTools.GetForumId(message),
             richMessage: new InputRichMessage { Html = messageText },

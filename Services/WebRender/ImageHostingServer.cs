@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using static Scheder.Tools.Logger;
+using static Tools.Logger;
 
 public class ImageHostingServer
 {
@@ -42,7 +42,7 @@ public class ImageHostingServer
         Listener.Stop();
 
         foreach (var kv in Images)
-            kv.Value.ExpirationTimer.Dispose();
+            kv.Value.ExpirationTimer?.Dispose();
         Images.Clear();
     }
 
@@ -59,7 +59,7 @@ public class ImageHostingServer
                 Log.Verbose("[ImageServer] request for id={Id}, known ids: {Join}", id, string.Join(",", Images.Keys));
                 if (Images.TryRemove(id, out var removed))
                 {
-                    removed.ExpirationTimer.Dispose();
+                    removed.ExpirationTimer?.Dispose();
                 }
             }, null, Lifetime, Timeout.InfiniteTimeSpan)
         };
@@ -104,6 +104,7 @@ public class ImageHostingServer
                 {
                     ctx.Response.ContentType = "image/png";
                     ctx.Response.StatusCode = 200;
+                    if (stored.Data == null) return;
                     ctx.Response.ContentLength64 = stored.Data.Length;
                     ctx.Response.OutputStream.Write(stored.Data, 0, stored.Data.Length);
                 }

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Scheder.Commands;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.TelegramInteractions.Commands.Other;
 using Scheder.Tools;

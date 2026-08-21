@@ -24,15 +24,15 @@ public static class BestDayOption
             // Поэтому фикс прост - если запрос пришёл до 2‑х (01:59 actually) часов ночи - сделать так, чтобы был сдвиг на один день назад
             date = date.AddDays(-1);
             
-            response.dayDiff = day switch {
+            response.DayDiff = day switch {
                 DayType.Tomorrow => 1,
                 DayType.ReTomorrow => 2,
-                _ => response.dayDiff
+                _ => response.DayDiff
             };
-            response.dayDisplay = day switch {
+            response.DayDisplay = day switch {
                 DayType.Tomorrow => DayType.Today,
                 DayType.ReTomorrow => DayType.Tomorrow,
-                _ => response.dayDisplay
+                _ => response.DayDisplay
             };
             
             response.IsEarlyDayMoveFix = true;
@@ -111,9 +111,9 @@ public static class BestDayOption
         
         response.StartDate = response.DateStart.ToString("yyyy-MM-dd");
         response.EndDate = response.DateEnd.ToString("yyyy-MM-dd");
-        if (!response.IsEarlyDayMoveFix) response.dayDisplay = day;
-        response.dayParsedName = DateExtractor.GetDayName(day);
-        response.dayType = day;
+        if (!response.IsEarlyDayMoveFix) response.DayDisplay = day;
+        response.DayParsedName = DateExtractor.GetDayName(day);
+        response.DayType = day;
         
         return response;
     }
@@ -131,10 +131,10 @@ public static class BestDayOption
         var dayDisplay = Declensions.GetDeclensionDayTitle(dTime);
 
         return new BestDayParseResult {
-            dayType = dayName,
-            dayParsedName = dayDisplay,
-            dayDisplay = dayDisplay,
-            dayDiff = 0,
+            DayType = dayName,
+            DayParsedName = dayDisplay,
+            DayDisplay = dayDisplay,
+            DayDiff = 0,
             StartDate = date,
             EndDate = date,
             DateStart = dTime,
@@ -166,10 +166,10 @@ public static class BestDayOption
         );
         
         return new BestDayParseResult {
-            dayType = dayName,
-            dayParsedName = DateExtractor.GetDayName(dayName),
-            dayDisplay = date,
-            dayDiff = 0,
+            DayType = dayName,
+            DayParsedName = DateExtractor.GetDayName(dayName),
+            DayDisplay = date,
+            DayDiff = 0,
             StartDate = date,
             EndDate = date,
             DateStart = dTime,
@@ -183,18 +183,17 @@ public static class BestDayOption
     
 
 
-    public class BestDayParseResult
-    {
-        public string dayType { get; set; }
-        public string dayParsedName { get; set; } = "";
-        public string dayDisplay { get; set; } = "";
-        public int dayDiff { get; set; } = 0;
-        public string StartDate { get; set; } = "";
-        public string EndDate { get; set; } = "";
+    public class BestDayParseResult {
+        public string DayType { get; set; } = string.Empty;
+        public string DayParsedName { get; set; } = string.Empty;
+        public string DayDisplay { get; set; } = string.Empty;
+        public int DayDiff { get; set; }
+        public string StartDate { get; set; } = string.Empty;
+        public string EndDate { get; set; } = string.Empty;
         public DateTime DateStart { get; set; }
         public DateTime DateEnd { get; set; }
         public bool IsWeek { get; set; }
         public bool IsEarlyDayMoveFix { get; set; }
-        public bool ExactDate { get; set; } = false;
+        public bool ExactDate { get; init; }
     }
 }

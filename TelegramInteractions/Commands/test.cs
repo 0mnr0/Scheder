@@ -1,13 +1,14 @@
-﻿using Scheder.Services.InterfacesAndHandlers;
+﻿using JetBrains.Annotations;
+using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Scheder.TelegramInteractions.Commands;
 
-
+[UsedImplicitly]
 [Command("/test")]
-public class test : ICommand
+public class Test : ICommand
 {
     public async Task ExecuteAsync(
         ITelegramBotClient bot,

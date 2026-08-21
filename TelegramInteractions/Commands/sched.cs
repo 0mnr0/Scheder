@@ -83,7 +83,7 @@ public class Sched : ICommand
         if (dayParseResult.IsEarlyDayMoveFix) {
             keyboard = new InlineKeyboardMarkup([
                 [
-                    new InlineKeyboardButton($"Показать на {dayParseResult.dayParsedName}")
+                    new InlineKeyboardButton($"Показать на {dayParseResult.DayParsedName}")
                         { CallbackData = $"sched:To:{dayParseResult.StartDate}", Style = KeyboardButtonStyle.Danger },
                     new InlineKeyboardButton("Всё супер, закрыть")
                         { CallbackData = $"sched:C", Style = KeyboardButtonStyle.Primary }
