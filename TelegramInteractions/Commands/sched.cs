@@ -224,9 +224,8 @@ public class Sched : ICommand
 ///////////////////////////////////////////////////////////////
         async Task SetDraft(string draft, ChatAction action)
         {
-            if (!allowDraft) {return;}
-            
             using (metric.Measure(MetricType.Draft)) {
+                if (!allowDraft) {return;}
                 await draftToken.CancelAsync();
                 draftToken = new CancellationTokenSource();
 
