@@ -27,11 +27,11 @@ public class RunConfig
         }
         
         if (
-            string.IsNullOrEmpty(Env.DB_HOST)
-            || Env.DB_PORT is null || Env.DB_PASS == string.Empty
-            || Env.DB_NAME is null || Env.DB_USER == string.Empty
-            || Env.DB_USER is null || Env.DB_PASS == string.Empty
-            || Env.DB_PASS is null || Env.DB_USER == string.Empty
+            string.IsNullOrEmpty(Env.DbHost)
+            || Env.DbPort is null || Env.DbPass == string.Empty
+            || Env.DbName is null || Env.DbUser == string.Empty
+            || Env.DbUser is null || Env.DbPass == string.Empty
+            || Env.DbPass is null || Env.DbUser == string.Empty
             )
         {
             isFatal = true;
@@ -41,8 +41,8 @@ public class RunConfig
         if (!await DatabaseTools.DatabaseExists())
         {
             isFatal = true;
-            Log.Fatal("[Database] Connection to database failed! Reason: \"{DbName}\" not exists!", Env.DB_NAME);
-            Log.Fatal(" -- Fix it with this command: CREATE DATABASE \"{DB_NAME}\"\n", Env.DB_NAME);
+            Log.Fatal("[Database] Connection to database failed! Reason: \"{DbName}\" not exists!", Env.DbName);
+            Log.Fatal(" -- Fix it with this command: CREATE DATABASE \"{DB_NAME}\"\n", Env.DbName);
         }
         
         if (!await PlaywrightInstalled())

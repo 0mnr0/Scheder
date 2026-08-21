@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Scheder.Services.ContextDetection;
+using Scheder.Tools.Config;
 
 namespace Scheder.Tools;
 
@@ -17,7 +18,7 @@ public static class BestDayOption
         var response = new BestDayParseResult();
         
         var date = DateTime.Now;
-        if (day is DayType.Tomorrow or DayType.ReTomorrow && clientHour.Hour <= 1 && !ignoreEarlyDay && !asForced)
+        if (day is DayType.Tomorrow or DayType.ReTomorrow && clientHour.Hour <= Env.EarlyDayFixTrigger && !ignoreEarlyDay && !asForced && !Env.DisableEarlyDayFix)
         {
             // Логика в том, что люди, зачастую, при наступлении нового дня
             // не соображают об этом "сразу" и могут спросить расписание на завтра, когда на самом деле, тот хочет получить расписание на сегодня
