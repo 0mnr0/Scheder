@@ -5,7 +5,7 @@ using static Scheder.Tools.Logger;
 namespace Scheder.TelegramInteractions.Helpers;
 
 public static class EphemeralCommand {
-    public static BotCommand[] CommandsList = [
+    public static readonly BotCommand[] CommandsList = [
         new() {
             Command = "auth",
             Description = "Привязать данные к аккаунту или обновить их"
@@ -24,7 +24,8 @@ public static class EphemeralCommand {
             Description = "Управление и синхронизация времени"
         },
         new() {
-            Command = "help"
+            Command = "help",
+            Description = string.Empty
         },
         new() {
             Command = "unbound",
@@ -39,7 +40,8 @@ public static class EphemeralCommand {
             Description = "Показать пары (аргументы поддерживаются)"
         },
         new() {
-            Command = "start"
+            Command = "start",
+            Description = string.Empty
         }
     ];
 
