@@ -6,6 +6,7 @@ namespace Scheder.Tools.RawTelegramApi;
 public static class RawRichMessage
 {
     private static readonly HttpClient Http = new();
+    private static readonly HttpClient Http1 = new();
 
     public static async Task Edit(long chatId, long messageId, string sentContent, byte[] imageBytes1, byte[] imageBytes2)
     {
@@ -58,24 +59,23 @@ public static class RawRichMessage
             new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
         content.Add(photoContent2, attachFieldName2, "slide2.jpg");
  
-        var response = await Http.PostAsync(
+        await Http.PostAsync(
             $"https://api.telegram.org/bot{Env.TelegramToken}/editMessageText",
             content);
     }
     
     
-    public static async Task DeleteEphemeral(long chat_id, int? ephemeralMessageId, long? receiverUserId = null)
+    public static async Task DeleteEphemeral(long chatId, int? ephemeralMessageId, long? receiverUserId = null)
     {
-        using var http = new HttpClient();
         using var content = new MultipartFormDataContent();
  
-        content.Add(new StringContent(chat_id.ToString()), "chat_id");
-        content.Add(new StringContent(ephemeralMessageId.ToString()), "ephemeral_message_id");
+        content.Add(new StringContent(chatId.ToString()), "chat_id");
+        content.Add(new StringContent(ephemeralMessageId.ToString() ?? ""), "ephemeral_message_id");
  
         if (receiverUserId is not null)
             content.Add(new StringContent(receiverUserId.Value.ToString()), "receiver_user_id");
  
-        var response = await http.PostAsync(
+        await Http1.PostAsync(
             $"https://api.telegram.org/bot{Env.TelegramToken}/deleteEphemeralMessage",
             content);
     }
