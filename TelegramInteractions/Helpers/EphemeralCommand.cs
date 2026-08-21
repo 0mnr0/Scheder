@@ -5,6 +5,8 @@ using static Scheder.Tools.Logger;
 namespace Scheder.TelegramInteractions.Helpers;
 
 public static class EphemeralCommand {
+    public const string EmptySymbol = "ㅤ";
+
     public static readonly BotCommand[] CommandsList = [
         new() {
             Command = "auth",
@@ -25,7 +27,7 @@ public static class EphemeralCommand {
         },
         new() {
             Command = "help",
-            Description = string.Empty
+            Description = EmptySymbol
         },
         new() {
             Command = "unbound",
@@ -41,7 +43,7 @@ public static class EphemeralCommand {
         },
         new() {
             Command = "start",
-            Description = string.Empty
+            Description = EmptySymbol
         }
     ];
 

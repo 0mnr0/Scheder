@@ -23,7 +23,7 @@ public class Help : ICommand
         var text = "<b>Доступные команды</b>:\n\n";
         List<BotCommand> emptyDescList = [];
         foreach (var command in EphemeralCommand.CommandsList) {
-            if (string.IsNullOrEmpty(command.Description)) {
+            if (string.IsNullOrEmpty(command.Description) || command.Description.Equals(EphemeralCommand.EmptySymbol)) {
                 emptyDescList.Add(command);
                 continue;
             }
