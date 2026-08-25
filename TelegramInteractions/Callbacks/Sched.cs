@@ -63,9 +63,9 @@ public class Sched : ICallbackCommand
             cancellationToken: cancellationToken
         );
         
-        var (finalWeather, cachedImgId) = await bgWeatherTask;
-        var useCache = cachedImgId is not null && cachedImgId.Count > 0;
-        if (finalWeather.Count != 0 || useCache && cachedImgId != null) {
+        var (finalWeather, cachedRichMessages) = await bgWeatherTask;
+        var useCache = cachedRichMessages is not null && cachedRichMessages.Count > 0;
+        if (finalWeather.Count != 0 || useCache && cachedRichMessages != null) {
             string newText;
             List<InputRichMessageMedia> mediaList = [];
 
@@ -80,27 +80,34 @@ public class Sched : ICallbackCommand
                 newText = $"""
                            <h5> Погода: </h5> 
                            <tg-slideshow>
-                               <img src="tg://photo?id=w1">
-                               <img src="tg://photo?id=w2">
-                           </tg-slideshow>
                           """;
 
                 
                 if (!useCache) {
-                    var stream1 = new MemoryStream(finalWeather[0]);
-                    var stream2 = new MemoryStream(finalWeather[1]);
-                    mediaList.AddRange(
-                    [
-                        new InputRichMessageMedia
-                            { Id = "w1", Media = new InputMediaPhoto(stream1 )},
-                        new InputRichMessageMedia
-                            { Id = "w2", Media = new InputMediaPhoto(stream2 )},
-                    ]);
+                    var i = -1;
+                    foreach (var weather in finalWeather) {
+                        i++;
+                        var stream = new MemoryStream(weather);
+                        mediaList.Add(
+                            new InputRichMessageMedia
+                            {
+                                Id = $"w{i + 1}",
+                                Media = new InputMediaPhoto(stream)
+                            }
+                        );
+                    }
+                    
                 }
                 else {
-                    mediaList.AddRange(cachedImgId!);
+                    mediaList.AddRange(cachedRichMessages!);
                 }
             }
+            
+            for (var i = 0; i < mediaList.Count; i++)
+            {
+                newText += $"""<img src="tg://photo?id=w{i + 1}">""";
+            }
+            newText += "</tg-slideshow>";
 
             messageText += newText;
             var irm = new InputRichMessage {

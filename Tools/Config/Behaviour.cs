@@ -18,7 +18,7 @@ public abstract class Behaviour {
         public static readonly bool AllowPreFetch = true;
         
         public static bool AllowScheduleCaching = true; // enable caching system for schedule
-        public static bool AllowWeatherCaching = true; // enable caching system for weather
+        public static bool AllowWeatherCaching = false; // enable caching system for weather
         public static bool AllowTokenCaching = true; // enable caching system for auth token
         
         public static readonly int ScheduleCachingTime = 20; // [20 Minutes] How long is the schedule cache considered relevant

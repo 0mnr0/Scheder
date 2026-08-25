@@ -236,32 +236,42 @@ public abstract class SchedMessageBuilder
 
 
     public static InputRichMessage AddWeather(string input, (List<byte[]>, List<InputRichMessageMedia>?) weatherImages, bool isExams = false) {
-        input += """
+        input += $"""
                     <h5> Погода: </h5> 
                     <tg-slideshow>
-                        <img src="tg://photo?id=w1">
-                        <img src="tg://photo?id=w2">
-                    </tg-slideshow>
                  """;
 
         var useCache = weatherImages.Item2 != null;
         
+        
         List<InputRichMessageMedia> mediaList = [];
         if (!useCache) {
             var finalWeather = weatherImages.Item1;
-            var stream1 = new MemoryStream(finalWeather[0]);
-            var stream2 = new MemoryStream(finalWeather[1]);
-            mediaList.AddRange(
-            [
-                new InputRichMessageMedia
-                    { Id = "w1", Media = new InputMediaPhoto(stream1 )},
-                new InputRichMessageMedia
-                    { Id = "w2", Media = new InputMediaPhoto(stream2 )},
-            ]);
+
+
+            var i = -1;
+            foreach (var weather in finalWeather) {
+                i++;
+                var stream = new MemoryStream(weather);
+                mediaList.Add(
+                    new InputRichMessageMedia
+                    {
+                        Id = $"w{i + 1}",
+                        Media = new InputMediaPhoto(stream)
+                    }
+                );
+            }
         }
         else {
             mediaList.AddRange(weatherImages.Item2!);
         }
+        
+        
+        for (var i = 0; i < mediaList.Count; i++)
+        {
+            input += $"""<img src="tg://photo?id=w{i + 1}">""";
+        }
+        input += "</tg-slideshow>";
         
         return new InputRichMessage {
             Html = input,
@@ -411,7 +421,9 @@ public abstract class SchedMessageBuilder
                 return ([], null);
             }
 
-            return (await WebRender.RenderWeather(weatherData, metric), null);
+            
+            var weatherImages = await WebRenderSpecial.RenderWeather(weatherData, metric, dayParse: dayParseResult);
+            return (weatherImages, null);
     }
 
 

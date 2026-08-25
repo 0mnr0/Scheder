@@ -54,6 +54,29 @@ div.background img[bg][accent="4"] {
     opacity: 0.76;
 }
 
+div.background img[bg].big {
+    opacity: 1;
+}
+
+div.display:not(.forceStyles) div.background.AutoFit { filter: none !important; }
+
+div.background.AutoFit img[bg] {
+    width: 100%;
+    height: 100%;
+    filter: none;
+    transform: none !important;
+    left: 0;
+    top: 0;
+}
+
+div.weather.additional  {
+    padding: 5px;
+}
+
+div.weather.additional div.display {
+    padding: 0;
+}
+
 img[visible] {
     position: absolute;
     filter: brightness(0.9);

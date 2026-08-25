@@ -95,7 +95,6 @@ public class RunConfig
                 Headless = true 
             });
             await browser.CloseAsync();
-            Console.WriteLine("ACCESS!");
             return true;
         }
         catch (Exception ex)

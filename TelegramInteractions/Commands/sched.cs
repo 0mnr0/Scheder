@@ -113,6 +113,7 @@ public class Sched : ICommand
             InputRichMessage newRichMessage;
 
             if ((isGroup && !Behaviour.Groups.AllowWeatherImageOutput) || (isPrivateChat && !Behaviour.Users.AllowWeatherImageOutput) || weatherAsText) {
+                // If media's is not allowed
                 var setNewText = await SchedMessageBuilder.BuildWeatherText(chatId, dayParseResult, isGroup);
                 if (setNewText is null) {
                     return;

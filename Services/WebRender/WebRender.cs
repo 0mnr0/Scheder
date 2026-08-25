@@ -1,5 +1,5 @@
-﻿using Microsoft.Playwright;
-using Scheder.Services.Weather;
+﻿using System.Text.Json;
+using Microsoft.Playwright;
 using Scheder.Tools;
 
 namespace Scheder.Services.WebRender;
@@ -31,7 +31,7 @@ public class WebRender
                     "--allow-file-access-from-files",
                     "--disable-site-isolation-trials"
                 ],
-                Headless = true
+                Headless = false
             });
             
             _context = await _browser.NewContextAsync();
@@ -97,28 +97,43 @@ public class WebRender
     
     public static void PrewarmWeatherPage() => ScheduleNextWeatherPage();
 
-    public static async Task<List<byte[]>> RenderWeather(List<WeatherAPI.WeatherObject> weather, PerformanceMetric? metric)
+    public static async Task<List<byte[]>> RenderWeather(WebRenderSpecial.RenderMaterials weather, PerformanceMetric? metric)
     {
         using (metric?.Measure(Metric)) {
             var page = await RentWeatherPageAsync();
             try {
-                await page.EvaluateAsync(@"weather => updateWeather(weather)", weather);
+                var additionalBlocks 
+                    = await page.EvaluateAsync<string[]>(@"async (weather) => { return await updateWeather(weather) }", weather);
 
+                List<byte[]> screenShots = [];
                 var element = page.Locator("#FirstTarget");
                 var firstImage = await element.ScreenshotAsync(new LocatorScreenshotOptions {
                     OmitBackground = true
                 });
+                screenShots.Add(firstImage);
 
                 element = page.Locator("#SecondTarget");
                 var secondImage = await element.ScreenshotAsync(new LocatorScreenshotOptions {
                     OmitBackground = true,
                     Type = ScreenshotType.Png
                 });
+                screenShots.Add(secondImage);
                 
-                return [firstImage, secondImage];
+                foreach (var block in additionalBlocks) {
+                    var specElement = page.Locator(block);
+                    var img = await specElement.ScreenshotAsync(new LocatorScreenshotOptions {
+                        OmitBackground = true,
+                        Type = ScreenshotType.Png
+                    });
+
+                    if (img.Length == 0) { continue; }
+                    screenShots.Add(img);
+                }
+                
+                return screenShots;
             }
             finally {
-                await page.CloseAsync();
+                //await page.CloseAsync();
                 ScheduleNextWeatherPage();
             }
         }
