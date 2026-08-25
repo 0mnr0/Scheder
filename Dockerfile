@@ -1,31 +1,41 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:10.0 AS base
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
 
-RUN apt-get update && apt-get install -y locales \
+COPY *.csproj ./
+RUN dotnet restore
+
+COPY . .
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8 \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    DOTNET_GENERATE_ASPNET_CERTIFICATE=false \
+    DOTNET_NOLOGO=true
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget ca-certificates apt-transport-https gnupg \
+    && wget -q https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \
+    && dpkg -i packages-microsoft-prod.deb \
+    && apt-get update && apt-get install -y --no-install-recommends powershell \
+    && rm -f packages-microsoft-prod.deb \
+    && rm -rf /var/lib/apt/lists/* 
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libglib2.0-0 \
+        locales \
     && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
-    && locale-gen \
+    && locale-gen en_US.UTF-8 \
+    && update-locale LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
+
+RUN pwsh /app/playwright.ps1 install chromium --with-deps \
+    && rm -rf /var/lib/apt/lists/* /tmp/*
 
 USER $APP_UID
-WORKDIR /app
-
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["Scheder.csproj", "./"]
-RUN dotnet restore "Scheder.csproj"
-COPY . .
-WORKDIR "/src/"
-RUN dotnet build "./Scheder.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Scheder.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Scheder.dll"]

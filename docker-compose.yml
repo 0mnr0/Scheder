@@ -8,6 +8,9 @@
       postgres:
         condition: service_healthy
     environment:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PLAYWRIGHT_DRIVER_PATH: /app/.playwright/node/linux-x64/node
+      IS_PROD: true
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
       DB_NAME: ${DB_NAME}
@@ -35,3 +38,4 @@
 
 volumes:
   postgres_data:
+  playwright_cache:

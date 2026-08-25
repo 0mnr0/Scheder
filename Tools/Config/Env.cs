@@ -6,7 +6,7 @@ public class Env
 {
     public static readonly string? TelegramToken = Environment.GetEnvironmentVariable("TG_TOKEN");
     public static readonly string? WeatherApiToken = Environment.GetEnvironmentVariable("Weather_Token") ?? null;
-    public static readonly string? DbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+    public static readonly string? DbHost = GetHost();
     public static readonly string? DbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
     public static readonly string? DbName = Environment.GetEnvironmentVariable("DB_NAME") ?? DatabaseTools.DatabaseName;
     public static readonly string? DbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
@@ -14,6 +14,7 @@ public class Env
     public static readonly string? PreFetchData = Environment.GetEnvironmentVariable("PreFetchData") ?? "{}";
     public static readonly bool DisableEarlyDayFix = GetBool("DisableEarlyDayFix", false);
     public static readonly bool FastStart = GetBool("FastStart");
+    public static readonly bool IS_PROD = GetBool("IS_PROD");
     public static readonly long DebugUid = GetLong("DebugUID", 0);
     
     // PROXY
@@ -49,6 +50,16 @@ public class Env
     
     private static bool GetBool(string name, bool defValue) {
         return string.IsNullOrEmpty(Environment.GetEnvironmentVariable(name)) ?  defValue : GetBool(name);
+    }
+    
+    private static string GetHost() {
+        var targetHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "postgres";
+        var devHost = Environment.GetEnvironmentVariable("DEV_HOST") ?? "localhost";
+        if (!string.IsNullOrEmpty(devHost) && !GetBool("IS_PROD")) {
+            return devHost;
+        }
+        return targetHost;
+        
     }
     
     

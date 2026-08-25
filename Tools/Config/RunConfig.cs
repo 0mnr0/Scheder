@@ -6,7 +6,7 @@ namespace Scheder.Tools.Config;
 
 public class RunConfig
 {
-    public static async Task test()
+    public static async Task Test()
     {
         
         DotNetEnv.Env.Load();
@@ -45,7 +45,7 @@ public class RunConfig
             Log.Fatal(" -- Fix it with this command: CREATE DATABASE \"{DB_NAME}\"\n", Env.DbName);
         }
         
-        if (!await PlaywrightInstalled())
+        if (!await IsPlaywrightAccessible() && !await PlaywrightInstalled())
         {
             isFatal = true;
             Log.Fatal("[Playwright] Playwright is failed to start, please install it! (Even if you disabled weather)");
@@ -75,8 +75,33 @@ public class RunConfig
 
     private static Task<bool> PlaywrightInstalled()
     {
-        Log.Debug("[Playwright] Playwright pre-install... (Requires even if will not be used)");
-        var exitCode = Microsoft.Playwright.Program.Main(["install", "chromium"]);
-        return Task.FromResult(exitCode == 0);
+        try {
+            Log.Debug("[Playwright] Playwright pre-install... (Requires even if will not be used)");
+            var exitCode = Microsoft.Playwright.Program.Main(["install", "chromium"]);
+            return Task.FromResult(exitCode == 0);
+        }
+        catch (Exception) {
+            return Task.FromResult(false);
+        }
+    }
+
+    private static async Task<bool> IsPlaywrightAccessible()
+    {
+        try
+        {
+            using var playwright = await Playwright.CreateAsync();
+            await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions 
+            { 
+                Headless = true 
+            });
+            await browser.CloseAsync();
+            Console.WriteLine("ACCESS!");
+            return true;
+        }
+        catch (Exception ex)
+        {   
+            Console.WriteLine("FAILED: "+ex.Message);
+            return false;
+        }
     }
 }

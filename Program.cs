@@ -4,7 +4,7 @@ using Scheder.Tools.Config;
 
 
 
-await RunConfig.test();
+await RunConfig.Test();
 await BotRunner.Prepare(); // creates a bot but doesn't start it yet 
 await BotRunner.LoadMaterials();
 
