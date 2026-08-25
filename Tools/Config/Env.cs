@@ -14,7 +14,6 @@ public class Env
     public static readonly string? PreFetchData = Environment.GetEnvironmentVariable("PreFetchData") ?? "{}";
     public static readonly bool DisableEarlyDayFix = GetBool("DisableEarlyDayFix", false);
     public static readonly bool FastStart = GetBool("FastStart");
-    public static readonly bool IS_PROD = GetBool("IS_PROD");
     public static readonly long DebugUid = GetLong("DebugUID", 0);
     
     // PROXY

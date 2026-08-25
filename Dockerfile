@@ -33,6 +33,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && update-locale LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --from=build /app/publish .
+
+RUN pwsh /app/playwright.ps1 install chromium --with-deps \
+    && rm -rf /var/lib/apt/lists/* /tmp/*
+
+USER $APP_UID
+ENTRYPOINT ["dotnet", "Scheder.dll"]
+
 
 RUN pwsh /app/playwright.ps1 install chromium --with-deps \
     && rm -rf /var/lib/apt/lists/* /tmp/*
