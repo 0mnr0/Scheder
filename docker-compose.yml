@@ -7,6 +7,8 @@
     depends_on:
       postgres:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
       PLAYWRIGHT_DRIVER_PATH: /app/.playwright/node/linux-x64/node

@@ -68,6 +68,8 @@ public class RunConfig
         {
             throw new Exception("Bot is not ready to start!");
         }
+        
+        Log.Information("[DataBase] Database address = {hst}:{prt}",Env.DbHost, Env.DbPort);
     }
 
 

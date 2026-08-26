@@ -35,15 +35,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=build /app/publish .
 
-RUN pwsh /app/playwright.ps1 install chromium --with-deps \
-    && rm -rf /var/lib/apt/lists/* /tmp/*
-
-USER $APP_UID
-ENTRYPOINT ["dotnet", "Scheder.dll"]
-
+RUN chmod +x /app/.playwright/node/*/node \
+    && pwsh /app/playwright.ps1 install chromium --with-deps \
+    && rm -rf /var/lib/apt/lists/* /tmp/* \
+    && chmod -R a+rX /ms-playwright
 
 RUN pwsh /app/playwright.ps1 install chromium --with-deps \
-    && rm -rf /var/lib/apt/lists/* /tmp/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* 
+
+RUN mkdir -p /app/.files \
+    && chown -R app:app /app
 
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Scheder.dll"]
