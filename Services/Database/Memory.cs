@@ -107,12 +107,14 @@ public static class Memory
 
     private static async Task<Dictionary<int, int>> GetSettingsCoreAsync(string table, string idColumn, long id)
     {
-        var json = (string?)await ExecuteScalar(
+        var result = await ExecuteScalar(
             $"SELECT settings FROM {table} WHERE {idColumn} = @id", Param("id", id));
 
         var dict = new Dictionary<int, int>();
-        if (json is null)
+        if (result is null || result == DBNull.Value)
             return dict;
+
+        var json = (string)result;
 
         using var doc = JsonDocument.Parse(json);
         if (doc.RootElement.ValueKind != JsonValueKind.Object)
