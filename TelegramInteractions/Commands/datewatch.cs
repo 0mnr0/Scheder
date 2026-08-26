@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using Scheder.Services.ContextDetection;
-using Scheder.Services.Database;
 using Scheder.Services.DateWatcher;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
@@ -33,7 +32,7 @@ public class Datewatch : ICommand {
                 chatId: chatId,
                 "Эту команду можно выполнять только администраторам группы!",
                 messageThreadId: threadId,
-                receiverUserId: whoAsked,
+                ephemeralMessageParameters: new EphemeralMessageParameters() {ReceiverUserId = whoAsked},
                 cancellationToken: cancellationToken
             );
             

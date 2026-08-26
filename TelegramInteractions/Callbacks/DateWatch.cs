@@ -52,7 +52,7 @@ public class DateWatch : ICallbackCommand {
                 await bot.SendMessage(
                     chatId: chatId,
                     $"Вы действительно хотите удалить прослушиватель на дату {targetDate}?",
-                    receiverUserId: isGroup ? whoAsked : null,
+                    ephemeralMessageParameters: isGroup ? new EphemeralMessageParameters() {ReceiverUserId = whoAsked} : null,
                     replyMarkup: keyboard,
                     cancellationToken: cancellationToken);
                 return;

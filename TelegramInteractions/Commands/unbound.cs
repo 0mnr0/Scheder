@@ -60,7 +60,7 @@ public class Unbound : ICommand
                     "Вы точно хотите отвязать эту группу от себя?",
                     replyMarkup: keyboard,
                     parseMode: ParseMode.Html,
-                    receiverUserId: whoTriggered,
+                    ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoTriggered},
                     cancellationToken: cancellationToken
                 );
             } else if (await ChatTools.IsUserAdmin(bot, chatId, whoTriggered))
@@ -81,7 +81,7 @@ public class Unbound : ICommand
                     "Вы точно хотите отвязать эту группу? Используется не ваши аутентификационные данные.",
                     replyMarkup: keyboard,
                     parseMode: ParseMode.Html,
-                    receiverUserId: whoTriggered,
+                    ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoTriggered},
                     cancellationToken: cancellationToken
                 );
             }

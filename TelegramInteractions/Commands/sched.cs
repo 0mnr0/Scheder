@@ -187,7 +187,7 @@ public class Sched : ICommand
                         ParseMode.Html,
                         messageThreadId: threadId,
                         cancellationToken: cancellationToken,
-                        receiverUserId: id
+                        ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = id}
                     );
                 }
                 else {

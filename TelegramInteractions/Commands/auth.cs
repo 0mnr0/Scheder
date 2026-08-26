@@ -40,7 +40,7 @@ public class Auth : ICommand
                 alertText,
                 messageThreadId: ChatTools.GetForumId(message),
                 parseMode: ParseMode.Html,
-                receiverUserId: whoAsking,
+                ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = (long)whoAsking},
                 cancellationToken: cancellationToken
             );
             
@@ -54,7 +54,7 @@ public class Auth : ICommand
                 "Неправильное количество аргументов, пожалуйста, используйте следующий синтаксис:\n\n<blockquote> <b>/auth login, password</b> </blockquote>\nЗапятая разделяет логин и пароль, пробелы стираются.",
                 messageThreadId: ChatTools.GetForumId(message),
                 parseMode: ParseMode.Html,
-                receiverUserId: isGroup ? whoAsking : null, // receiverUserId is not supported in DM
+                ephemeralMessageParameters: isGroup ? new EphemeralMessageParameters { ReceiverUserId = (long)whoAsking } : null,
                 cancellationToken: cancellationToken
             );
             return;

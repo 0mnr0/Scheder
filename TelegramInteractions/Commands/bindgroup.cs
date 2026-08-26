@@ -21,14 +21,12 @@ public class Bindgroup : ICommand
         string[] args,
         CancellationToken cancellationToken)
     {
-        var whoAsking = message.From?.Id;
+        var whoAsking = message.From?.Id ?? -1;
         var chatId =  message.Chat.Id;
         var isAdminAsking = await ChatTools.IsUserAdmin(bot, chatId, whoAsking);
         var threadId = ChatTools.GetForumId(message);
-        if (whoAsking == null)
-        {
-            return;
-        }
+        if (whoAsking == -1) return;
+        
         var isAlreadyBound = await Memory.Group.IsGroupBind(chatId);
         if (isAlreadyBound)
         {
@@ -61,7 +59,7 @@ public class Bindgroup : ICommand
 
 
 
-        var isRegistered = await Memory.User.HasAuth((long) whoAsking);
+        var isRegistered = await Memory.User.HasAuth(whoAsking);
         var isGroup = !ChatTools.IsPrivateChat(message);
         var isAdmin = await ChatTools.IsUserAdmin(bot, message.Chat.Id, message.From?.Id);
 
@@ -154,7 +152,7 @@ public class Bindgroup : ICommand
             parseMode: ParseMode.Html,
             messageThreadId: ChatTools.GetForumId(message),
             replyMarkup: keyboard,
-            receiverUserId: whoAsking,
+            ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoAsking},
             cancellationToken: cancellationToken);
         
 

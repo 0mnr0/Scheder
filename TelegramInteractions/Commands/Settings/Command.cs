@@ -32,7 +32,7 @@ public class Command : ICommand
                 "Эта команда доступна только администраторам",
                 parseMode: ParseMode.None,
                 replyMarkup: keyboard,
-                receiverUserId: fromId,
+                ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = fromId},
                 cancellationToken: cancellationToken);
 
             await Task.Delay(5000, cancellationToken);
@@ -50,7 +50,7 @@ public class Command : ICommand
             text,
             parseMode: ParseMode.None,
             replyMarkup: keyboard,
-            receiverUserId: isGroup ? fromId : null,
+            ephemeralMessageParameters: isGroup ? new EphemeralMessageParameters {ReceiverUserId = fromId} : null,
             cancellationToken: cancellationToken);
     }
 }

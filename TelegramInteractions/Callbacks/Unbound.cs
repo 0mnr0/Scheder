@@ -105,9 +105,10 @@ public class Unbound : ICallbackCommand
                 await bot.SendMessage(
                     chatId: targetChatId,
                     "Вы больше не являетесь главным поставщиком аутентификационных данных. Чтобы привязать группу используйте \"/bindgroup.\"",
-                    receiverUserId: whoAsking,
+                    ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoAsking},
                     replyMarkup: deBoundKeyBoard,
-                    cancellationToken: cancellationToken);
+                    cancellationToken: cancellationToken
+                    );
 
                 
             }
