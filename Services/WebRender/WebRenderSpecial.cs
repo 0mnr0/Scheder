@@ -134,8 +134,6 @@ public class WebRenderSpecial {
             Log.Information("[WebRules] Downloading all files...");
             Directory.CreateDirectory(".files");
             
-            Console.WriteLine("content: "+Env.WeatherSpec);
-            
             foreach (var rule in _rules) {
                 
                 var files = rule.Content;
@@ -151,7 +149,6 @@ public class WebRenderSpecial {
                     }
                     
                 }
-                Console.WriteLine("ruleContent: "+rule.ReadyContent);
             }
             
         }
