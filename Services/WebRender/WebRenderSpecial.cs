@@ -134,16 +134,26 @@ public class WebRenderSpecial {
             Log.Information("[WebRules] Downloading all files...");
             Directory.CreateDirectory(".files");
             
+            Console.WriteLine("content: "+Env.WeatherSpec);
+            
             foreach (var rule in _rules) {
-                if (!rule.IsContentInUrl) continue;
                 
                 var files = rule.Content;
                 foreach (var file in files) {
-                    var path = await DownloadImage(file);
-                    path = Path.GetFullPath(path);
-                    rule.ReadyContent.Add(path);
+                    
+                    if (file.StartsWith("http")) {
+                        var path = await DownloadImage(file);
+                        path = Path.GetFullPath(path);
+                        rule.ReadyContent.Add(path);
+                        
+                    } else {
+                        rule.ReadyContent.Add(Path.GetFullPath(file));
+                    }
+                    
                 }
+                Console.WriteLine("ruleContent: "+rule.ReadyContent);
             }
+            
         }
     }
 
