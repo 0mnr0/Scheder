@@ -104,9 +104,15 @@ public class GetSched
             return (cachedSched, cachedExams, ["-"]);
         }
 
-        var token4 = (long)(fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
+        var boundToken = (fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
+        
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (boundToken == null) {
+            return (null, null, ["No bounded person for group"]);
+        }
+        
         (recommendedToken, var jwt) =
-            recommendedToken is null ? await TokenService.Get(token4, fromGroup, parent: uid, metric: metric) : (recommendedToken, ["?"]);
+            recommendedToken is null ? await TokenService.Get((long) boundToken, fromGroup, parent: uid, metric: metric) : (recommendedToken, ["?"]);
 
 
         // fix for double TokenService.Get call
