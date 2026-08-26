@@ -31,7 +31,7 @@ public class WebRender
                     "--allow-file-access-from-files",
                     "--disable-site-isolation-trials"
                 ],
-                Headless = false
+                Headless = true
             });
             
             _context = await _browser.NewContextAsync();

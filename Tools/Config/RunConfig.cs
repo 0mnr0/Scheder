@@ -50,8 +50,6 @@ public class RunConfig
             isFatal = true;
             Log.Fatal("[Playwright] Playwright is failed to start, please install it! (Even if you disabled weather)");
         }
-
-        
         
         if (Env.DebugUid == 0)
         {

@@ -13,9 +13,3 @@ BotRunner.Once();
 
 Console.WriteLine("Bot Started!");
 await Task.Delay(Timeout.Infinite); // for docker
-
-
-// TODO:
-// Сделать проверку на корректность расположенных файлов для WebSpecial (ContentType: local)
-// Исправить кэш изображений погода (кэшируется один день на все ответы)
-// Переехать на dd_mm_yyyy в BestDay (str)
