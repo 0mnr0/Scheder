@@ -44,6 +44,13 @@ public static class SettingsUi
             };
             rows.Add([.. nav]);
         }
+        
+        var back = new List<InlineKeyboardButton>
+        {
+            new("Закрыть") {CallbackData = "keyboard:autoDeleteMsg", Style = KeyboardButtonStyle.Danger}
+        };
+        rows.Add([.. back]);
+        
 
         return (
             """
