@@ -299,6 +299,12 @@ public static class Memory
                 Param("reminders", "[]"),
                 Param("listeners", "[]"));
         }
+        
+        public static Task DeleteUserAsync(long uid) =>
+            ExecuteNonQuery(
+                "DELETE FROM users WHERE uid = @uid",
+                Param("uid", uid));
+        
 
         public static Task SaveAuthAsync(long uid, string login, string password)
         {

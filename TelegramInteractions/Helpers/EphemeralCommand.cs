@@ -22,6 +22,10 @@ public static class EphemeralCommand {
             Description = "Управление прослушиваемыми датами"
         },
         new() {
+            Command = "forgetme",
+            Description = "Стереть аутентификационные данные и забыть пользователя"
+        },
+        new() {
             Command = "gmt",
             Description = "Управление и синхронизация времени"
         },
