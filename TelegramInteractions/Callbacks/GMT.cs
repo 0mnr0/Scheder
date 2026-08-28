@@ -2,11 +2,11 @@
 using Scheder.Services.Database;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.TelegramInteractions.Attributes;
+using Scheder.Tools;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using static Scheder.Tools.MDTools;
 
 namespace Scheder.TelegramInteractions.Callbacks;
 
@@ -22,6 +22,7 @@ public class Gmt : ICallbackCommand
     {
         var isPlusOperation = args[1] == "+";
         var isMinusOperation = args[1] == "-";
+        
         var isSaveOperation = args[1] == "save";
         var isSyncOperation = args[1] == "sync";
         var isCancelOperation = args[1] == "cancel";
@@ -96,12 +97,20 @@ public class Gmt : ICallbackCommand
             await bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
-                EscapeMarkdownV2($"""
-                                  <b> Какое у вас время? </b>
-                                  <i>Разница с сервером: {(difference > 0 ? $"+{difference}" : difference.ToString())}</i>
-
-                                  {(currentUserHour < 10 ? $"0{currentUserHour}" : $"{currentUserHour}")}:{currentMinutes}
-                                  """),
+                null,
+                richMessage: new InputRichMessage {
+                    Html = $"""
+                            <h3> Какое время у вас? </h3>
+                            <table bordered striped>
+                                <thead>
+                                    <tr><th align="center"> <h4> {currentUserHour}:{currentMinutes} </h4> </th></tr>
+                                </thead>
+                            </table>
+                            
+                            <hr/>
+                            <i>Разница с сервером: {(difference > 0 ? $"+{difference}" : difference.ToString())} {Declensions.GetDeclensionHourGmtTitle(difference)}</i>
+                            """
+                },
                 parseMode: ParseMode.Html,
                 replyMarkup: keyboard,
                 cancellationToken: cancellationToken);

@@ -19,54 +19,57 @@ public class Gmt : ICommand
         string[] args,
         CancellationToken cancellationToken)
     {
+        if (message.From is null) return;
+        
         if (!ChatTools.IsPrivateChat(message)) {
             await bot.SendMessage(message.Chat.Id, "Эта функция настраивается в личных сообщениях тем, кто привязал группу.", cancellationToken: cancellationToken);
             return;
         }
 
+        var currentHour = DateTime.Now.Hour;
+        var currentMinutes = DateTime.Now.ToString("mm");
 
-        /*
+        // 
         var txt =
             $"""
-
-             <table bordered valign>
-                 <tr><th> Какое у вас время? </th></tr>
-                 <tr align="center"> <td valign> 00:{currentMinutes} </td> </tr>
+             <h3> Какое время у вас? </h3>
+             <table bordered striped>
+                 <thead>
+                     <tr><th align="center"> <h4> {currentHour}:{currentMinutes} </h4> </th></tr>
+                 </thead>
              </table>
-
              """;
 
         
         
-
+        var keyboard = new InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton.WithCallbackData("-1 Час", $"gmt:{currentHour}:-"),
+                InlineKeyboardButton.WithCallbackData("Синхр", $"gmt:{currentHour}:sync"),
+                InlineKeyboardButton.WithCallbackData("+1 Час", $"gmt:{currentHour}:+")
+            ],
+            [
+                new InlineKeyboardButton("Сохранить") {CallbackData = $"gmt:{currentHour}:save", Style = KeyboardButtonStyle.Success},
+                new InlineKeyboardButton("Отмена") {CallbackData = $"gmt:{currentHour}:cancel", Style = KeyboardButtonStyle.Danger}
+            ]
+        ]);
+        
         await bot.SendRichMessage(
-            msg.Chat.Id,
+            message.Chat.Id,
             new InputRichMessage
             {
                 Html = txt
             },
             replyMarkup: keyboard,
-            cancellationToken: cancellationToken);*/
+            cancellationToken: cancellationToken);
         
         
-        var currentMinutes = DateTime.Now.ToString("mm");
-        var keyboard = new InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton.WithCallbackData("-1 Час", $"gmt:00:-"),
-                InlineKeyboardButton.WithCallbackData("Синхр", $"gmt:00:sync"),
-                InlineKeyboardButton.WithCallbackData("+1 Час", $"gmt:00:+")
-            ],
-            [
-                new InlineKeyboardButton("Сохранить") {CallbackData = $"gmt:00:save", Style = KeyboardButtonStyle.Success},
-                new InlineKeyboardButton("Отмена") {CallbackData = $"gmt:00:cancel", Style = KeyboardButtonStyle.Danger}
-            ]
-        ]);
-        await bot.SendMessage(
+        /*await bot.SendMessage(
             message.Chat.Id,
             MDTools.EscapeMarkdownV2($"<b>Какое у вас время?</b>\n00:{currentMinutes}"),
             replyMarkup: keyboard,
             parseMode: ParseMode.Html,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken);*/
         
     }
 }
