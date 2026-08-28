@@ -14,7 +14,7 @@ public static class SettingsList
             States = [0, 1, 2],
             StateLabels = ["Отключено", "Начинается со слова \"пары\"", "Всегда"],
             Default = 1,
-            GroupDefault = 0
+            GroupDefault = 1
         },
         new()
         {

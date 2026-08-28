@@ -45,10 +45,9 @@ public class Command : ICommand
             return;
         }
 
-        await bot.SendMessage(
+        await bot.SendRichMessage(
             chatId,
-            text,
-            parseMode: ParseMode.None,
+            richMessage: new InputRichMessage {Html = text},
             replyMarkup: keyboard,
             ephemeralMessageParameters: isGroup ? new EphemeralMessageParameters {ReceiverUserId = fromId} : null,
             cancellationToken: cancellationToken);

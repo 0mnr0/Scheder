@@ -48,14 +48,16 @@ public class Callback : ICallbackCommand
                 if (editAsEphemeral && ephData != null) {
 
                     await bot.EditEphemeralMessageText(
-                        chatId, userId, ephData.Value,
-                        text: text, replyMarkup: keyboard, cancellationToken: cancellationToken
+                        chatId, userId, ephData.Value, text: null,
+                        richMessage: new InputRichMessage {Html = text},
+                        replyMarkup: keyboard, cancellationToken: cancellationToken
                     );
 
                 }
                 else {
                     
-                    await bot.EditMessageText(chatId, messageId, text,
+                    await bot.EditMessageText(chatId, messageId, text: null,
+                        richMessage:  new InputRichMessage {Html = text},
                         parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
                 }
                 
@@ -81,14 +83,16 @@ public class Callback : ICallbackCommand
                 if (editAsEphemeral && ephData != null) {
 
                     await bot.EditEphemeralMessageText(
-                        chatId, userId, ephData.Value,
-                        text: text, replyMarkup: keyboard, cancellationToken: cancellationToken
+                        chatId, userId, ephData.Value, text: null,
+                        richMessage: new InputRichMessage {Html = text},
+                        replyMarkup: keyboard, cancellationToken: cancellationToken
                         );
 
                 }
                 else {
-                    await bot.EditMessageText(chatId, messageId, text,
-                        parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                    await bot.EditMessageText(chatId, messageId, text: null,
+                        richMessage: new InputRichMessage {Html = text},
+                        replyMarkup: keyboard, cancellationToken: cancellationToken);
                 }
 
 
@@ -117,13 +121,15 @@ public class Callback : ICallbackCommand
                     if (editAsEphemeral && ephData != null) {
 
                         await bot.EditEphemeralMessageText(
-                            chatId, userId, ephData.Value,
-                            text: text, replyMarkup: keyboard, cancellationToken: cancellationToken
+                            chatId, userId, ephData.Value, text: null,
+                            richMessage: new InputRichMessage {Html = text},
+                            replyMarkup: keyboard, cancellationToken: cancellationToken
                         );
 
                     }
                     else {
-                        await bot.EditMessageText(chatId, messageId, text,
+                        await bot.EditMessageText(chatId, messageId, text: null,
+                            richMessage: new InputRichMessage {Html = text},
                             parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
                     }
                 }
@@ -131,7 +137,8 @@ public class Callback : ICallbackCommand
                 {
                     var values = await SettingsService.GetEffectiveValuesAsync(chatId, isGroup, cancellationToken);
                     var (text, keyboard) = SettingsUi.BuildListView(page, values);
-                    await bot.EditMessageText(chatId, messageId, text,
+                    await bot.EditMessageText(chatId, messageId, text: null,
+                        richMessage: new InputRichMessage {Html = text},
                         parseMode: ParseMode.None, replyMarkup: keyboard, cancellationToken: cancellationToken);
                 }
 

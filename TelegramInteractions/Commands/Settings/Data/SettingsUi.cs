@@ -46,9 +46,13 @@ public static class SettingsUi
         }
 
         return (
-            "⚙️ Параметры бота\n\n" +
-            "⚠️ Внимание\n" + 
-            "Разработчик может принудительно включать или отключать некоторые опции для всех аккаунтов. Ваши настройки не будут затронуты но поведение может отличаться",
+            """
+                <h2>⚙️ Параметры бота</h2>
+                <hr/>
+                
+                <b>⚠️ Внимание</b>
+                <p>Разработчик может принудительно включать или отключать некоторые опции для всех аккаунтов. Ваши настройки не будут затронуты но поведение может отличаться </p>
+            """,
             new InlineKeyboardMarkup(rows)
         );
     }
@@ -59,12 +63,14 @@ public static class SettingsUi
         int page)
     {
         var valueText = FormatValueLabel(def, value);
-        var text = $"{def.Title}\n\n{def.Description}\n\nТекущее значение: {valueText}";
+        var text = $"<h1>{def.Title}</h1><blockquote> <h4> {valueText} </h4> </blockquote> <p>ㅤ</p> <hr/>{def.Description}";
 
         var keyboard = new InlineKeyboardMarkup([
             [InlineKeyboardButton.WithCallbackData("🔄 Переключить", $"setting:t:{def.Id}:d:{page}")],
             [InlineKeyboardButton.WithCallbackData("◀️ Назад", $"setting:l:{page}")]
         ]);
+        
+        
 
         return (text, keyboard);
     }
