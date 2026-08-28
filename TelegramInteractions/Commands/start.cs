@@ -21,10 +21,9 @@ public class Start : ICommand
         CancellationToken cancellationToken)
     {
         var whoAsking = message.From?.Id;
-        if (whoAsking == null)
-        {
-            return;
-        }
+        if (whoAsking == null) return;
+        var isGroup = ChatTools.IsGroup(message);
+        var threadId = ChatTools.GetForumId(message);
 
         await ChatTools.AddGroupIfNotExists(message);
 
@@ -33,16 +32,24 @@ public class Start : ICommand
         // var isGroup = ChatTools.IsForum(message);
 
         var txt = $"""
-                   Доброе время суток! Это бот для получения расписания для Top-Academy. Чтобы начать работать с ботом, пожалуйста пришлите ваш логин и пароль в формате:
-
-                   <blockquote> /auth MyLogin, MyPassword </blockquote>
-                   {(wasRegistered ? "Этой командой вы так-же можете изменить ваш логин и пароль если вы уже зарегистрированы" : "")}
+                   <h3> Доброе время суток! </h3>
+                   
+                   </h5> Это бот для получения расписания для Top-Academy. Чтобы начать работать с ботом {(isGroup ? 
+                           "привяжите группу с помощью команды /bindgroup."
+                           
+                           : "пожалуйста пришлите ваш логин и пароль в формате:\n<p>ㅤ</p>" + 
+                             "<blockquote> /auth MyLogin, MyPassword </blockquote>" +
+                            (wasRegistered ? "Этой командой вы так-же можете изменить ваш логин и пароль если вы уже зарегистрированы" : "")
+                           )}
+                   </h5>
                    """;
         
-        await bot.SendMessage(
+        await bot.SendRichMessage(
             whoAsking,
-            txt,
-            parseMode: ParseMode.Html,
+            richMessage: new InputRichMessage {
+                Html = txt
+            },
+            messageThreadId: threadId,
             cancellationToken: cancellationToken);
     }
 }
