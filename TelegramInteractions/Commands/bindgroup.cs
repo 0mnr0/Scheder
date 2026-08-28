@@ -42,7 +42,7 @@ public class Bindgroup : ICommand
             var deBoundKeyBoard = new InlineKeyboardMarkup([
                 boundFor == whoAsking || isAdminAsking ?  unboundButton : [],
                 [
-                    new InlineKeyboardButton("Отмена") {CallbackData = $"keyboard:deleteMsg", Style = KeyboardButtonStyle.Primary }
+                    new InlineKeyboardButton("Понятно") {CallbackData = "keyboard:deleteMsg", Style = KeyboardButtonStyle.Primary }
                 ]
             ]);
             

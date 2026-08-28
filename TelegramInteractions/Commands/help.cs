@@ -20,7 +20,7 @@ public class Help : ICommand
         CancellationToken cancellationToken) {
 
 
-        var text = "<b>Доступные команды</b>:\n\n";
+        var text = "<h3>Доступные команды:</h3><br> </br>";
         List<BotCommand> emptyDescList = [];
         foreach (var command in EphemeralCommand.CommandsList) {
             if (string.IsNullOrEmpty(command.Description) || command.Description.Equals(EphemeralCommand.EmptySymbol)) {
@@ -29,18 +29,21 @@ public class Help : ICommand
             }
             
             text +=
-                $"/{command.Command}{(string.IsNullOrEmpty(command.Description) ? "" : " — "+command.Description)}\n";
+                $"/{command.Command}{(string.IsNullOrEmpty(command.Description) ? "" : " — "+command.Description)}<br> </br>";
         }
 
         if (emptyDescList.Count > 0) {
-            text += "\n<i>Список команд без описания</i>:\n";
-            text = emptyDescList.Aggregate(text, (current, emptyCommand) => current + $"/{emptyCommand.Command}\n");
+            text += "<br> </br><br> </br><i>Список команд без описания</i>:<br> </br>";
+            text = emptyDescList.Aggregate(text, (current, emptyCommand) => current + $"/{emptyCommand.Command}<br> </br>");
         }
 
-        await bot.SendMessage(
+        text += "<br> </br> <tg-button type=\"url\" style=\"primary\" url=\"https://github.com/0mnr0/Scheder\">GitHub</tg-button>";
+
+        await bot.SendRichMessage(
             message.Chat.Id,
-            text,
-            parseMode: ParseMode.Html,
+            richMessage: new InputRichMessage {
+                Html = text
+            },
             messageThreadId: ChatTools.GetForumId(message),
             cancellationToken: cancellationToken);
     }
