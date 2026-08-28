@@ -34,26 +34,64 @@ public class Auth : ICommand
 
         
         if (isGroup) {
-            const string alertText = "Ни в коем случае больше так не делайте. Не выполняйте авторизацию в группах, так вы можете показать ваш пароль и логин всем участникам группы. Благо, эта команда видна только вам. Удалите сообщение";
-            await bot.SendMessage(
+            const string alertTitle =  "<h4>Ни в коем случае больше так не делайте </h4>\n";
+            const string alertText = 
+                "<p>Не выполняйте авторизацию в группах, так вы можете показать ваш пароль и логин всем участникам группы</p>" ;
+            
+            var alertMsg = await bot.SendRichMessage(
                 message.Chat.Id,
-                alertText,
+                richMessage:  new InputRichMessage { Html = alertTitle + alertText + "\n<p> Мы пытаемся удалить это сообщение... </p>" },
                 messageThreadId: ChatTools.GetForumId(message),
-                parseMode: ParseMode.Html,
                 ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = (long)whoAsking},
                 cancellationToken: cancellationToken
             );
+
+            try {
+                await bot.DeleteMessage(
+                    chatId: message.Chat.Id,
+                    messageId: message.Id,
+                    cancellationToken: cancellationToken
+                );
+                
+                await bot.EditEphemeralMessageText(
+                    alertMsg.Chat.Id,
+                    (long)whoAsking,
+                    (int)alertMsg.EphemeralMessageId!,
+                    null,
+                    richMessage: new InputRichMessage {
+                        Html = alertTitle + alertText +"<p> Настоятельно рекомендуется сменить пароль </p>"
+                    },
+                    cancellationToken: cancellationToken
+                );
+            }
+            catch (Exception) {
+                await bot.EditEphemeralMessageText(
+                    alertMsg.Chat.Id,
+                    (long)whoAsking,
+                    (int)alertMsg.EphemeralMessageId!,
+                    null,
+                    richMessage: new InputRichMessage {
+                        Html = "<h1> Удалите ваше сообщение! </h1> \n <h2> У бота нет прав на удаление сообщений! </h2>"
+                               + alertText
+                    },
+                    cancellationToken: cancellationToken
+                );
+            }
             
             return;
         }
         
         
         if (authData.Length != 2) {
-            await bot.SendMessage(
+            await bot.SendRichMessage(
                 message.Chat.Id,
-                "Неправильное количество аргументов, пожалуйста, используйте следующий синтаксис:\n\n<blockquote> <b>/auth login, password</b> </blockquote>\nЗапятая разделяет логин и пароль, пробелы стираются.",
+                richMessage: new InputRichMessage {
+                    Html = "<h3> Неправильное количество аргументов </h3>"
+                            + "<p> Пожалуйста, используйте следующий синтаксис: </p> \n<br> </br>" 
+                            + "<blockquote> <b>/auth login, password</b> </blockquote>\n<br> </br>"
+                            + "Запятая разделяет логин и пароль, пробелы стираются"
+                },
                 messageThreadId: ChatTools.GetForumId(message),
-                parseMode: ParseMode.Html,
                 ephemeralMessageParameters: isGroup ? new EphemeralMessageParameters { ReceiverUserId = (long)whoAsking } : null,
                 cancellationToken: cancellationToken
             );
@@ -76,13 +114,27 @@ public class Auth : ICommand
         
         
         
-        var (payload, _) = await API.GetAuthAsync(authData[0], authData[1]);
+        var (payload, authRes) = await API.GetAuthAsync(authData[0], authData[1]);
         if (payload == null)
         {
             await bot.EditMessageText(
                 message.Chat.Id,
                 msg.Id,
-                "Не удалось вас авторизовать, проверьте данные от входа и попробуйте ещё раз", cancellationToken: cancellationToken);
+                null,
+                richMessage: new InputRichMessage {
+                    Html = $"""
+                                <h4> Неудача :( </h4>
+                                <p> Не удалось вас авторизовать, проверьте данные от входа и попробуйте ещё раз </p>
+                                <p>ㅤ</p>
+                                <details>
+                                    <summary>Подробнее</summary>
+                                    <p> Код ошибок: {string.Join(", ",  authRes)} </p>
+                                    <hr/>
+                                    <i>Иногда сервера Top Academy не отвечают успешной авторизацией даже при правильных аутентификационных данных, попробуйте позже. </i>
+                                </details>
+                           """
+                },
+                cancellationToken: cancellationToken);
         }
         else
         {
@@ -110,7 +162,11 @@ public class Auth : ICommand
             await bot.EditMessageText(
                 message.Chat.Id,
                 msg.Id, 
-                ("Супер! Теперь вы зарегистрированы в боте, можете пользоваться всеми доступными командами"), cancellationToken: cancellationToken);
+                null,
+                richMessage: new InputRichMessage {
+                    Html = "<h3>Супер!</h3>\n<p>Теперь вы зарегистрированы в боте, можете пользоваться всеми доступными командами</p>"
+                },
+                cancellationToken: cancellationToken);
             
         }
 
