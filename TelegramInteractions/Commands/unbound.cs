@@ -34,6 +34,7 @@ public class Unbound : ICommand
                 "Выберите из списка групп ту, которую надо отключить от вашей авторизации:\n\n<i>Если нужной в списке нет - вы можете выполнить команду в нужной группе. </i>",
                 replyMarkup: keyboard,
                 parseMode: ParseMode.Html,
+                messageThreadId: ChatTools.GetForumId(message),
                 cancellationToken: cancellationToken
             );
         }
@@ -60,11 +61,11 @@ public class Unbound : ICommand
                     "Вы точно хотите отвязать эту группу от себя?",
                     replyMarkup: keyboard,
                     parseMode: ParseMode.Html,
+                    messageThreadId: ChatTools.GetForumId(message),
                     ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoTriggered},
                     cancellationToken: cancellationToken
                 );
-            } else if (await ChatTools.IsUserAdmin(bot, chatId, whoTriggered))
-            {
+            } else if (await ChatTools.IsUserAdmin(bot, chatId, whoTriggered)) {
                 var keyboard = new InlineKeyboardMarkup([
                     [
                         new InlineKeyboardButton("Отвязать группу")
@@ -81,9 +82,24 @@ public class Unbound : ICommand
                     "Вы точно хотите отвязать эту группу? Используется не ваши аутентификационные данные.",
                     replyMarkup: keyboard,
                     parseMode: ParseMode.Html,
+                    messageThreadId: ChatTools.GetForumId(message),
                     ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoTriggered},
                     cancellationToken: cancellationToken
                 );
+            }
+            else {
+                var eMsg = await bot.SendMessage(
+                    chatId,
+                    "Команда доступна только тем кто привязал группу или администраторам группы",
+                    parseMode: ParseMode.Html,
+                    messageThreadId: ChatTools.GetForumId(message),
+                    ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoTriggered},
+                    cancellationToken: cancellationToken
+                );
+                await Task.Delay(5000, cancellationToken);
+                
+                await bot.DeleteEphemeralMessage(eMsg.Chat.Id, message.From.Id, (int)eMsg.EphemeralMessageId!, cancellationToken);
+                await bot.DeleteMessage(message.Chat.Id, message.MessageId, cancellationToken);
             }
 
         } 
