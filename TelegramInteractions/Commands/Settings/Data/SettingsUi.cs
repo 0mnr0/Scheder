@@ -6,7 +6,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 public static class SettingsUi
 {
-    private const int PageSize = 10;
+    private const int PageSize = 8;
 
     public static (string Text, InlineKeyboardMarkup Keyboard) BuildListView(
         int page,
