@@ -45,7 +45,7 @@ public class Start : ICommand
                    """;
         
         await bot.SendRichMessage(
-            whoAsking,
+            message.Chat.Id,
             richMessage: new InputRichMessage {
                 Html = txt
             },

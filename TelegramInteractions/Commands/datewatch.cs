@@ -32,7 +32,7 @@ public class Datewatch : ICommand {
                 chatId: chatId,
                 "Эту команду можно выполнять только администраторам группы!",
                 messageThreadId: threadId,
-                ephemeralMessageParameters: new EphemeralMessageParameters() {ReceiverUserId = whoAsked},
+                ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoAsked},
                 cancellationToken: cancellationToken
             );
             
@@ -75,6 +75,7 @@ public class Datewatch : ICommand {
             await bot.SendMessage(
                 chatId: chatId,
                 text: text,
+                messageThreadId: threadId,
                 parseMode: ParseMode.Html,
                 replyMarkup: keyboard,
                 cancellationToken: cancellationToken

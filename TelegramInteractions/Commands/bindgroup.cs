@@ -46,14 +46,28 @@ public class Bindgroup : ICommand
                 ]
             ]);
             
-            await bot.SendMessage(
-                whoAsking,
-                "Эта группа уже привязана!",
+            await bot.SendRichMessage(
+                message.Chat.Id,
+                richMessage: new InputRichMessage {
+                    Html = "<h5> Эта группа уже привязана! </h5>" +
+                           "<tg-button type=\"callback_data\" data=\"keyboard:deleteEphMsg\">Понятно</tg-button>"
+                },
                 messageThreadId: threadId,
-                replyMarkup: deBoundKeyBoard,
+                ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = whoAsking},
                 cancellationToken: cancellationToken
             );
-            
+
+
+            var chatName = message.Chat.FirstName;
+            if (whoAsking == boundFor) {
+                await bot.SendMessage(
+                    whoAsking,
+                    chatName == null ? "Эта группа уже привязана!" : $"Группа \"{chatName} уже привязана!\"",
+                    replyMarkup: deBoundKeyBoard,
+                    cancellationToken: cancellationToken
+                );
+            }
+
             return;
         }
 
