@@ -22,7 +22,17 @@ public class Gmt : ICommand
         if (message.From is null) return;
         
         if (!ChatTools.IsPrivateChat(message)) {
-            await bot.SendMessage(message.Chat.Id, "Эта функция настраивается в личных сообщениях тем, кто привязал группу.", cancellationToken: cancellationToken);
+            var msg = await bot.SendMessage(
+                message.Chat.Id, "Эта функция настраивается в личных сообщениях того, кто привязал группу.",
+                ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = message.From.Id},
+                messageThreadId: ChatTools.GetForumId(message),
+                cancellationToken: cancellationToken
+                );
+            
+            await Task.Delay(5000, cancellationToken);
+            await bot.DeleteEphemeralMessage(msg.Chat.Id, message.From.Id, (int)msg.EphemeralMessageId!, cancellationToken);
+            await bot.DeleteMessage(message.Chat.Id, message.MessageId, cancellationToken);
+            
             return;
         }
 
