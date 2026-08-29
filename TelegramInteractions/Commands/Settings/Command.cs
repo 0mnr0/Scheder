@@ -27,11 +27,12 @@ public class Command : ICommand
         var (text, keyboard) = SettingsUi.BuildListView(page: 0, values);
 
         if (isGroup && !await ChatTools.IsUserAdmin(bot, chatId, fromId)) {
-            var msg = await bot.SendMessage(
+            var msg = await bot.SendRichMessage(
                 chatId,
-                "Эта команда доступна только администраторам",
-                parseMode: ParseMode.None,
-                replyMarkup: keyboard,
+                richMessage: new InputRichMessage {
+                    Html = "<h5> Эта команда доступна только администраторам </h5>\n" +
+                           "<tg-button type=\"callback_data\" data=\"keyboard:deleteEphMsg\">Понятно</tg-button>"
+                },
                 ephemeralMessageParameters: new EphemeralMessageParameters {ReceiverUserId = fromId},
                 cancellationToken: cancellationToken);
 
