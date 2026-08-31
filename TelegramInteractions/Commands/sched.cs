@@ -176,8 +176,8 @@ public class Sched : ICommand
             if (isGroup && !Behaviour.Groups.AllowSendingResponseSpeed) { return; }
             if (isPrivateChat && !Behaviour.Users.AllowSendingResponseSpeed || isPrivateChat && !Behaviour.Users.AllowDisplaySpeedMetricToAnyone) { return; }
 
-            long[] sendTo = [ElevatedUserConfig.DebugUID];
-            if (Env.TalkativePerformance && message.From != null && sendTo[0] != message.From.Id) { _ = sendTo.Append(message.From.Id); }
+            List<long> sendTo = [ElevatedUserConfig.DebugUID];
+            if (Env.TalkativePerformance && message.From != null && sendTo[0] != message.From.Id) { sendTo.Add(message.From.Id); }
 
             foreach (var id in sendTo) {
                 if (isGroup) {

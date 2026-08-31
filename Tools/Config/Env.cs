@@ -26,7 +26,7 @@ public class Env
     private static readonly bool DisableTokenCaching = GetBool("DisableTokenCaching");
 
     // OTHER
-    public static readonly bool TalkativePerformance = GetBool("FastStart");
+    public static readonly bool TalkativePerformance = GetBool("TalkativePerformance");
     public static readonly bool ProdPrepare = GetBool("ProdPrepare");
     
     // NON-DOCUMENTED-ENV-VARs (For testing purposes only)
