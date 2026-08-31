@@ -236,13 +236,15 @@ public class Sched : ICommand
                     return;
                 }
 
-                await bot.SendRichMessageDraft(
-                    chatId: chatId,
-                    draftId: uniqueDraft,
-                    messageThreadId: threadId,
-                    richMessage: new InputRichMessage { Html = $"<tg-thinking>{draft}</tg-thinking>" },
-                    cancellationToken: draftToken.Token
-                );
+                if (!string.IsNullOrEmpty(draft)) {
+                    await bot.SendRichMessageDraft(
+                        chatId: chatId,
+                        draftId: uniqueDraft,
+                        messageThreadId: threadId,
+                        richMessage: new InputRichMessage { Html = $"<tg-thinking>{draft}</tg-thinking>" },
+                        cancellationToken: draftToken.Token
+                    );
+                }
             }
         }
     }
