@@ -201,7 +201,7 @@ public class Sched : ICommand
             }
         }
 
-        await SetDraft("", 0);
+        await SetDraft(string.Empty, 0);
 
 
 
