@@ -237,6 +237,7 @@ public abstract class SchedMessageBuilder
 
     public static InputRichMessage AddWeather(string input, (List<byte[]>, List<InputRichMessageMedia>?) weatherImages, bool isExams = false) {
         input += $"""
+                    <br>
                     <h5> Погода: </h5> 
                     <tg-slideshow>
                  """;
