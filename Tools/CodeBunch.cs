@@ -68,7 +68,7 @@ public class CodeBunch {
             var chatName = (await bot.GetChat(groupId, cancellationToken: cancellationToken)).Title ?? $"ID: {groupId}";
 
             keyboard.AddNewRow(
-                new InlineKeyboardButton(chatName + $"|unbound:{groupId}")
+                new InlineKeyboardButton(chatName)
                     { CallbackData = $"unbound:{groupId}", Style = KeyboardButtonStyle.Danger }
             );
         }
