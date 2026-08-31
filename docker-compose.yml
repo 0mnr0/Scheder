@@ -20,7 +20,9 @@
       DB_PASS: ${DB_PASSWORD}
       TG_TOKEN: ${TG_TOKEN}
       Weather_Token: ${WEATHER_TOKEN}
-
+    volumes:
+      - ./logs:/app/logs
+    
   postgres:
     image: postgres:16
     restart: unless-stopped

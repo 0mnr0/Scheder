@@ -9,7 +9,7 @@ public class Logger
     public static readonly ILogger Log = new LoggerConfiguration()
         .MinimumLevel.Verbose()
         .WriteTo.Console(theme: AnsiConsoleTheme.Code)
-        .WriteTo.File($"logs/app-{DateTime.Now:yyyyMMdd_HHmmss}.txt")
+        .WriteTo.File($"logs/app-run-{DateTime.Now:yyyyMMdd_HHmmss}.txt")
         .CreateLogger();
     
 }

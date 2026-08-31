@@ -44,7 +44,9 @@ RUN pwsh /app/playwright.ps1 install chromium --with-deps \
     && rm -rf /var/lib/apt/lists/* /tmp/* 
 
 RUN mkdir -p /app/.files \
-    && chown -R app:app /app
+    && chown -R app:app /app 
+
+RUN mkdir /app/logs
 
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Scheder.dll"]
