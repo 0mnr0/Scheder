@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Playwright;
 using Scheder.Tools;
+using Scheder.Tools.Config;
 
 namespace Scheder.Services.WebRender;
 public class WebRender
@@ -17,6 +18,7 @@ public class WebRender
     public static async Task EnsureInitializedAsync()
     {
         if (_browser is not null) return;
+        if (Env.SkipChromium) return;
 
         await Lock.WaitAsync();
         try
@@ -31,7 +33,7 @@ public class WebRender
                     "--allow-file-access-from-files",
                     "--disable-site-isolation-trials"
                 ],
-                Headless = true
+                Headless = false
             });
             
             _context = await _browser.NewContextAsync();
@@ -100,6 +102,8 @@ public class WebRender
     public static async Task<List<byte[]>> RenderWeather(WebRenderSpecial.RenderMaterials weather, PerformanceMetric? metric)
     {
         using (metric?.Measure(Metric)) {
+            if (Env.SkipChromium) return [];
+            
             var page = await RentWeatherPageAsync();
             try {
                 var additionalBlocks 

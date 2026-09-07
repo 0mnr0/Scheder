@@ -13,6 +13,7 @@ public class Env
     public static readonly string? DbPass = Environment.GetEnvironmentVariable("DB_PASS") ?? "postgres";
     public static readonly string? PreFetchData = Environment.GetEnvironmentVariable("PreFetchData") ?? "{}";
     public static readonly string? WeatherSpec = Environment.GetEnvironmentVariable("WeatherSpec") ?? "{}";
+    public static readonly bool SkipChromium = GetBool("SkipChromium", false);
     public static readonly bool DisableEarlyDayFix = GetBool("DisableEarlyDayFix", false);
     public static readonly bool FastStart = GetBool("FastStart");
     public static readonly long DebugUid = GetLong("DebugUID", 0);
