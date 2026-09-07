@@ -66,7 +66,9 @@ public class RunConfig
             Log.Warning("[RunConfigTest] .env is fine, launching...");
         } else
         {
-            throw new Exception("Bot is not ready to start!");
+            Log.Fatal("Bot is not ready to start!");
+            Environment.Exit(-1);
+            return;
         }
         
         Log.Information("[DataBase] Database address = {hst}:{prt}",Env.DbHost, Env.DbPort);
