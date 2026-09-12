@@ -23,7 +23,7 @@ const WebRenderSelection  = {
 let Additions = {
 	imagesResponded: 0,
 	GetImage: (OBJ, Default) => {
-		if (OBJ === null || OBJ.ReadyContent === undefined || OBJ.ReadyContent.length === 0) { alert(-1); return Default }
+		if (OBJ === null || OBJ.ReadyContent === undefined || OBJ.ReadyContent.length === 0) { return Default }
 		let content = OBJ.ReadyContent;
 		if (Additions.imagesResponded >= content.length) {Additions.imagesResponded = 0;}
 		let ret = content[Additions.imagesResponded];
