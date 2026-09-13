@@ -36,7 +36,7 @@ public class API
         return await Client.SendAsync(request);
     }
 
-    public static async Task<HttpResponseMessage> PostAsync(string url, object jsonPayload, string? authToken = null)
+    private static async Task<HttpResponseMessage> PostAsync(string url, object jsonPayload, string? authToken = null)
     {
         using var request = CreateRequest(HttpMethod.Post, url, authToken);
         request.Content = JsonContent.Create(jsonPayload);

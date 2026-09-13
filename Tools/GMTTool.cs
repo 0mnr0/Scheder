@@ -17,9 +17,14 @@ public class GmtTool
     }
 
     public static async Task<string> GetCurrentDayWithGmt(long uid, bool fromGroup = false) {
-        var timeShift =  await Get(uid, fromGroup);
+        var timeShift = await Get(uid, fromGroup);
         var currentDate = DateTime.Now.AddHours(timeShift);
         
         return currentDate.ToString("yyyy-MM-dd");
+    }
+
+    public static async Task<DateTime> GetCurrentDatetimeWithGmt(long uid, bool fromGroup = false) {
+        var timeShift = await Get(uid, fromGroup);
+        return DateTime.Now.AddHours(timeShift);
     }
 }

@@ -40,7 +40,7 @@ public class KeyBoard : ICallbackCommand
         if (isAutoMsgDelete && callbackQuery.Message is not null) {
             try {
                 await DeleteEphMsg(bot, callbackQuery, whoAsking, cancellationToken);
-            } catch (Exception e) {
+            } catch (Exception) {
                 await DeleteMsg(bot, callbackQuery, cancellationToken);
             }
         }
