@@ -1,4 +1,4 @@
-## Scheder
+# Scheder
 ### Telegram bot, created to automatize schedule routine
 Built for Top-Academy on Telegram.Bot (Api 10.3)
 
@@ -100,7 +100,7 @@ To delete this note from server, bot sends a POST `/update` with this data:
 }
 ```
 
-If not set this feature will not be available
+If `TimeMissApi` not set - this feature will not be available
 </details>
 
 ---
@@ -134,6 +134,10 @@ This config will parse and cache token in this conditions:
 
 `IsGroup` - required. Defines, that target ID is (not) group  
 `CopyFor` - *optional*. Defines, copy cached token for another groups and users
+
+> [!WARNING]
+> There’s no point in updating the token more often than 3 times an hour. Journal stores the token permissions for ~25–30 minutes.
+
 
 ### Why does this thing exists?
 This thing is preparing token before users will ask bot for any action. This mechanism allows to use ready token instead of parsing fresh one. In brief - reduces token parse time
@@ -192,6 +196,7 @@ In this example:
 <br>
 `AddMax` - **int** | Applies only for `ShowType=1`. Sets maximum amount of additional content blocks to show. This is useful if you only need one piece of content from the list of contents. In the configuration `Selection=1` and `AddMax=1`, one block with random content will be added.
 
+You can create several rules with different settings.
 
 </details>
 </details>
