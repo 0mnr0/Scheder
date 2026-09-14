@@ -49,7 +49,6 @@ public class TimeMissApi {
 
         var userTime = await GmtTool.GetCurrentDatetimeWithGmt(tgId);
         var localUserTime = userTime.ToString("dd.MM.yyyy HH:mm");
-        Console.WriteLine("localUserTime: " + localUserTime);
         var localUserDate = userTime.ToString("dd.MM.yyyy");
 
 

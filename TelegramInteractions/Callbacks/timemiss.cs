@@ -4,6 +4,7 @@ using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.iWillBeLate;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
+using Scheder.Tools.Config;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -25,11 +26,21 @@ public class Timemiss : ICallbackCommand {
         var sendRem = args[0] == "rem";
         var isPrivateChat = ChatTools.IsPrivateChat(callbackQuery.Message);
 
-        if (!await Memory.User.IsUserExistsAsync(whoAsked)) {
-            Console.WriteLine($"User {whoAsked} doesn't exist");
+        if (Env.TimeMissApi is null) {
             await bot.AnswerCallbackQuery(
                 callbackQuery.Id,
-                "Нужна регистрация в боте :/",
+                "Функция отключена в настройках окружения",
+                showAlert: true,
+                cancellationToken: cancellationToken
+            );
+            return;
+        }
+
+        if (!await Memory.User.IsUserExistsAsync(whoAsked)) {
+            await bot.AnswerCallbackQuery(
+                callbackQuery.Id,
+                "Для этой функции требуется авторизация в боте. Выполните её в личных сообщениях.",
+                showAlert: true,
                 cancellationToken: cancellationToken
             );
             return;
@@ -64,17 +75,46 @@ public class Timemiss : ICallbackCommand {
             );
 
             if (isPrivateChat) {
-                await bot.DeleteMessage(
+                await bot.EditMessageText(
                     callbackQuery.Message.Chat.Id,
                     callbackQuery.Message.MessageId,
+                    null,
+                    richMessage: new InputRichMessage {
+                        Html = """
+                               <h4> Готово! </h4>
+                               <p> С нашей стороны всё чисто. Мы предали информацию, теперь дело за расширением и внимательностью преподавателя. </p>
+                               
+                               </hr>
+                               
+                               <tg-button-row>
+                                 <tg-button type="callback_data" data="callback:openTimemiss:0">Назад</tg-button>
+                                 <tg-button type="callback_data" data="keyboard:deleteMsg" style="primary">Закрыть</tg-button>
+                               </tg-button-row>
+                               """
+                    },
                     cancellationToken: cancellationToken
                 );
             }
             else {
-                await bot.DeleteEphemeralMessage(
+                
+                await bot.EditEphemeralMessageText(
                     callbackQuery.Message.Chat.Id,
                     callbackQuery.From.Id,
                     (int)callbackQuery.Message.EphemeralMessageId!,
+                    null,
+                    richMessage: new InputRichMessage {
+                        Html = """
+                               <h4> Готово! </h4>
+                               <p> С нашей стороны всё чисто. Мы предали информацию, теперь дело за расширением и внимательностью преподавателя. </p>
+
+                               </hr>
+
+                               <tg-button-row>
+                                 <tg-button type="callback_data" data="callback:openTimemiss:1">Назад</tg-button>
+                                 <tg-button type="callback_data" data="keyboard:deleteMsg" style="primary">Закрыть</tg-button>
+                               </tg-button-row>
+                               """
+                    },
                     cancellationToken: cancellationToken
                 );
             }

@@ -13,11 +13,13 @@ public class Env
     public static readonly string? DbPass = Environment.GetEnvironmentVariable("DB_PASS") ?? "postgres";
     public static readonly string? PreFetchData = Environment.GetEnvironmentVariable("PreFetchData") ?? "{}";
     public static readonly string? WeatherSpec = Environment.GetEnvironmentVariable("WeatherSpec") ?? "{}";
-    public static readonly string? TimeMissApi = Environment.GetEnvironmentVariable("TimeMissAPI") ?? null;
+    public static readonly string? TimeMissApi = GetString("TimeMissAPI") ?? null;
+    
     public static readonly bool SkipChromium = GetBool("SkipChromium", false);
     public static readonly bool DisableEarlyDayFix = GetBool("DisableEarlyDayFix", false);
     public static readonly bool FastStart = GetBool("FastStart");
     public static readonly long DebugUid = GetLong("DebugUID", 0);
+    
     
     // PROXY
     public static readonly bool UseProxy = GetBool("UseProxy");
@@ -52,6 +54,10 @@ public class Env
     
     private static bool GetBool(string name, bool defValue) {
         return string.IsNullOrEmpty(Environment.GetEnvironmentVariable(name)) ?  defValue : GetBool(name);
+    }
+    
+    private static string? GetString(string name) {
+        return string.IsNullOrEmpty(Environment.GetEnvironmentVariable(name)) ? null : Environment.GetEnvironmentVariable(name);
     }
     
     private static string GetHost() {
