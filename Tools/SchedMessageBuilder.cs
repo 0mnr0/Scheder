@@ -8,6 +8,7 @@ using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
 using Scheder.TelegramInteractions.Commands.Settings.Data;
 using Scheder.Tools.Config;
+using Serilog;
 using Telegram.Bot.Types;
 
 namespace Scheder.Tools;
@@ -287,15 +288,24 @@ public abstract class SchedMessageBuilder
 
     private static (List<Lesson>, List<ExamObject>) ParseAndSort(string json, string? jsonExams, BestDayOption.BestDayParseResult day)
     {
-        var lessons = JsonSerializer.Deserialize<List<Lesson>>(json)
-                      ?? [];
+        try {
+            var lessons = JsonSerializer.Deserialize<List<Lesson>>(json)
+                          ?? [];
 
-        var sched = lessons
-            .OrderBy(l => ParseDate(l.Date))
-            .ThenBy(l => l.LessonIndex)
-            .ToList();
-        
-        return (sched, ParseAndSortExams(jsonExams, day));
+            var sched = lessons
+                .OrderBy(l => ParseDate(l.Date))
+                .ThenBy(l => l.LessonIndex)
+                .ToList();
+
+            return (sched, ParseAndSortExams(jsonExams, day));
+        }
+        catch (JsonException e) {
+            Log.Fatal("[ParseAndSort] {0}", e.Message);
+            Log.Fatal("[ParseAndSort] json: {0}", json);
+            Log.Fatal("[ParseAndSort] exam: {0}", jsonExams);
+            
+            throw new JsonException(e.Message, e);
+        }
     }
 
     private static List<ExamObject> ParseAndSortExams(string? jsonExams, BestDayOption.BestDayParseResult day, bool skipDateEnd = false)
