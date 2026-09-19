@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Scheder.Tools.Config;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.Weather;
 
@@ -7,17 +8,17 @@ public class WeatherAPI
 {
     private static readonly HttpClient Client = new();
 
-    public static async Task<List<WeatherObject>?> Get(string city, string date)
-    {
-        var json = await Client.GetStringAsync(
-            $"https://api.weatherapi.com/v1/forecast.json?key={Env.WeatherApiToken}&q={city}&dt={date}");
+    public static async Task<List<WeatherObject>?> Get(string city, string date) {
+
+        var parseUrl = $"https://api.weatherapi.com/v1/forecast.json?key={Env.WeatherApiToken}&q={city}&dt={date}";
+        var json = await Client.GetStringAsync(parseUrl);
         
         var doc = JsonDocument.Parse(json);
-
         var forecast = doc.RootElement
             .GetProperty("forecast")
             .GetProperty("forecastday");
 
+        Log.Information("[WeatherAPI] ({S}): {A}", parseUrl, json);
         if (forecast.GetArrayLength() == 0) return null;
         
         var hours = forecast[0].GetProperty("hour");

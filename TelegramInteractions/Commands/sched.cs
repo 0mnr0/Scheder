@@ -11,6 +11,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using static Scheder.Tools.Logger;
 
 namespace Scheder.TelegramInteractions.Commands;
 
@@ -106,10 +107,13 @@ public class Sched : ICommand
 
         var bgWeatherResult = await bgWeatherTask;
         var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
+        if (finalWeather.Count == 0 || finalWeather is null) {
+            Log.Error("Weather is empty!");
+        }
         
         var weatherAsText = await SettingsService.GetValue(chatId, SettingsTypeList.AllowWeather, isGroup, cancellationToken) is 1;
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
-        if (finalWeather.Count != 0 || useCache && cachedImgId!=null) {
+        if (finalWeather is not null && finalWeather.Count != 0 || useCache && cachedImgId!=null) {
             InputRichMessage newRichMessage;
 
             if ((isGroup && !Behaviour.Groups.AllowWeatherImageOutput) || (isPrivateChat && !Behaviour.Users.AllowWeatherImageOutput) || weatherAsText) {
@@ -132,7 +136,7 @@ public class Sched : ICommand
             
             if (!useCache) {
                 await Weather.SetRichImageUrls( // that's cache system
-                    finalWeather,
+                    finalWeather!,
                     chatId,
                     dayParseResult,
                     isGroup

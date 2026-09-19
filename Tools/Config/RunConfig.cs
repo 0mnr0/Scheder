@@ -11,6 +11,7 @@ public class RunConfig
         
         DotNetEnv.Env.Load();
         Env.UpdateRules();
+        Log.Information("[LOGS] Log file: {GetFullPath}", Path.GetFullPath(FileName));
         
         if (Env.FastStart)
         {
