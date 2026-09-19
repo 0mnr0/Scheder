@@ -3,6 +3,7 @@
 public abstract class Behaviour {
     
     public abstract class Groups {
+        public static readonly bool AllowAskingHistory = false;
         public static readonly bool AllowWeatherImageOutput = true;
         public static readonly bool AllowSendingResponseSpeed = true; // Sends response time to specific UID (as new ephemeral message (visible for this ID only))
         public static readonly bool AllowNonAdminsToDateWatch = true; // Defines, is usual users is allowed to use /datewatch command

@@ -112,6 +112,7 @@ public static class BestDayOption
         
         response.StartDate = response.DateStart.ToString("yyyy-MM-dd");
         response.EndDate = response.DateEnd.ToString("yyyy-MM-dd");
+        response.StartEndDate = $"{response.StartDate} - {response.EndDate}";
         if (!response.IsEarlyDayMoveFix) response.DayDisplay = day;
         response.DayParsedName = DateExtractor.GetDayName(day);
         response.DayType = day;
@@ -138,6 +139,7 @@ public static class BestDayOption
             DayDiff = 0,
             StartDate = date,
             EndDate = date,
+            StartEndDate = $"{date} - {date}",
             DateStart = dTime,
             DateEnd = dTime,
             IsWeek = false,
@@ -173,6 +175,7 @@ public static class BestDayOption
             DayDiff = 0,
             StartDate = date,
             EndDate = date,
+            StartEndDate = $"{date} - {date}",
             DateStart = dTime,
             DateEnd = dTime,
             IsWeek = false,
@@ -191,6 +194,7 @@ public static class BestDayOption
         public int DayDiff { get; set; }
         public string StartDate { get; set; } = string.Empty;
         public string EndDate { get; set; } = string.Empty;
+        public string StartEndDate { get; set; } = string.Empty;
         public DateTime DateStart { get; set; }
         public DateTime DateEnd { get; set; }
         public bool IsWeek { get; set; }

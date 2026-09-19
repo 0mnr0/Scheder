@@ -74,12 +74,34 @@ public class Sched : ICommand
         
         var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken, metric: metric);
         
-        
         await SetDraft("Парсинг токена и расписаний…", ChatAction.Typing);
         var (schedule, exams, jwt) = await GetSched.GetSchedAndExams(chatId, dayParseResult, fromGroup, metric: metric);
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams, jwtData: jwt, metric: metric);
         
         
+        var savedResponse = AskingHistory.HaveResponse(chatId, dayParseResult.StartEndDate);
+        if (savedResponse is not null && isGroup && savedResponse.StrHash.Equals(AskingHistory.GetHash(messageText))) {
+            try {
+                await bot.SendMessage(
+                    chatId: savedResponse.ChatId,
+                    "Этот вопрос был задан менее 15 минут назад",
+                    messageThreadId: ChatTools.GetForumId(message),
+                    replyParameters: new ReplyParameters {
+                        MessageId = savedResponse.AskedMessageId
+                    },
+                    cancellationToken: cancellationToken
+                );
+                return;
+            }
+            catch (Exception e) {
+                Log.Error("[Sched] {e}", e);
+            }
+        }
+
+        if (savedResponse is not null && isGroup && !savedResponse.StrHash.Equals(AskingHistory.GetHash(messageText))) {
+            AskingHistory.DeleteResponse(savedResponse);
+        }
+
         var keyboard = new InlineKeyboardMarkup();
         if (dayParseResult.IsEarlyDayMoveFix) {
             keyboard = new InlineKeyboardMarkup([
@@ -100,6 +122,11 @@ public class Sched : ICommand
             replyMarkup: keyboard,
             cancellationToken: cancellationToken
         );
+        
+        if (isGroup) {
+            AskingHistory.AddResponse(chatId, currentMessage.Id, message.Id, messageText, dayParseResult.StartEndDate);
+        }
+
         metric.Stop(MetricType.MessageSend);
         metric.Stop(MetricType.Total);
         await bot.SendChatAction(chatId, ChatAction.UploadDocument, threadId, cancellationToken: cancellationToken);
@@ -107,9 +134,10 @@ public class Sched : ICommand
 
         var bgWeatherResult = await bgWeatherTask;
         var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
-        if (finalWeather.Count == 0 || finalWeather is null) {
-            Log.Error("Weather is empty!");
+        if ((finalWeather.Count == 0 || finalWeather is null) || cachedImgId is null || cachedImgId.Count == 0) {
+            Log.Error($"Weather is empty: {finalWeather is { Count: 0 }}, {finalWeather is null}, {cachedImgId is null}, {cachedImgId is { Count: 0 }}");
         }
+        
         
         var weatherAsText = await SettingsService.GetValue(chatId, SettingsTypeList.AllowWeather, isGroup, cancellationToken) is 1;
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;
