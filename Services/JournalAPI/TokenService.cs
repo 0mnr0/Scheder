@@ -62,7 +62,6 @@ public class TokenService
                 if (string.IsNullOrEmpty(newToken)) return (null, tries);
 
                 var now = DateTime.Now;
-                _ = Task.Run(async () => { await Memory.User.SetJwtAsync(uid, newToken); });
 
                 var fetchedToken = new FetchedToken
                 {
@@ -73,6 +72,7 @@ public class TokenService
                 };
 
                 Cache.Set(uid, fetchedToken, TimeSpan.FromMinutes(JwtKeepTime));
+                await Memory.User.SetJwtAsync(uid, newToken);
                 return (newToken, tries);
 
             }

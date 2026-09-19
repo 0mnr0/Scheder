@@ -8,7 +8,7 @@ namespace Scheder.Services.JournalAPI;
 public class GetSched
 {
     private const MetricType Metric = MetricType.Analyze;
-    private const MetricType MetricParse = MetricType.DataParse;
+
     public static async Task<BestDayOption.BestDayParseResult> GetDay(long uid, (string, string) day, PerformanceMetric? metric, bool fromGroup=false, bool ignoreEarlyDay = false)
     {
         using (metric?.Measure(Metric)) {
@@ -75,6 +75,7 @@ public class GetSched
         if (token == null) return null;
         
         var response = await API.GetExams(token, metric: metric);
+        if (response.Code != 200) return null;
         var examsList = response.Message;
 
         return examsList;
@@ -88,31 +89,32 @@ public class GetSched
         bool fromGroup = false,
         string? recommendedToken = null,
         PerformanceMetric? metric = null
-    )
-    {
-        var allowCache = await SettingsService.GetBool(uid, SettingsTypeList.AllowDataCaching, fromGroup, CancellationToken.None);
-        
+    ) {
+        var allowCache =
+            await SettingsService.GetBool(uid, SettingsTypeList.AllowDataCaching, fromGroup, CancellationToken.None);
+
         var cacheDate = $"{dayData.StartDate} — {dayData.EndDate}";
         var (cachedSched, cachedExams) =
             CachedScheduleLibrary.DateExists(uid, cacheDate)
                 ? CachedScheduleLibrary.GetText(uid, cacheDate)
                 : (null, null);
 
-        if (cachedSched != null && cachedExams != null && allowCache)
-        {
+        if (cachedSched != null && cachedExams != null && allowCache) {
             Log.Debug("[CachedScheduleLibrary | {uid}] Sending cached response!", uid);
             return (cachedSched, cachedExams, ["-"]);
         }
 
         var boundToken = (fromGroup ? await CodeBunch.GetUidFromGroup(uid) : uid)!;
-        
+
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (boundToken == null) {
             return (null, null, ["No bounded person for group"]);
         }
-        
+
         (recommendedToken, var jwt) =
-            recommendedToken is null ? await TokenService.Get((long) boundToken, fromGroup, parent: uid, metric: metric) : (recommendedToken, ["?"]);
+            recommendedToken is null
+                ? await TokenService.Get((long)boundToken, fromGroup, parent: uid, metric: metric)
+                : (recommendedToken, ["?"]);
 
 
         // fix for double TokenService.Get call
@@ -123,21 +125,14 @@ public class GetSched
             GetExamsFromApi(uid, dayData, fromGroup, recommendedToken, metric: metric)
         );
 
-        
+
         CachedScheduleLibrary.Delete(uid, cacheDate);
-        if (allowCache)
-        {
+        if (allowCache) {
             CachedScheduleLibrary.Add(uid, cacheDate, newSched, newExams);
         }
 
 
         return (newSched, newExams, jwt);
-    
-}
 
-
-
-
-
-
+    }
 }
