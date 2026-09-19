@@ -4,6 +4,8 @@
     build:
       context: .
       dockerfile: Dockerfile
+    user: root
+    entrypoint: [ "sh", "-c", "chown -R app:app /app/logs && exec su -s /bin/sh app -c 'dotnet Scheder.dll'" ]
     depends_on:
       postgres:
         condition: service_healthy
