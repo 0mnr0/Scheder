@@ -57,6 +57,17 @@ public class RunConfig
             Log.Information("[DebugUid] is empty, debug data will not be sent");
         }
 
+        if (Env.UseProxy && string.IsNullOrEmpty(Env.ProxyLine)) { 
+            isFatal = true;
+            Log.Fatal("[Proxy] Incorrect ProxyConnection variable!");
+        }
+
+        
+        if (Env.UseProxyForWeather && string.IsNullOrEmpty(Env.ProxyLine)) {
+            isFatal = true;
+            Log.Fatal("[Proxy] Incorrect ProxyConnection variable!");
+        }
+
         if (string.IsNullOrWhiteSpace(Env.WeatherApiToken))
         {
             Log.Warning("[WeatherApiToken] is null or empty!");

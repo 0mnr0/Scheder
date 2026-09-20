@@ -19,8 +19,8 @@ public class Proxy {
         return ProxyManager.ParseProxyString(line);
     }
 
-    public static HttpClient? SetAutoProxy() {
-        if (!Env.UseProxy) return null;
+    public static HttpClient? SetAutoProxy(bool getForced = false) {
+        if (!Env.UseProxy && !getForced) return null;
 
         
         var conLine = Env.ProxyLine!;

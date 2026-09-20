@@ -47,6 +47,8 @@ Built for Top-Academy on Telegram.Bot (Api 10.3)
 <br>
 `UseProxy` - **bool** | Set to true or false and set `ProxyConnection`
 <br>
+`UseProxyForWeather` - **bool** | Recommended if bot is hosted in Russia. Requires `ProxyConnection`
+<br>
 `ProxyConnection` - **str** | Use one line configuration. Example: `socks5://password:password@ip_here:port_here`. Supports: HTTP(s), Socks4/4a/5/5e
 <br>
 `TalkativePerformance` - **bool** | Allow to show metric not only to DebugUID

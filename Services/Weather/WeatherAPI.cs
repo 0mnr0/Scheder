@@ -1,17 +1,29 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 using Scheder.Tools.Config;
+using Scheder.Tools.Proxy;
 using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.Weather;
 
 public class WeatherAPI
 {
-    private static readonly HttpClient Client = new();
+    private static HttpClient _client = new();
+
+
+    public static void Init() {
+        if (!Env.UseProxyForWeather) return;
+        
+        var proxy = Proxy.SetAutoProxy(true);
+        if (proxy is null) return;
+        
+        _client = proxy;
+    }
 
     public static async Task<List<WeatherObject>?> Get(string city, string date) {
 
         var parseUrl = $"https://api.weatherapi.com/v1/forecast.json?key={Env.WeatherApiToken}&q={city}&dt={date}";
-        var json = await Client.GetStringAsync(parseUrl);
+        var json = await _client.GetStringAsync(parseUrl);
         
         var doc = JsonDocument.Parse(json);
         var forecast = doc.RootElement

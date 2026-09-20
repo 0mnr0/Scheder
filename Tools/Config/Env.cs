@@ -16,6 +16,7 @@ public class Env
     public static readonly string? TimeMissApi = GetString("TimeMissAPI") ?? null;
     
     public static readonly bool SkipChromium = GetBool("SkipChromium", false);
+    public static readonly bool UseProxyForWeather = GetBool("UseProxyForWeather", false);
     public static readonly bool DisableEarlyDayFix = GetBool("DisableEarlyDayFix", false);
     public static readonly bool FastStart = GetBool("FastStart");
     public static readonly long DebugUid = GetLong("DebugUID", 0);
