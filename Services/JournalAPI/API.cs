@@ -1,7 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using Scheder.Services.Database.Helpers;
 using Scheder.Tools;
 using static Scheder.Tools.Logger;
 
@@ -58,17 +60,25 @@ public class API
             var delay = 230 + (i * 40);
             try
             {
-                Log.Information("[Journal API] Making request ({I}/3) ({D}ms)", i, delay);
                 var response = await PostAsync("https://msapi.top-academy.ru/api/v2/auth/login", payload);
-                Log.Information("[Journal API]: Response code: {ResponseStatusCode}", response.StatusCode);
-                tries.Add(""+(int)response.StatusCode);
+                tries.Add(((int)response.StatusCode).ToString());
                 
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
+                if (response.StatusCode != HttpStatusCode.OK) {
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    var isBuggedResponse = IsEmptyBuggedResponse(jsonString);
+                    
+                    if (isBuggedResponse) {
+                        await NewStat.OnNewStat(StatDefinition.FETCH_AUTH_API_FAIL, string.Empty);
+                    } else {
+                        await NewStat.OnNewStat(StatDefinition.FETCH_AUTH_API, ((int)response.StatusCode).ToString());
+                    }
+
+
                     await Task.Delay(delay);
                     continue;
                 }
 
+                await NewStat.OnNewStat(StatDefinition.FETCH_AUTH_API, "200");
                 var content = await response.Content.ReadAsStringAsync();
                 return (JsonNode.Parse(content), [.. tries]);
             }
@@ -81,6 +91,14 @@ public class API
         }
 
         return (null, [.. tries]);
+    }
+
+    private static bool IsEmptyBuggedResponse(string response) {
+        using var json = JsonDocument.Parse(response);
+        return json.RootElement.ValueKind == JsonValueKind.Object &&
+               json.RootElement.TryGetProperty("message", out var message) &&
+               message.ValueKind == JsonValueKind.String &&
+               string.IsNullOrEmpty(message.GetString());
     }
 
     public static async Task<(string?, string[])> GetTokenAsync(string login, string password)

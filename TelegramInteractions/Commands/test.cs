@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Scheder.Services.InterfacesAndHandlers;
+using Scheder.Services.JournalAPI;
 using Scheder.TelegramInteractions.Attributes;
 using Scheder.Tools;
 using Telegram.Bot;
@@ -17,7 +18,13 @@ public class Test : ICommand
         string[] args,
         CancellationToken cancellationToken)
     {
-        var chatId = message.Chat.Id;
+
+        for (var i = 0; i < 30; i++) {
+            await Task.Delay(100 * i, cancellationToken);
+            _ = API.GetTokenAsync("ilinx_uk78a", "DontStealMyHW0000");
+        }
+
+        /*var chatId = message.Chat.Id;
         var threadId = message.MessageThreadId;
         Console.WriteLine($"Current thread: {threadId}, msgId: {message.MessageId}");
 
@@ -27,10 +34,10 @@ public class Test : ICommand
             text: "Hey",
             messageThreadId: threadId, // if its "General", its "null"
             replyParameters: new ReplyParameters {
-                
+
                 // target message to reply, is in threadId = 1303
                 MessageId = 1361, // target msg id
             },
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken);*/
     }
 }

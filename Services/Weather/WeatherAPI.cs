@@ -1,5 +1,5 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
+using Scheder.Services.Database.Helpers;
 using Scheder.Tools.Config;
 using Scheder.Tools.Proxy;
 using static Scheder.Tools.Logger;
@@ -12,18 +12,42 @@ public class WeatherAPI
 
 
     public static void Init() {
+        _client.Timeout = TimeSpan.FromSeconds(0.8);
         if (!Env.UseProxyForWeather) return;
         
         var proxy = Proxy.SetAutoProxy(true);
         if (proxy is null) return;
         
+        proxy.Timeout = TimeSpan.FromSeconds(0.8);
         _client = proxy;
     }
 
     public static async Task<List<WeatherObject>?> Get(string city, string date) {
 
         var parseUrl = $"https://api.weatherapi.com/v1/forecast.json?key={Env.WeatherApiToken}&q={city}&dt={date}";
-        var json = await _client.GetStringAsync(parseUrl);
+        // var json = await _client.GetStringAsync(parseUrl);
+
+        var json = string.Empty;
+        for (var i = 0; i < 4; i++) {
+            try {
+                var response = await _client.GetAsync(parseUrl);
+                if (i > 0) {
+                    Log.Warning("[WeatherAPI] Fail Counter: Iteration {S} = Code {A}", i+1, response.StatusCode);
+                }
+                await NewStat.OnNewStat(StatDefinition.FETCH_WEATHER_API, ((int)response.StatusCode).ToString());
+                if (!response.IsSuccessStatusCode) {
+                    continue;
+                }
+
+                json = await response.Content.ReadAsStringAsync();
+                break;
+            }
+            catch (Exception e) {
+                await NewStat.OnNewStat(StatDefinition.FETCH_WEATHER_API_TIMEOUT, "Timeout");
+                Log.Warning("[WeatherAPI] Fail Counter: Iteration {S} = Fail: {e}", i+1, e.Message);
+            }
+        }
+        if (string.IsNullOrEmpty(json)) return null;
         
         var doc = JsonDocument.Parse(json);
         var forecast = doc.RootElement

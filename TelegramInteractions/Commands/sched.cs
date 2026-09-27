@@ -1,5 +1,6 @@
 ﻿using Scheder.Services.ContextDetection;
 using Scheder.Services.Database;
+using Scheder.Services.Database.Helpers;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
 using Scheder.Services.Weather;
@@ -56,6 +57,7 @@ public class Sched : ICommand
         
         metric.Start(MetricType.Total);
         var calledViaContext = args is ["directMessage", _]; // checks that .length == 2 and first index is "directMessage"
+        _ = NewStat.OnNewStat(StatDefinition.BOT_SCHED_ASK, chatId.ToString());
 
         if (isGroup && !await Memory.Group.IsGroupBind(chatId)) {
             await bot.SendMessage(
@@ -109,7 +111,7 @@ public class Sched : ICommand
                     new InlineKeyboardButton($"Показать на {dayParseResult.DayParsedName}")
                         { CallbackData = $"sched:To:{dayParseResult.StartDate}", Style = KeyboardButtonStyle.Danger },
                     new InlineKeyboardButton("Всё супер, закрыть")
-                        { CallbackData = $"sched:C", Style = KeyboardButtonStyle.Primary }
+                        { CallbackData = "sched:C", Style = KeyboardButtonStyle.Primary }
                 ]
             ]);
         }
@@ -134,10 +136,6 @@ public class Sched : ICommand
 
         var bgWeatherResult = await bgWeatherTask;
         var (finalWeather, cachedImgId) = (bgWeatherResult.Item1, bgWeatherResult.Item2);
-        if ((finalWeather.Count == 0 || finalWeather is null) || cachedImgId is null || cachedImgId.Count == 0) {
-            Log.Error($"Weather is empty: {finalWeather is { Count: 0 }}, {finalWeather is null}, {cachedImgId is null}, {cachedImgId is { Count: 0 }}");
-        }
-        
         
         var weatherAsText = await SettingsService.GetValue(chatId, SettingsTypeList.AllowWeather, isGroup, cancellationToken) is 1;
         var useCache = cachedImgId is not null && cachedImgId.Count > 0;

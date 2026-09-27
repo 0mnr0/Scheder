@@ -1,4 +1,5 @@
-﻿using Scheder.Tools.Config;
+﻿using Scheder.Services.Database.Helpers;
+using Scheder.Tools.Config;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -96,7 +97,9 @@ public class UpdateHandler : IUpdateHandler
         CancellationToken cancellationToken)
     {
         Log.Fatal("[Telegram.Bot]: {e}", exception);
-
+        
+        _ = NewStat.OnNewStat(StatDefinition.CODE_FAILURE, string.Empty);
+        Task.Delay(250, cancellationToken).Wait(cancellationToken);
         return Task.CompletedTask;
     }
 }

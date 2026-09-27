@@ -2,6 +2,7 @@
 using System.Reflection.Metadata;
 using JetBrains.Annotations;
 using Scheder.Services.ContextDetection;
+using Scheder.Services.Database.Helpers;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI;
 using Scheder.TelegramInteractions.Attributes;
@@ -26,6 +27,8 @@ public class Exams : ICommand
         var isGroup = ChatTools.IsGroup(message);
         var msgText = message.Text!;
         var noHumanoidFixes = msgText[^1].ToString() == "!";
+        
+        await NewStat.OnNewStat(StatDefinition.BOT_EXAM_ASK, chatId.ToString());
         
         var day = DateExtractor.GetDay(msgText, null);
         var dayParseResult = await GetSched.GetDay(chatId, day, null, isGroup, ignoreEarlyDay: noHumanoidFixes);

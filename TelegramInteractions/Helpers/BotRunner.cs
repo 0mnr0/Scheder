@@ -22,6 +22,7 @@ public class BotRunner {
     
     private static async Task CookMaterials() {
         DotNetEnv.Env.Load();
+        await Stats.InitializeAsync();
         await Memory.InitializeAsync();
         ElevatedUserConfig.DebugUID = Env.DebugUid;
 
@@ -68,7 +69,6 @@ public class BotRunner {
     }
     
     public static async Task Once() {
-        Console.WriteLine(Env.UseWebHook);
         if (Env.UseWebHook) {
             var receiver = new WebhookUpdateReceiver(_bot, _updateHandler, secretToken: Env.TelegramToken);
             var listener = new LocalWebhookListener(receiver, port: Env.WebHookListenPort, path: Env.WebHookAddress!);
@@ -84,7 +84,8 @@ public class BotRunner {
                 _updateHandler,
                 new ReceiverOptions {
                     AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery]
-                });
+                } );
         }
     }
+    
 }

@@ -1,8 +1,9 @@
 ﻿namespace Scheder.Services.Database;
 
-using System.Text.Json.Serialization;
 using Npgsql;
 using NpgsqlTypes;
+
+public record StatRecord(int Id, string Key, string Value, DateTime When);
 
 public static class Stats
 {
@@ -30,66 +31,57 @@ public static class Stats
         return await cmd.ExecuteNonQueryAsync();
     }
 
+    private static async Task<List<StatRecord>> ExecuteQuery(string sql, params NpgsqlParameter[] parameters)
+    {
+        await using var conn = await OpenConnectionAsync();
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddRange(parameters);
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var result = new List<StatRecord>();
+        while (await reader.ReadAsync())
+        {
+            result.Add(new StatRecord(
+                reader.GetInt32(reader.GetOrdinal("id")),
+                reader.GetString(reader.GetOrdinal("key")),
+                reader.GetString(reader.GetOrdinal("value")),
+                reader.GetDateTime(reader.GetOrdinal("time"))
+            ));
+        }
+
+        return result;
+    }
 
     public static Task InitializeAsync()
     {
         const string sql = """
 
                                        CREATE TABLE IF NOT EXISTS stats (
-                                           id          SERIAL PRIMARY KEY,
-                                           action_type TEXT    NOT NULL,
-                                           chat_id     BIGINT  NOT NULL,
-                                           who_asked   BIGINT  NOT NULL,
-                                           time        TEXT    NOT NULL,
-                                           data        JSONB   NOT NULL DEFAULT '{}'
+                                           id    SERIAL PRIMARY KEY,
+                                           key   TEXT        NOT NULL,
+                                           value TEXT        NOT NULL,
+                                           time  TIMESTAMPTZ NOT NULL
                                        );
                            """;
 
         return ExecuteNonQuery(sql);
     }
-    
-    public static Task SaveAsync(string actionType, long chatId, long whoAsked, string time, string json) =>
+
+    // Вставляет запись (key, value, when) в БД
+    public static Task InsertStatAsync(string key, string value, DateTime when) =>
         ExecuteNonQuery(
-            "INSERT INTO stats (action_type, chat_id, who_asked, time, data) " +
-            "VALUES (@actionType, @chatId, @whoAsked, @time, @data::jsonb)",
-            Param("actionType", actionType, NpgsqlDbType.Text),
-            Param("chatId", chatId, NpgsqlDbType.Bigint),
-            Param("whoAsked", whoAsked, NpgsqlDbType.Bigint),
-            Param("time", time, NpgsqlDbType.Text),
-            Param("data", json, NpgsqlDbType.Jsonb));
-}
+            "INSERT INTO stats (key, value, time) VALUES (@key, @value, @time)",
+            Param("key", key, NpgsqlDbType.Text),
+            Param("value", value, NpgsqlDbType.Text),
+            Param("time", when, NpgsqlDbType.TimestampTz));
 
+    // Возвращает все записи по указанному ключу
+    public static Task<List<StatRecord>> GetStatAsync(string key) =>
+        ExecuteQuery(
+            "SELECT id, key, value, time FROM stats WHERE key = @key ORDER BY time",
+            Param("key", key, NpgsqlDbType.Text));
 
-
-public class StatsData
-{
-    [JsonPropertyName("Total")]
-    public int Total { get; set; }
-
-    [JsonPropertyName("Context")]
-    public int Context { get; set; }
-
-    [JsonPropertyName("Token")]
-    public int Token { get; set; }
-
-    [JsonPropertyName("ParseJournal")]
-    public int ParseJournal { get; set; }
-
-    [JsonPropertyName("Build")]
-    public int Build { get; set; }
-
-    [JsonPropertyName("Delivery")]
-    public int Delivery { get; set; }
-
-    [JsonPropertyName("WeatherParse")]
-    public int WeatherParse { get; set; }
-
-    [JsonPropertyName("WeatherRender")]
-    public int WeatherRender { get; set; }
-
-    [JsonPropertyName("DraftTime")]
-    public int? DraftTime { get; set; }
-
-    [JsonPropertyName("TriggerPercent")]
-    public string? TriggerPercent { get; set; }
+    // Возвращает все записи
+    public static Task<List<StatRecord>> GetStatsAsync() =>
+        ExecuteQuery("SELECT id, key, value, time FROM stats ORDER BY time");
 }
