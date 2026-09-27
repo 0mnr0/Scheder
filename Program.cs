@@ -9,7 +9,7 @@ await BotRunner.Prepare(); // creates a bot but doesn't start it yet
 await BotRunner.LoadMaterials();
 
 DateWatcherService.Run();
-BotRunner.Once();
+await BotRunner.Once();
 
 Console.WriteLine("Bot Started!");
 await Task.Delay(Timeout.Infinite); // for docker

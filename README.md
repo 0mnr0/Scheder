@@ -59,6 +59,13 @@ Built for Top-Academy on Telegram.Bot (Api 10.3)
 <br>
 `DisableEarlyDayFix` - **bool** | Disables protection for tomorrow dates at early hours. See "Details"
 <br>
+`UseWebHook` - **bool** | Works with webhooks instead of polling
+<br>
+`WebHookDomain` - **bool** | Set domain if u are using webhooks (example: `https://example.com`)
+<br>
+`WebHookPath` - **bool** | Set WebHook path for a domain (example: `/bot/webhook`)
+
+<br>
 
 `TimeMissAPI`, `PreFetchData`, `WeatherSpec` - See "Details"
 
@@ -136,6 +143,7 @@ This config will parse and cache token in this conditions:
 
 `IsGroup` - required. Defines, that target ID is (not) group  
 `CopyFor` - *optional*. Defines, copy cached token for another groups and users
+
 
 > [!WARNING]
 > There’s no point in updating the token more often than 3 times an hour. Journal stores the token permissions for ~25–30 minutes.

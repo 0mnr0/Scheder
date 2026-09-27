@@ -5,8 +5,8 @@ using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI.PreFetch;
 using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
-using Scheder.TelegramInteractions.Commands;
 using Scheder.TelegramInteractions.Commands.Other;
+using Scheder.Tools;
 using Scheder.Tools.Config;
 using Scheder.Tools.Proxy;
 using Telegram.Bot;
@@ -67,11 +67,24 @@ public class BotRunner {
         
     }
     
-    public static void Once() {
-        _bot.StartReceiving(
-            _updateHandler,
-            new ReceiverOptions {
-                AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery]
-            });
+    public static async Task Once() {
+        Console.WriteLine(Env.UseWebHook);
+        if (Env.UseWebHook) {
+            var receiver = new WebhookUpdateReceiver(_bot, _updateHandler, secretToken: Env.TelegramToken);
+            var listener = new LocalWebhookListener(receiver, port: Env.WebHookListenPort, path: Env.WebHookAddress!);
+            listener.Start();
+            
+            await _bot.SetWebhook(
+                url: $"{Env.WebHookDomain}{Env.WebHookAddress}", secretToken: ChatTools.GenerateRandomString(32));
+        }
+        else {
+            await _bot.DeleteWebhook();
+            
+            _bot.StartReceiving(
+                _updateHandler,
+                new ReceiverOptions {
+                    AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery]
+                });
+        }
     }
 }

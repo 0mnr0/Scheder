@@ -21,6 +21,11 @@ public class Env
     public static readonly bool FastStart = GetBool("FastStart");
     public static readonly long DebugUid = GetLong("DebugUID", 0);
     
+    public static readonly bool UseWebHook = GetBool("UseWebHook", false);
+    public static readonly string? WebHookDomain = GetString("WebHookDomain");
+    public static readonly string? WebHookAddress = GetString("WebHookAddress");
+    public static readonly int WebHookListenPort = GetInt("WebHookListenPort", 54890);
+    
     
     // PROXY
     public static readonly bool UseProxy = GetBool("UseProxy");
