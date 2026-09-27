@@ -19,14 +19,15 @@ public class Proxy {
         return ProxyManager.ParseProxyString(line);
     }
 
-    public static HttpClient? SetAutoProxy(bool getForced = false) {
-        if (!Env.UseProxy && !getForced) return null;
+    public static HttpClient SetAutoProxy(bool getForced = false) {
+        var defaultHttpClient = new HttpClient {Timeout = TimeSpan.FromSeconds(30)};
+        if (!Env.UseProxy && !getForced) return defaultHttpClient;
 
         
         var conLine = Env.ProxyLine!;
         if (string.IsNullOrEmpty(conLine)) {
             Logger.Log.Error("UseProxy set to true but \"ProxyLine\" is null or empty! Proxy is not used!");
-            return null;
+            return defaultHttpClient;
         }
         
         var conData = ParseProxyString(conLine);
@@ -50,7 +51,7 @@ public class Proxy {
             return RunHttp(creds, startData);
         }
 
-        return null;
+        return defaultHttpClient;
     }
 
 
