@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.Json;
 using JetBrains.Annotations;
 using Scheder.Services.ContextDetection;
 using Scheder.Services.InterfacesAndHandlers;
@@ -53,7 +54,8 @@ public class Sched : ICallbackCommand
         if (args[0] == "2") {dayParseResult.DayDisplay = DayType.ReTomorrow;}
         var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken);
         var (schedule, exams, _) = await GetSched.GetSchedAndExams(chatId, dayParseResult, isGroup);
-        var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams);
+        
+        var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, examList: exams);
         
         var currentMessage = await bot.EditMessageText(
             chatId: chatId,

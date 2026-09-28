@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Scheder.Services.ContextDetection;
+using Scheder.Services.JournalAPI;
 using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
 using Scheder.TelegramInteractions.Commands.Settings.Data;
@@ -17,13 +18,12 @@ public abstract class SchedMessageBuilder
     public static string BuildMessage(
         string? raw,
         BestDayOption.BestDayParseResult day,
-        string? rawExamList = null,
+        API.ExamsResponse? examList = null,
         string[]? jwtData = null,
         PerformanceMetric? metric = null,
         bool asChange = false,
         bool showDateInTitle = false
-    )
-    {
+    ) {
         using (metric?.Measure(MetricType.Build)) {
             if (string.IsNullOrEmpty(raw))
             {
@@ -36,7 +36,7 @@ public abstract class SchedMessageBuilder
             var dayName = showDateInTitle ? day.DayDisplay : DateExtractor.GetDayName(day.DayDisplay);
             var dateDisplay = (displayWeek ? $"{day.StartDate} — {day.EndDate}" : day.StartDate).Replace("-", ".");
 
-            var (lessons, exams) = ParseAndSort(raw, rawExamList, day);
+            var (lessons, exams) = ParseAndSort(raw, examList, day);
             var messageSize = 512
                               + lessons.Count * (displayWeek ? 420 : 250)
                               + exams.Count * 200;
@@ -152,7 +152,7 @@ public abstract class SchedMessageBuilder
 
             if (exams.Count > 0) {
                 messageText.Append(
-                    BuildExams(rawExamList, day, showDates: displayWeek)
+                    BuildExams(examList, day, showDates: displayWeek)
                 );
             }
 
@@ -170,14 +170,14 @@ public abstract class SchedMessageBuilder
 
 
     public static string BuildExams(
-            string? raw,
+            API.ExamsResponse? exams,
             BestDayOption.BestDayParseResult day,
             bool showDates = false,
             bool isStandalone = false,
             PerformanceMetric? metric = null
         ) {
         using (metric?.Measure(MetricType.Build)) {
-            var examList = ParseAndSortExams(raw, day, skipDateEnd: isStandalone);
+            var examList = ParseAndSortExams(exams, day, skipDateEnd: isStandalone);
             var messageText = new StringBuilder(220 * examList.Count + 200);
 
             switch (isStandalone) {
@@ -197,18 +197,34 @@ public abstract class SchedMessageBuilder
 
             for (var i = 0; i < examList.Count; i++) {
                 var exam = examList[i];
+                var unknownTeacherName = string.IsNullOrEmpty(exam.TeacherName);
+                messageText.Append("<table bordered>");
 
-                messageText.Append($"""
-                                    <table bordered>
-                                        <thead>
-                                            <tr><th align="center"> <b> {i + 1}) {exam.TeacherName}</b>  </th></tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr><th align="center"> {exam.SpecName} </th></tr>
-                                            {(showDates ? $"""<tr><th align="center">Дата: {exam.Date}</th></tr>""" : "")}
-                                        </tbody>
-                                    </table>
-                                    """);
+                if (unknownTeacherName) {
+                    messageText.Append($"""
+                                            <thead>
+                                                <tr><th align="center"> <b> {i + 1}) {exam.SpecName}</b>  </th></tr>
+                                            </thead>
+                                            <tbody>
+                                            {(showDates
+                                                ? $"""<tbody> <tr><th align="center">Дата: {exam.Date}</th></tr> </tbody>"""
+                                                : "")
+                                            }
+                                        """);
+                }
+                else {
+                    messageText.Append($"""
+                                            <thead>
+                                                <tr><th align="center"> <b> {i + 1}) {exam.TeacherName}</b>  </th></tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><th align="center"> {exam.SpecName} </th></tr>
+                                                {(showDates ? $"""<tr><th align="center">Дата: {exam.Date}</th></tr>""" : "")}
+                                            </tbody>
+                                        """);
+                }
+
+                messageText.Append("</table>");
 
             }
 
@@ -285,7 +301,7 @@ public abstract class SchedMessageBuilder
 
 
 
-    private static (List<Lesson>, List<ExamObject>) ParseAndSort(string json, string? jsonExams, BestDayOption.BestDayParseResult day)
+    private static (List<Lesson>, List<ExamObject>) ParseAndSort(string json, API.ExamsResponse? jsonExams, BestDayOption.BestDayParseResult day)
     {
         try {
             var lessons = JsonSerializer.Deserialize<List<Lesson>>(json) // line 292
@@ -307,11 +323,11 @@ public abstract class SchedMessageBuilder
         }
     }
 
-    private static List<ExamObject> ParseAndSortExams(string? jsonExams, BestDayOption.BestDayParseResult day, bool skipDateEnd = false)
+    private static List<ExamObject> ParseAndSortExams(API.ExamsResponse? jsonExams, BestDayOption.BestDayParseResult day, bool skipDateEnd = false)
     {
         
-        var exams = jsonExams != null ? (JsonSerializer.Deserialize<List<ExamObject>>(jsonExams) ?? []) : [];
-
+        var exams = jsonExams != null ? BuildExamObjects(jsonExams) : [];
+        
         var examsList = exams
             .OrderBy(l => ParseDate(l.Date))
             .ToList();
@@ -385,13 +401,53 @@ public abstract class SchedMessageBuilder
         public required string SpecName { get; set; }
         
         [JsonPropertyName("teacher")]
-        public required string TeacherName { get; set; }
+        public required string? TeacherName { get; set; }
+    }
+
+    private static List<ExamObject> BuildExamObjects(API.ExamsResponse jsonExams) {
+        var onlyPartialData = jsonExams is { MainSuccess: true, Success: false } || jsonExams.StudentExams is null;
+        
+        if (string.IsNullOrEmpty(jsonExams.FutureExams)) return [];
+        jsonExams.StudentExams ??= string.Empty;
+        
+        List<ExamObject> outputExams = [];
+        List<ExamDefine.StudentExams> studExams = [];
+        
+        
+        var futureExams = JsonSerializer.Deserialize<List<ExamDefine.FutureExams>>(jsonExams.FutureExams)!;
+        if (!onlyPartialData) {
+            studExams = JsonSerializer.Deserialize<List<ExamDefine.StudentExams>>(jsonExams.StudentExams)!;
+        }
+        foreach (var exam in futureExams) {
+            var newExam = new ExamObject {
+                Date = exam.Date,
+                SpecName = exam.Spec,
+                TeacherName = null
+            };
+            
+            if (!onlyPartialData) {
+                var linkedExam = studExams.FirstOrDefault(x => 
+                    x.AttestationType == exam.AttestationType &&
+                    x.Spec == exam.Spec &&
+                    x.SubjectId == exam.SubjectId
+                );
+                
+                if (linkedExam != null) {
+                    newExam.TeacherName = linkedExam.Teacher;
+                }
+            }
+            
+            outputExams.Add(newExam);
+        }
+
+        return outputExams;
+
     }
 
 
 
 
-    
+
 
     public static async Task<string?> BuildWeatherText(long chatId, BestDayOption.BestDayParseResult dayParseResult, bool isGroup) {
         var weatherData = await Weather.GetWeather(chatId, dayParseResult, isGroup);

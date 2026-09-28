@@ -21,7 +21,7 @@ public class Test : ICommand
 
         for (var i = 0; i < 30; i++) {
             await Task.Delay(100 * i, cancellationToken);
-            _ = API.GetTokenAsync("ilinx_uk78a", "DontStealMyHW0000");
+            _ = API.GetTokenAsync("", "");
         }
 
         /*var chatId = message.Chat.Id;

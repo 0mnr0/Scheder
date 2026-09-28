@@ -78,7 +78,7 @@ public class Sched : ICommand
         
         await SetDraft("Парсинг токена и расписаний…", ChatAction.Typing);
         var (schedule, exams, jwt) = await GetSched.GetSchedAndExams(chatId, dayParseResult, fromGroup, metric: metric);
-        var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, rawExamList: exams, jwtData: jwt, metric: metric);
+        var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, examList: exams, jwtData: jwt, metric: metric);
         
         
         var savedResponse = AskingHistory.HaveResponse(chatId, dayParseResult.StartEndDate);

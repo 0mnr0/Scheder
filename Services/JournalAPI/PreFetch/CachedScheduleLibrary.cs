@@ -8,7 +8,7 @@ public class CachedScheduleLibrary
     {
         public string? SchedOnDate { get; set; } 
         public string? Sched { get; set; }
-        public string? Exams { get; set; }
+        public API.ExamsResponse? Exams { get; set; }
         public DateTime Update { get; set; }
     }
     
@@ -62,7 +62,7 @@ public class CachedScheduleLibrary
     }
     
     
-    public static bool Add(long uid, string targetDate, string? schedValue, string? examsValue, bool allowReplace = true)
+    public static bool Add(long uid, string targetDate, string? schedValue, API.ExamsResponse? examsValue, bool allowReplace = true)
     {
         lock (Lock) {
             if (!Behaviour.Other.AllowScheduleCaching) return false;
@@ -100,7 +100,7 @@ public class CachedScheduleLibrary
         }
     }
     
-    public static (string?, string?) GetText(long uid, string targetDate)
+    public static (string?, API.ExamsResponse?) GetText(long uid, string targetDate)
     {
         lock (Lock) {
             if (!Behaviour.Other.AllowScheduleCaching) return (null, null);

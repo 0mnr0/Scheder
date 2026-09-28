@@ -54,7 +54,7 @@ public class GetSched
     }
 
 
-    public static async Task<string?> GetExamsFromApi(
+    public static async Task<API.ExamsResponse?> GetExamsFromApi(
         long uid,
         BestDayOption.BestDayParseResult dayData,
         bool fromGroup = false,
@@ -75,15 +75,12 @@ public class GetSched
         if (token == null) return null;
         
         var response = await API.GetExams(token, metric: metric);
-        if (response.Code != 200) return null;
-        var examsList = response.Message;
-
-        return examsList;
+        return response.MainSuccess ? response : null;
     }
 
 
 
-    public static async Task<(string?, string?, string[])> GetSchedAndExams(
+    public static async Task<(string?, API.ExamsResponse?, string[])> GetSchedAndExams(
         long uid,
         BestDayOption.BestDayParseResult dayData,
         bool fromGroup = false,

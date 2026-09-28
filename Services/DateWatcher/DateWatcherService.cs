@@ -72,7 +72,6 @@ public class DateWatcherService {
             var (sched, exams, _) = await GetSched.GetSchedAndExams(uid, bestDay, isGroup);
             
             if (sched == null) {return;} // failed to parse. Skip
-            exams ??= "";
 
             var msgText = SchedMessageBuilder.BuildMessage(sched, bestDay, exams, asChange: true);
             var newHashCode = CodeBunch.GetTextHash(msgText);

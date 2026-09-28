@@ -150,14 +150,23 @@ public class API
     public static async Task<ExamsResponse> GetExams(string token, PerformanceMetric? metric = null)
     {
         using (metric?.Measure(MetricType.DataParse)) {
-            var response = await GetAsync(
-                @$"https://msapi.top-academy.ru/api/v2/progress/operations/student-exams",
-                token
+            var (studentExams, futureExams) = await ParallelTasks.Run(
+                GetAsync("https://msapi.top-academy.ru/api/v2/progress/operations/student-exams", token),
+                GetAsync("https://msapi.top-academy.ru/api/v2/dashboard/info/future-exams", token)
             );
 
+            var studentFetchOk = studentExams.StatusCode == HttpStatusCode.OK;
+            var futureFetchOk = futureExams.StatusCode == HttpStatusCode.OK;
+            
+            var studentContent = studentFetchOk ? await studentExams.Content.ReadAsStringAsync() : null;
+            var futureContent = futureFetchOk ? await futureExams.Content.ReadAsStringAsync() : null;
+
             var returnValue = new ExamsResponse {
-                Code = (int)response.StatusCode,
-                Message = await response.Content.ReadAsStringAsync()
+                MainSuccess = futureFetchOk,
+                Success = studentFetchOk && futureFetchOk,
+                Codes = [(int)studentExams.StatusCode, (int)futureExams.StatusCode],
+                StudentExams = studentContent,
+                FutureExams = futureContent,
             };
 
             return returnValue;
@@ -174,10 +183,12 @@ public class API
         public string? Message { get; set; }
     }
     
-    public class ExamsResponse
-    {
-        public int Code { get; set; }
-        public string? Message { get; set; }
+    public class ExamsResponse {
+        public bool MainSuccess { get; set; }
+        public bool Success { get; set; }
+        public List<int> Codes { get; set; } = [];
+        public string? StudentExams { get; set; }
+        public string? FutureExams { get; set; }
     }
 
 }
