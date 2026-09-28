@@ -54,7 +54,7 @@ public class WeatherAPI
             .GetProperty("forecast")
             .GetProperty("forecastday");
 
-        Log.Information("[WeatherAPI] ({S}): {A}", parseUrl, json);
+        Log.Information("[WeatherAPI] ({S}): Size: {A}", parseUrl, json.Length);
         if (forecast.GetArrayLength() == 0) return null;
         
         var hours = forecast[0].GetProperty("hour");
