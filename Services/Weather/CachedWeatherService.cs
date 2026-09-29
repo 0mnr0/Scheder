@@ -7,7 +7,7 @@ public abstract class CachedWeatherService
 {
     public class WeatherCacheEntry
     {
-        public required List<WeatherAPI.WeatherObject> Parsed { get; init; }
+        public required List<WeatherObject> Parsed { get; init; }
         public DateTime Update { get; init; }
         public List<byte[]>? RichImages { get; set; }
     }
@@ -56,7 +56,7 @@ public abstract class CachedWeatherService
     }
     
     
-    public static bool Add(string targetCity, string targetDate, List<WeatherAPI.WeatherObject> weatherData, bool allowReplace = true)
+    public static bool Add(string targetCity, string targetDate, List<WeatherObject> weatherData, bool allowReplace = true)
     {
         lock (Lock)
         {
@@ -93,7 +93,7 @@ public abstract class CachedWeatherService
         }
     }
     
-    public static List<WeatherAPI.WeatherObject>? GetText(string targetCity, string targetDate)
+    public static List<WeatherObject>? GetText(string targetCity, string targetDate)
     {
         lock (Lock)
         {

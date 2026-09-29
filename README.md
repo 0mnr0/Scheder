@@ -37,7 +37,9 @@ Built for Top-Academy on Telegram.Bot (Api 10.3)
 
 #### Additional .env values:
 
-`WEATHER_TOKEN` - **string** | [WeatherAPI](https://weatherapi.com) api key. If not set - weather will not be available. City will be parsed automatically
+`WEATHER_TOKEN` - **string** | [WeatherAPI](https://weatherapi.com) api key. If not set - weather will be parsed from OpenMeteo. City will be parsed automatically
+<br>
+`UseWeatherApi` - **bool** | Default value = false. Can return a timeout error even with proxy, use if OpenMeteo didn't work at all.
 <br>
 `SkipChromium` - **bool** | Recommended if `WEATHER_TOKEN` is not set. Do not start Chromium at all.
 <br>

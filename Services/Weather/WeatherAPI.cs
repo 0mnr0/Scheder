@@ -6,17 +6,14 @@ using static Scheder.Tools.Logger;
 
 namespace Scheder.Services.Weather;
 
-public class WeatherAPI
+public abstract class WeatherApi
 {
     private static HttpClient _client = new();
-
-
     public static void Init() {
         _client.Timeout = TimeSpan.FromSeconds(0.8);
         if (!Env.UseProxyForWeather) return;
         
         var proxy = Proxy.SetAutoProxy(true);
-        if (proxy is null) return;
         
         proxy.Timeout = TimeSpan.FromSeconds(0.8);
         _client = proxy;
@@ -75,9 +72,9 @@ public class WeatherAPI
 
             };
 
-            weatherBlock.WeatherTitle = WeatherAssoc.getOpinion(weatherBlock.Condition);
-            weatherBlock.WeatherIcon = WeatherAssoc.getIcon(weatherBlock.Condition);
-            weatherBlock.WeatherTextIcon = WeatherAssoc.getTextIcon(weatherBlock.Condition);
+            weatherBlock.WeatherTitle = WeatherAssoc.WeatherApi.GetOpinion(weatherBlock.Condition);
+            weatherBlock.WeatherIcon = WeatherAssoc.WeatherApi.GetIcon(weatherBlock.Condition);
+            weatherBlock.WeatherTextIcon = WeatherAssoc.WeatherApi.GetTextIcon(weatherBlock.Condition);
             
             weatherStat.Add(
                 weatherBlock
@@ -88,13 +85,5 @@ public class WeatherAPI
         return weatherStat;
     }
 
-    public class WeatherObject(string time)
-    {
-        public string Time { get; set; } = time;
-        public double Temp { get; set; }
-        public int Condition { get; set; }
-        public string? WeatherTitle { get; set; }
-        public string? WeatherIcon { get; set; }
-        public string? WeatherTextIcon { get; set; }
-    }
+    
 }

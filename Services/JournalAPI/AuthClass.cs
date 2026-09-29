@@ -12,6 +12,7 @@ public class AuthClass
     
     [JsonPropertyName("JWT")]
     public string? Jwt { get; set; }
+    
     [JsonPropertyName("JWTRefreshTime")]
     public DateTime? JwtRefreshTime { get; set; }
 }

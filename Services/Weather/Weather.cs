@@ -13,18 +13,18 @@ public class Weather
         return await Memory.User.GetCity(userId);
     }
 
-    private static async Task<List<WeatherAPI.WeatherObject>?> GetDirectWeather(string userCity, string day, bool isGroup = false)
+    private static async Task<List<WeatherObject>?> GetDirectWeather(string userCity, string day, bool isGroup = false)
     {
         if (Env.WeatherApiToken == null) return null;
-        if (!userCity.Contains('/')) return await WeatherAPI.Get(userCity, day);
+        if (!userCity.Contains('/')) return await WeatherAutoApi.Get(userCity, day);
         
         var data = userCity.Split('/');
         userCity = data[^1];
-        return await WeatherAPI.Get(userCity, day);
+        return await WeatherAutoApi.Get(userCity, day);
     }
 
 
-    public static async Task<List<WeatherAPI.WeatherObject>?> GetWeather(long uid, BestDayOption.BestDayParseResult dayObject, bool isGroup = false, PerformanceMetric? metric = null)
+    public static async Task<List<WeatherObject>?> GetWeather(long uid, BestDayOption.BestDayParseResult dayObject, bool isGroup = false, PerformanceMetric? metric = null)
     {
         using (metric?.Measure(MetricType.WeatherFetch)) {
             if (dayObject.IsWeek) return null;

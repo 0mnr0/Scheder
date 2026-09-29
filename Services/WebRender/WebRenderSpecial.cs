@@ -53,14 +53,14 @@ public class WebRenderSpecial {
 
     public class RenderMaterials {
         public required WebRenderData? Additional { get; set; }
-        public required List<WeatherAPI.WeatherObject> Main { get; set; }
+        public required List<WeatherObject> Main { get; set; }
     }
 
     private static WebRenderData[] _rules = [];
     private static readonly HttpClient Client = new();
 
 
-    public static async Task<List<byte[]>> RenderWeather(List<WeatherAPI.WeatherObject>? weatherData, PerformanceMetric? metric, BestDayOption.BestDayParseResult dayParse) {
+    public static async Task<List<byte[]>> RenderWeather(List<WeatherObject>? weatherData, PerformanceMetric? metric, BestDayOption.BestDayParseResult dayParse) {
         if (weatherData == null) return [];
         
         var day = DateTime.ParseExact(

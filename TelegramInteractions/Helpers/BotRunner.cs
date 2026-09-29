@@ -50,7 +50,7 @@ public class BotRunner {
     public static async Task Prepare() {
         var proxyClient = Proxy.SetAutoProxy();
         await Stats.InitializeAsync();
-        WeatherAPI.Init();
+        WeatherAutoApi.Init();
         
         _bot = new TelegramBotClient(Env.TelegramToken!, httpClient: proxyClient);
 
