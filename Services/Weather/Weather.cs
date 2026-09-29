@@ -15,7 +15,7 @@ public class Weather
 
     private static async Task<List<WeatherObject>?> GetDirectWeather(string userCity, string day, bool isGroup = false)
     {
-        if (Env.WeatherApiToken == null) return null;
+        if (string.IsNullOrEmpty(Env.WeatherApiToken) && Env.UseWeatherApi) return null;
         if (!userCity.Contains('/')) return await WeatherAutoApi.Get(userCity, day);
         
         var data = userCity.Split('/');
@@ -28,7 +28,7 @@ public class Weather
     {
         using (metric?.Measure(MetricType.WeatherFetch)) {
             if (dayObject.IsWeek) return null;
-            if (Env.WeatherApiToken == null) return null;
+            if (string.IsNullOrEmpty(Env.WeatherApiToken) && Env.UseWeatherApi) return null;
             var day = dayObject.StartDate;
 
             if (isGroup) {
