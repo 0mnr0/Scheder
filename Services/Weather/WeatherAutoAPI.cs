@@ -12,7 +12,8 @@ public abstract class WeatherAutoApi {
             return await WeatherApi.Get(city, date);
         }
 
-        return await OpenMeteoAPI.Get(city, date);
+        // return await OpenMeteoAPI.Get(city, date);
+        return null;
     }
 
     public static void Init() {
@@ -24,7 +25,7 @@ public abstract class WeatherAutoApi {
             WeatherApi.Init();
         }
         else {
-            OpenMeteoAPI.Init();
+            // OpenMeteoAPI.Init();
         }
     }
 }
