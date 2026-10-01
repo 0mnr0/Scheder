@@ -52,7 +52,6 @@ public class Sched : ICallbackCommand
         var dayParseResult = await GetSched.GetForcedDay(chatId, day, null, isGroup);
         if (args[0] == "1") {dayParseResult.DayDisplay = DayType.Tomorrow;}
         if (args[0] == "2") {dayParseResult.DayDisplay = DayType.ReTomorrow;}
-        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken);
         var (schedule, exams, _) = await GetSched.GetSchedAndExams(chatId, dayParseResult, isGroup);
         
         var messageText = SchedMessageBuilder.BuildMessage(schedule, dayParseResult, examList: exams);
@@ -64,6 +63,8 @@ public class Sched : ICallbackCommand
             richMessage: new InputRichMessage { Html = messageText },
             cancellationToken: cancellationToken
         );
+        
+        var bgWeatherTask = SchedMessageBuilder.BuildWeather(chatId, dayParseResult, isGroup, cancellationToken);
         
         var (finalWeather, cachedRichMessages) = await bgWeatherTask;
         var useCache = cachedRichMessages is not null && cachedRichMessages.Count > 0;
