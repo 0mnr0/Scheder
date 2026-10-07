@@ -107,70 +107,117 @@ public static class WeatherAssoc
             };
         }
     }
-    
-    
-    
-    public static class OpenMeteo
+
+    public static class GoogleApi
     {
-        public static string GetOpinion(int code)
+        public static string GetOpinion(string? type)
         {
-            return code switch
+            return type switch
             {
-                0 => "Ясно",
-                1 => "Малооблачно",
-                2 => "Облачно",
-                3 => "Пасмурно",
-                45 or 48 => "Туман",
-                51 or 53 or 55 or 56 or 57 => "Возможна морось",
-                61 or 66 => "Легкий дождь",
-                63 or 80 or 81 => "Дождь",
-                65 or 67 or 82 => "Сильный дождь",
-                71 or 85 => "Слабый снег",
-                73 => "Снег",
-                75 or 86 => "Сильный снег",
-                77 => "Град",
-                95 => "Дождь с грозой",
-                96 or 99 => "Гроза с градом",
-                _ => $"ХЗ ({code})"
+                "TYPE_UNSPECIFIED" => "Гугл сказал что сам без понятия что будет",
+                "CLEAR" => "Ясно",
+                "MOSTLY_CLEAR" => "Малооблачно",
+                "PARTLY_CLOUDY" => "Малооблачно",
+                "MOSTLY_CLOUDY" => "Малооблачно",
+                "CLOUDY" => "Облачно",
+                "WINDY" => "Ветрено",
+                "WIND_AND_RAIN" => "Пурга",
+                "LIGHT_RAIN_SHOWERS" => "Мелкий дождь",
+                "CHANCE_OF_SHOWERS" => "Возможен дождь",
+                "SCATTERED_SHOWERS" => "Дождь",
+                "RAIN_SHOWERS" => "Ливень",
+                "HEAVY_RAIN_SHOWERS" => "Ливень",
+                "LIGHT_TO_MODERATE_RAIN" => "Дождь",
+                "MODERATE_TO_HEAVY_RAIN" => "Дождь",
+                "RAIN" => "Дождь",
+                "LIGHT_RAIN" => "Дождь",
+                "HEAVY_RAIN" => "Дождь",
+                "RAIN_PERIODICALLY_HEAVY" => "Дождь",
+                "LIGHT_SNOW_SHOWERS" => "Снег",
+                "CHANCE_OF_SNOW_SHOWERS" => "Снег",
+                "SCATTERED_SNOW_SHOWERS" => "Снег",
+                "SNOW_SHOWERS" => "Снегопад",
+                "HEAVY_SNOW_SHOWERS" => "Снегопад",
+                "LIGHT_TO_MODERATE_SNOW" => "Снег",
+                "MODERATE_TO_HEAVY_SNOW" => "Снег",
+                "SNOW" => "Снег",
+                "LIGHT_SNOW" => "Снег",
+                "HEAVY_SNOW" => "Снегопад",
+                "SNOWSTORM" => "Снег + гроза",
+                "SNOW_PERIODICALLY_HEAVY" => "Снег",
+                "HEAVY_SNOW_STORM" => "Снегопад",
+                "BLOWING_SNOW" => "Метель",
+                "RAIN_AND_SNOW" => "Мокрый снег",
+                "HAIL" => "Град",
+                "HAIL_SHOWERS" => "Град",
+                "THUNDERSTORM" => "Гроза",
+                "THUNDERSHOWER" => "Гроза",
+                "LIGHT_THUNDERSTORM_RAIN" => "Гроза",
+                "SCATTERED_THUNDERSTORMS" => "Гроза",
+                "HEAVY_THUNDERSTORM" => "Гроза",
+                _ => $"ХЗ ({type})"
             };
         }
-
-        public static string GetIcon(int code)
+ 
+        public static string GetIcon(string? type)
         {
-            return code switch
+            return type switch
             {
-                0 => "clear_day",
-                1 => "clear_with_cloudy",
-                2 => "cloudy_with_clear",
-                3 => "cloudy",
-                45 or 48 => "haze_fog",
-                51 or 53 or 55 or 56 or 57 => "sleet_hail",
-                61 or 66 => "drizzle",
-                63 or 80 or 81 => "cloudy_with_rain",
-                65 or 67 or 82 => "rain_showers",
-                71 or 73 or 85 => "cloudy_with_snow",
-                75 or 86 => "heavy_snow",
-                77 => "icy",
-                95 => "thunderstorms",
-                96 or 99 => "strong_thunderstorms",
+                "CLEAR" or "MOSTLY_CLEAR" => "clear_day",
+                "PARTLY_CLOUDY" => "clear_with_cloudy",
+                "MOSTLY_CLOUDY" or "WINDY" => "cloudy_with_clear",
+                "CLOUDY" => "cloudy",
+ 
+                "CHANCE_OF_SHOWERS" => "cloudy_then_rain",
+                "LIGHT_RAIN" => "drizzle",
+                "LIGHT_RAIN_SHOWERS" or "SCATTERED_SHOWERS" or "RAIN_SHOWERS"
+                    or "LIGHT_TO_MODERATE_RAIN" or "RAIN" or "WIND_AND_RAIN" => "cloudy_with_rain",
+                "HEAVY_RAIN_SHOWERS" or "MODERATE_TO_HEAVY_RAIN" or "HEAVY_RAIN"
+                    or "RAIN_PERIODICALLY_HEAVY" => "rain_showers",
+ 
+                "CHANCE_OF_SNOW_SHOWERS" => "cloudy_then_snow",
+                "LIGHT_SNOW_SHOWERS" or "SCATTERED_SNOW_SHOWERS" or "SNOW_SHOWERS"
+                    or "LIGHT_TO_MODERATE_SNOW" or "SNOW" or "LIGHT_SNOW" => "cloudy_with_snow",
+                "HEAVY_SNOW_SHOWERS" or "MODERATE_TO_HEAVY_SNOW" or "HEAVY_SNOW"
+                    or "SNOW_PERIODICALLY_HEAVY" => "heavy_snow",
+                "BLOWING_SNOW" => "blowing_snow",
+                "RAIN_AND_SNOW" => "snow_with_rain",
+ 
+                "HAIL" or "HAIL_SHOWERS" => "icy",
+ 
+                "THUNDERSTORM" or "HEAVY_THUNDERSTORM" => "strong_thunderstorms",
+                "THUNDERSHOWER" or "LIGHT_THUNDERSTORM_RAIN" or "SCATTERED_THUNDERSTORMS"
+                    or "SNOWSTORM" or "HEAVY_SNOW_STORM" => "thunderstorms",
+ 
                 _ => "not_available"
             };
         }
-
-        public static string GetTextIcon(int code)
+ 
+        public static string GetTextIcon(string? type)
         {
-            return code switch
+            return type switch
             {
-                0 => "☀",
-                1 or 2 => "⛅",
-                3 => "☁",
-                45 or 48 => "🌫",
-                51 or 53 or 55 or 56 or 57 => "☔",
-                61 or 63 or 65 or 66 or 67 or 80 or 81 or 82 => "🌧",
-                71 or 73 or 75 or 85 or 86 => "🌨",
-                77 => "☔",
-                95 or 96 or 99 => "☔",
-                _ => $"❓({code})"
+                "CLEAR" or "MOSTLY_CLEAR" => "☀",
+                "PARTLY_CLOUDY" or "MOSTLY_CLOUDY" or "WINDY" => "⛅",
+                "CLOUDY" => "☁",
+ 
+                "CHANCE_OF_SHOWERS" or "LIGHT_RAIN" or "LIGHT_RAIN_SHOWERS" or "SCATTERED_SHOWERS"
+                    or "RAIN_SHOWERS" or "HEAVY_RAIN_SHOWERS" or "LIGHT_TO_MODERATE_RAIN"
+                    or "MODERATE_TO_HEAVY_RAIN" or "RAIN" or "HEAVY_RAIN" or "RAIN_PERIODICALLY_HEAVY"
+                    or "WIND_AND_RAIN" => "🌧",
+ 
+                "CHANCE_OF_SNOW_SHOWERS" or "LIGHT_SNOW_SHOWERS" or "SCATTERED_SNOW_SHOWERS"
+                    or "SNOW_SHOWERS" or "HEAVY_SNOW_SHOWERS" or "LIGHT_TO_MODERATE_SNOW"
+                    or "MODERATE_TO_HEAVY_SNOW" or "SNOW" or "LIGHT_SNOW" or "HEAVY_SNOW"
+                    or "SNOW_PERIODICALLY_HEAVY" or "RAIN_AND_SNOW" => "🌨",
+ 
+                "BLOWING_SNOW" => "🌫",
+ 
+                "HAIL" or "HAIL_SHOWERS" or "THUNDERSTORM" or "THUNDERSHOWER"
+                    or "LIGHT_THUNDERSTORM_RAIN" or "SCATTERED_THUNDERSTORMS" or "HEAVY_THUNDERSTORM"
+                    or "SNOWSTORM" or "HEAVY_SNOW_STORM" => "☔",
+ 
+                _ => $"❓({type})"
             };
         }
     }

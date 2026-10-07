@@ -6,6 +6,7 @@ public class Env
 {
     public static readonly string? TelegramToken = Environment.GetEnvironmentVariable("TG_TOKEN");
     public static readonly string? WeatherApiToken = Environment.GetEnvironmentVariable("Weather_Token") ?? null;
+    public static readonly string? GoogleApiToken = Environment.GetEnvironmentVariable("Google_Weather_Token") ?? null;
     public static readonly string? DbHost = GetHost();
     public static readonly string? DbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
     public static readonly string? DbName = Environment.GetEnvironmentVariable("DB_NAME") ?? DatabaseTools.DatabaseName;

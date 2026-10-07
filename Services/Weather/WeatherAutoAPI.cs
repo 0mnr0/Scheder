@@ -9,11 +9,15 @@ public abstract class WeatherAutoApi {
         }
         
         if (Env.UseWeatherApi) {
+            if (string.IsNullOrEmpty(Env.WeatherApiToken)) {
+                return null;
+            }
+            
             return await WeatherApi.Get(city, date);
         }
 
-        // return await OpenMeteoAPI.Get(city, date);
-        return null;
+        if (string.IsNullOrEmpty(Env.GoogleApiToken)) return null;
+        return await GoogleWeatherApi.Get(city, date);
     }
 
     public static void Init() {
@@ -25,7 +29,7 @@ public abstract class WeatherAutoApi {
             WeatherApi.Init();
         }
         else {
-            // OpenMeteoAPI.Init();
+            GoogleWeatherApi.Init();
         }
     }
 }

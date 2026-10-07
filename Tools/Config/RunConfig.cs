@@ -68,9 +68,15 @@ public class RunConfig
             Log.Fatal("[Proxy] Incorrect ProxyConnection variable!");
         }
 
-        if (Env.UseWeatherApi && string.IsNullOrEmpty(Env.WeatherApiToken))
+        if (Env.AppendWeather && Env.UseWeatherApi && string.IsNullOrEmpty(Env.WeatherApiToken))
         {
-            Log.Warning("[WeatherApiToken] \"Weather_Token\" is null or empty! You can set \"UseWeatherApi\" to \"false\" and use OpenMeteo provider. It doesn't require API key");
+            Log.Warning("[WeatherApiToken] \"Weather_Token\" is null or empty! You can set \"UseWeatherApi\" to \"false\" if you dont wanna use weather");
+            Log.Warning("[WeatherApiToken] Weather is not available!");
+        }
+
+        if (Env.AppendWeather && string.IsNullOrEmpty(Env.GoogleApiToken) && !Env.UseWeatherApi)
+        {
+            Log.Warning("[WeatherApiToken] \"Google_Weather_Token\" is null or empty! You can set \"UseWeatherApi\" to \"false\" if you dont wanna use weather");
             Log.Warning("[WeatherApiToken] Weather is not available!");
         }
 
