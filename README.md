@@ -37,9 +37,11 @@ Built for Top-Academy on Telegram.Bot (Api 10.3)
 
 #### Additional .env values:
 
-`WEATHER_TOKEN` - **string** | [WeatherAPI](https://weatherapi.com) api key. If not set - weather will be parsed from OpenMeteo. City will be parsed automatically
+`GOOGLE_WEATHER_TOKEN` - **string** | [Get Google API Key Here]([https://weatherapi.com](https://developers.google.com/maps/documentation/weather/get-api-key)). City will be parsed automatically. (Recommended)
 <br>
-`UseWeatherApi` - **bool** | Default value = false. Can return a timeout error even with proxy, use if OpenMeteo didn't work at all.
+`WEATHER_TOKEN` - **string** | [WeatherAPI](https://weatherapi.com) api key. City will be parsed automatically (Not recommended)
+<br>
+`UseWeatherApi` - **bool** | Default value = false. WeatherApi can return a timeout error even with proxy, use only if Google Weather is failing for some reason.
 <br>
 `AppendWeather` - **bool** | Default value = true. If false - recommended weather will be skipped. Also recommended to use `SkipChromium`
 <br>
