@@ -24,7 +24,7 @@ public class NonCommandSupport : ITextHandler
         if (string.IsNullOrWhiteSpace(text) || string.IsNullOrEmpty(text))
             return;
 
-        
+        Console.WriteLine("fullDetection:  " + fullDetection);
         if (!fullDetection && !text.StartsWith("пар", StringComparison.CurrentCultureIgnoreCase))
         {
             return;
@@ -34,8 +34,10 @@ public class NonCommandSupport : ITextHandler
         switch (ratio)
         {
             case < DetectionContextRatio.DefaultThreshold:
+                Console.WriteLine(ratio+" = SKIP: " + DetectionContextRatio.DefaultThreshold);
                 return;
             case >= DetectionContextRatio.DefaultThreshold:
+                Console.WriteLine(ratio+" = RUN: " + DetectionContextRatio.DefaultThreshold);
                 await _schedCommand.ExecuteAsync(bot, message, ["directMessage", ratio*100+""], cancellationToken);
                 return;
         }
