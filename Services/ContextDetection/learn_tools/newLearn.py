@@ -334,8 +334,11 @@ def dataset_hash(samples: List[Sample]) -> str:
 def build_pipeline() -> Pipeline:
     char_vec = TfidfVectorizer(analyzer="char", ngram_range=(3, 5),
                                 lowercase=True, max_features=30000, sublinear_tf=True)
-    word_vec = TfidfVectorizer(analyzer="word", ngram_range=(1, 2),
-                                lowercase=True, max_features=10000, sublinear_tf=True, min_df=1)
+    word_vec = TfidfVectorizer(
+        analyzer="word", ngram_range=(1, 2),
+        lowercase=True, max_features=10000, sublinear_tf=True, min_df=1,
+        token_pattern=r"\S+",
+    )
     features = FeatureUnion([("char", char_vec), ("word", word_vec)])
 
     base_clf = LogisticRegression(max_iter=2000, C=0.8, random_state=42)

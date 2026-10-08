@@ -13,6 +13,7 @@ def main():
         clf,
         initial_types=initial_type,
         options={"zipmap": False},
+        target_opset={"": 17, "ai.onnx.ml": 3},
     )
 
     with open(ONNX_PATH, "wb") as f: f.write(onx.SerializeToString())
