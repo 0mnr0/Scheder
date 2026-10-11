@@ -80,6 +80,13 @@ public class RunConfig
             Log.Warning("[WeatherApiToken] Weather is not available!");
         }
 
+        if (Env.TransparentProxyIp is not null && string.IsNullOrEmpty(Env.TransparentProxyIp)) {
+            Log.Warning("[TransparentProxyIp] is null or empty!");
+        }
+        if (Env.TransparentProxyIp is not null && Environment.UserName != "root") {
+            Log.Warning("[TransparentProxyIp] can be launched from root and only on linux!");
+        }
+
         if (!isFatal)
         {
             Log.Warning("[RunConfigTest] .env is fine, launching...");

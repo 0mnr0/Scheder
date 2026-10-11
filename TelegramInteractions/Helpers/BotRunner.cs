@@ -3,6 +3,7 @@ using Scheder.Services.Database;
 using Scheder.Services.DateWatcher;
 using Scheder.Services.InterfacesAndHandlers;
 using Scheder.Services.JournalAPI.PreFetch;
+using Scheder.Services.TelegramIPBlockBypass;
 using Scheder.Services.Weather;
 using Scheder.Services.WebRender;
 using Scheder.TelegramInteractions.Commands.Other;
@@ -48,6 +49,12 @@ public class BotRunner {
     }
     
     public static async Task Prepare() {
+        if (Env.TransparentProxyIp is null || string.IsNullOrEmpty(Env.TransparentProxyIp)) {
+            TelegramIPBlockPatch.Cleanup();
+        } else if (!string.IsNullOrEmpty(Env.TransparentProxyIp)) {
+            await TelegramIPBlockPatch.Run();
+        }
+
         var proxyClient = Proxy.SetAutoProxy();
         await Stats.InitializeAsync();
         WeatherAutoApi.Init();
