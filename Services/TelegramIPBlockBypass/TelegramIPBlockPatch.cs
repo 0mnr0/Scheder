@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using Scheder.Tools.Config;
 
 namespace Scheder.Services.TelegramIPBlockBypass;
@@ -75,6 +76,11 @@ public class TelegramIPBlockPatch {
 
     private static readonly string? TargetServerIp = Env.TransparentProxyIp;
     public static async Task<bool> Run() {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return false;
+        }
+        
         if (TargetServerIp is null) {
             Cleanup();
             return false;
@@ -131,6 +137,11 @@ public class TelegramIPBlockPatch {
     
     public static void Cleanup()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return;
+        }
+        
         Ipt($"-t nat -D OUTPUT -j {Chain}", ignoreError: true);
         Ipt($"-t nat -D PREROUTING -j {Chain}", ignoreError: true);
         Ipt($"-t nat -F {Chain}", ignoreError: true);
