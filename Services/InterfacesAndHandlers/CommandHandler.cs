@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Scheder.TelegramInteractions.Attributes;
+using Scheder.TelegramInteractions.Commands;
 using Scheder.TelegramInteractions.Commands.Other;
 using Scheder.Tools;
 using Telegram.Bot;
@@ -57,7 +58,10 @@ public class CommandHandler
         if (parts.Length == 0)
             return;
         
-        
+        if (await Auth.TryHandlePendingAsync(bot, message, cancellationToken))
+            return;
+
+
         if (ChatTools.IsPrivateChat(message) && !await CodeBunch.RegValidCheck(message)) {
             await _nonregHandler.ExecuteAsync(bot, message, parts, cancellationToken);
             return;

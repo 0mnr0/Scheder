@@ -75,7 +75,7 @@ public class Forgetme : ICallbackCommand {
                             <p> Ваши аутентификационные данные были стёрты. {(boundedGroups.Count > 0 ? "Привязанные группы были отвязаны." : "")} </p>
                             
                             <tg-button-row>
-                                <tg-button type="callback_data" data="keyboard:deleteMsg">Супер</tg-button>
+                                <tg-button type="callback_data" data="keyboard:deleteMsg">Да будет так</tg-button>
                             </tg-button-row>
                             """
                 },
