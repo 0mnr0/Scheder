@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Scheder.Tools;
 using Scheder.Tools.Config;
 
 namespace Scheder.Services.TelegramIPBlockBypass;
@@ -137,14 +138,21 @@ public class TelegramIPBlockPatch {
     
     public static void Cleanup()
     {
+        Console.WriteLine("IsLinux: "+RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             return;
         }
-        
-        Ipt($"-t nat -D OUTPUT -j {Chain}", ignoreError: true);
-        Ipt($"-t nat -D PREROUTING -j {Chain}", ignoreError: true);
-        Ipt($"-t nat -F {Chain}", ignoreError: true);
-        Ipt($"-t nat -X {Chain}", ignoreError: true);
+
+        try {
+
+            Ipt($"-t nat -D OUTPUT -j {Chain}", ignoreError: true);
+            Ipt($"-t nat -D PREROUTING -j {Chain}", ignoreError: true);
+            Ipt($"-t nat -F {Chain}", ignoreError: true);
+            Ipt($"-t nat -X {Chain}", ignoreError: true);
+        }
+        catch (Exception) {
+            Logger.Log.Error("Failed to cleanup routing");
+        }
     }
 }

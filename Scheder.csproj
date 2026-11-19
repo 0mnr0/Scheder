@@ -48,6 +48,7 @@
   
   <ItemGroup>
     <Folder Include="Services\TheMascot\icons\" />
+    <Folder Include="Services\WebRender\WebWidget\" />
   </ItemGroup>
 
 </Project>
