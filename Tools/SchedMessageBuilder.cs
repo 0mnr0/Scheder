@@ -36,7 +36,18 @@ public abstract class SchedMessageBuilder
             var dayName = showDateInTitle ? day.DayDisplay : DateExtractor.GetDayName(day.DayDisplay);
             var dateDisplay = (displayWeek ? $"{day.StartDate} — {day.EndDate}" : day.StartDate).Replace("-", ".");
 
-            var (lessons, exams) = ParseAndSort(raw, examList, day);
+            List<Lesson> lessons;
+            List<ExamObject> exams;
+            try
+            {
+                (lessons, exams) = ParseAndSort(raw, examList, day);
+            }
+            catch (JsonException e)
+            {
+                Log.Warning("[BuildMessage] Failed to parse schedule: {error}", e.Message);
+                return BuildJwtFail(["Invalid schedule JSON"], "Не удалось разобрать ответ журнала :(");
+            }
+
             var messageSize = 512
                               + lessons.Count * (displayWeek ? 420 : 250)
                               + exams.Count * 200;
@@ -315,9 +326,9 @@ public abstract class SchedMessageBuilder
             return (sched, ParseAndSortExams(jsonExams, day));
         }
         catch (JsonException e) {
-            Log.Fatal("[ParseAndSort] {0}", e.Message);
-            Log.Fatal("[ParseAndSort] json: {0}", json);
-            Log.Fatal("[ParseAndSort] exam: {0}", jsonExams);
+            Log.Error("[ParseAndSort] {0}", e.Message);
+            Log.Error("[ParseAndSort] json: {0}", json);
+            Log.Error("[ParseAndSort] exam: {0}", jsonExams);
             
             throw new JsonException(e.Message, e);
         }
@@ -493,16 +504,17 @@ public abstract class SchedMessageBuilder
     }
 
 
-    private static string BuildJwtFail(string[]? data)
+    private static string BuildJwtFail(string[]? data, string? title = null)
     {
+        var apiFailed = data?.Any(entry => entry.StartsWith("HTTP ", StringComparison.OrdinalIgnoreCase)) == true;
+        var reAuthorized = data?.Contains("ReAuth") == true;
+        var header = title ?? (apiFailed ? "Журнал не отдал расписание :(" : "Токен не получен :/");
 
         var text = new StringBuilder(capacity: 1000);
-        text.Append("""
-                        <b> <i> Токен не получен :/ </i> </b>
-                        <details>
-                            <summary> Детали: </summary>
-                    """);
-        
+        text.Append($"<b> <i> {header} </i> </b>");
+        text.Append("<details>");
+        text.Append("<summary> Детали: </summary>");
+
         if (data is null)
         {
             text.Append("<i> jwtData is null </i>");
@@ -511,7 +523,16 @@ public abstract class SchedMessageBuilder
             text.Append($"<p> Tries: {data.Length} </p>");
             text.Append($"<p> Codes: [{string.Join(", ", data)}] </p>");
         }
-        
+
+        if (reAuthorized)
+        {
+            text.Append("<p> Токен уже обновлён автоматически — попробуйте запросить расписание ещё раз. </p>");
+        }
+        else if (apiFailed)
+        {
+            text.Append("<p> Попробуйте повторить запрос позже. </p>");
+        }
+
         text.Append("</details>");
         return text.ToString();
     }

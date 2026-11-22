@@ -131,7 +131,7 @@ public class TokenPreFetch
             {
                 var dateObject = (parseDate, DayDefinition.Day);
                 var day = await GetSched.GetDay(copyObject.Id, dateObject, null, copyObject.IsGroup);
-                await GetSched.GetSchedAndExams(copyObject.Id, day, fromGroup: copyObject.IsGroup, recommendedToken: token);
+                await GetSched.GetSchedAndExams(copyObject.Id, day, fromGroup: copyObject.IsGroup);
             }
         }
         Log.Debug("[TokenPreFetch] {dat}", string.Join(", ", CachedScheduleLibrary.Cache.Keys));

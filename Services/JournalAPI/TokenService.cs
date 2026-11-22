@@ -97,6 +97,21 @@ public class TokenService
         }
     }
 
+    
+    public static async Task Invalidate(long uid)
+    {
+        Cache.Remove(uid);
+        await Memory.User.ClearJwtAsync(uid);
+    }
+
+
+    public static async Task<string?> ReAuthorize(long uid, bool isGroup, long parent = 0, PerformanceMetric? metric = null)
+    {
+        await Invalidate(uid);
+
+        var (token, _) = await Get(uid, isGroup, cacheUpdate: true, parent: parent, metric: metric);
+        return token;
+    }
 
     private class FetchedToken
     {

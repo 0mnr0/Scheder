@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Npgsql;
 using NpgsqlTypes;
@@ -375,9 +375,14 @@ public static class Memory
             });
 
             return ExecuteNonQuery(
-                "UPDATE users SET auth = auth || @patch::jsonb WHERE uid = @uid",
+                "UPDATE users SET auth = COALESCE(auth, '{}'::jsonb) || @patch::jsonb WHERE uid = @uid",
                 Param("patch", patch), Param("uid", uid));
         }
+        
+        public static Task ClearJwtAsync(long uid) =>
+            ExecuteNonQuery(
+                "UPDATE users SET auth = COALESCE(auth, '{}'::jsonb) - 'JWT' - 'JWTRefreshTime' WHERE uid = @uid",
+                Param("uid", uid));
 
 
         public static Task<(string? jwt, DateTime? gotAt)> GetJwtAsync(long uid) =>
